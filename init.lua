@@ -243,6 +243,59 @@ now(function()
 end)
 
 now(function()
+	add({
+		source = "nvim-neorg/neorg",
+		checkout = "v9.2.0",
+		depends = {
+			"nvim-neorg/lua-utils.nvim",
+			"pysan3/pathlib.nvim",
+			"nvim-neotest/nvim-nio",
+			"nvim-treesitter",
+		},
+	})
+
+	require("neorg").setup({
+		load = {
+			["core.defaults"] = {},
+			["core.neorgcmd"] = {},
+			["core.summary"] = {},
+			["core.journal"] = {},
+			["core.autocommands"] = {},
+			["core.export"] = { config = {} },
+			["core.export.markdown"] = { config = {} },
+			["core.integrations.treesitter"] = { config = {} },
+			["core.ui"] = {},
+			["core.ui.calendar"] = {},
+			["core.qol.todo_items"] = {
+				config = {
+					create_todo_items = true,
+					create_todo_parents = true,
+				},
+			},
+			["core.concealer"] = {
+				config = {
+					icons = {
+						code_block = {
+							conceal = true,
+						},
+					},
+				},
+			},
+			["core.dirman"] = {
+				config = {
+					workspaces = {
+						notes = "~/notes",
+					},
+					default_workspace = "notes",
+				},
+			},
+		},
+	})
+	vim.wo.foldlevel = 99
+	vim.wo.conceallevel = 2
+end)
+
+now(function()
 	local starter = require("mini.starter")
 	local M = {}
 
@@ -315,10 +368,10 @@ now(function()
 		header = M.starter.header(),
 		items = {
 			starter.sections.sessions(3, true),
-			-- {
-			-- 	{ name = "Notes", action = "Neorg index", section = "Notes" },
-			-- 	{ name = "Journal", action = "Neorg journal toc open", section = "Notes" },
-			-- },
+			{
+				{ name = "Notes", action = "Neorg index", section = "Notes" },
+				{ name = "Journal", action = "Neorg journal toc open", section = "Notes" },
+			},
 			starter.sections.builtin_actions(),
 			starter.sections.recent_files(5, false, true),
 			starter.sections.recent_files(5, true, false),
@@ -657,26 +710,6 @@ later(function()
 end)
 
 later(function()
-	require("mini.indentscope").setup({
-		draw = {
-			animation = function()
-				return 1
-			end,
-		},
-		symbol = "│",
-	})
-end)
-
-later(function()
-	require("mini.jump").setup()
-end)
-
-later(function()
-	require("mini.jump2d").setup()
-	vim.api.nvim_set_hl(0, "MiniJump2dSpot", { reverse = true })
-end)
-
-later(function()
 	require("mini.map").setup()
 end)
 
@@ -690,6 +723,26 @@ end)
 
 later(function()
 	require("mini.visits").setup()
+end)
+
+later(function()
+	require("mini.jump").setup()
+end)
+
+later(function()
+	require("mini.jump2d").setup()
+	vim.api.nvim_set_hl(0, "MiniJump2dSpot", { reverse = true })
+end)
+
+later(function()
+	require("mini.indentscope").setup({
+		draw = {
+			animation = function()
+				return 1
+			end,
+		},
+		symbol = "│",
+	})
 end)
 
 later(function()
@@ -771,6 +824,7 @@ later(function()
 			{ mode = "n", keys = "<leader>i", desc = "󰏪 insert" },
 			{ mode = "n", keys = "<leader>l", desc = "󰘦 lsp" },
 			{ mode = "n", keys = "<leader>m", desc = " mini" },
+			{ mode = "n", keys = "<leader>n", desc = " notes" },
 			{ mode = "n", keys = "<leader>q", desc = " nvim" },
 			{ mode = "n", keys = "<leader>S", desc = "󰆓 session" },
 			{ mode = "n", keys = "<leader>u", desc = "󰔃 ui" },

@@ -34,12 +34,9 @@ keymap("n", "<leader>mu", function() require("mini.deps").update() end, { desc =
 -- Buffers
 keymap("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer", silent = true })
 keymap("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer", silent = true })
-keymap("n", "[b", "<cmd>bprevious<cr>", { desc = "Prev Buffer", silent = true })
-keymap("n", "]b", "<cmd>bnext<cr>", { desc = "Next Buffer", silent = true })
 keymap("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer", silent = true })
-keymap("n", "<leader>`", "<cmd>e #<cr>", { desc = "Switch to Other Buffer", silent = true })
 keymap("n", "<leader>bD", "<cmd>:bd<cr>", { desc = "Delete Buffer and Window", silent = true })
-keymap("n", "<leader>bd", ":lua MiniBufremove.delete()<cr>", { desc = "Delete Buffer", silent = true })
+keymap("n", "<leader>bd", function () MiniBufremove.delete() end, { desc = "Delete Buffer", silent = true })
 
 -- Windows
 keymap("n", "<leader>ws", split_sensibly, { desc = "[S]plit [S]ensibly", remap = true })
@@ -165,6 +162,17 @@ keymap("n", "<Esc>", "<cmd>noh<cr>", { desc = 'Clear Search' })
 -- ║          AI           ║
 -- ╚═══════════════════════╝
 keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'Codecompanion [A]i [A]actions'})
+
+-- ╔═══════════════════════╗
+-- ║         Notes         ║
+-- ╚═══════════════════════╝
+
+keymap('n', '<leader>nn', '<cmd>Neorg index<cr>', {desc = 'Open Neorg index' })
+keymap('n', '<leader>nj', '<cmd>Neorg journal<cr>', {desc = 'Open Neorg journal' })
+keymap('n', '<leader>nt', '<cmd>Neorg toc<cr>', {desc = 'Create Table of Contents' })
+keymap('n', '<leader>ni', '<cmd>Neorg inject-metadata<cr>', {desc = 'Create metadata for note' })
+keymap('n', '<leader>nu', '<cmd>Neorg update-metadata<cr>', {desc = 'Update metadata for note' })
+keymap('n', '<leader>nT', '<cmd>Neorg tangle<cr>', {desc = 'Export code block into its own file' })
 
 
 -- ╔═══════════════════════╗
