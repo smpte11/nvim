@@ -435,9 +435,14 @@ now(function()
 	require("blink.cmp").setup({
 		appearance = {},
 		sources = {
-			default = { "lsp", "path", "snippets", "buffer", "copilot" },
+			default = { "lsp", "lazydev", "path", "snippets", "buffer", "copilot" },
 			cmdline = {},
 			providers = {
+				lazydev = {
+					name = "LazyDev",
+					module = "lazydev.integrations.blink",
+					score_offset = 100, -- show at a higher priority than lsp
+				},
 				markdown = {
 					name = "RenderMarkdown",
 					module = "render-markdown.integ.blink",
@@ -508,7 +513,10 @@ now(function()
 			},
 			documentation = {
 				window = { border = "single" },
+				auto_show = true,
+				auto_show_delay_ms = 500,
 			},
+			ghost_text = { enabled = true },
 		},
 	})
 
@@ -942,6 +950,27 @@ end)
 later(function()
 	add({
 		source = "scalameta/nvim-metals",
+	})
+
+	local metals_config = require("metals").bare_config()
+
+	-- Example of settings
+	metals_config.settings = {
+		showImplicitArguments = true,
+		excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
+	}
+
+	metals_config.init_options.statusBarProvider = "off"
+
+	-- Example if you are using cmp how to make sure the correct capabilities for snippets are set
+	metals_config.capabilities = require("blink.cmp").get_lsp_capabilities()
+
+	vim.api.nvim_create_autocmd("FileType", {
+		group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
+		pattern = { "scala", "sbt", "java" },
+		callback = function()
+			require("metals").initialize_or_attach(metals_config)
+		end,
 	})
 end)
 
