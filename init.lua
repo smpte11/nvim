@@ -176,6 +176,8 @@ now(function()
 	require("mini.pick").setup({
 		window = window,
 	})
+
+	vim.ui.select = MiniPick.ui_select
 end)
 
 now(function()
