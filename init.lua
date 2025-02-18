@@ -398,12 +398,15 @@ now(function()
 		items = {
 			starter.sections.sessions(3, true),
 			{
-				{ name = "Notes", action = "Neorg index", section = "Notes" },
-				{ name = "Journal", action = "Neorg journal toc open", section = "Notes" },
+				{ name = "Git Status", action = "Neogit", section = "Git" },
 			},
 			starter.sections.builtin_actions(),
 			starter.sections.recent_files(5, false, true),
 			starter.sections.recent_files(5, true, false),
+			{
+				{ name = "Notes", action = "Neorg index", section = "Notes" },
+				{ name = "Journal", action = "Neorg journal toc open", section = "Notes" },
+			},
 		},
 		content_hooks = {
 			starter.gen_hook.indexing(
