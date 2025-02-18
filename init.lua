@@ -943,6 +943,8 @@ later(function()
 			"vimdoc",
 			"terraform",
 			"hcl",
+			"norg",
+			"norg_meta",
 		},
 		auto_install = true,
 		highlight = { enable = true },
