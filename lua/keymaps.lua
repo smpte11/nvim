@@ -45,8 +45,6 @@ keymap("n", "<leader>wv", "<C-W>v", { desc = "Split [W]indow [V]ertically", rema
 keymap("n", "<leader>wd", "<C-W>c", { desc = "[W]indow [D]elete", remap = true })
 
 -- Search
---vim.keymap.set('n', '<leader>"', builtin.registers, { desc = '["] Registers' })
-
 keymap('n', '<leader><leader>', function() MiniPick.builtin.buffers() end, { desc = '[ ] Find existing buffers' })
 keymap("n", "<leader>sh", function() MiniPick.builtin.help_tags() end, { desc = "[S]earch [H]elp" })
 keymap("n", "<leader>sf", function() MiniPick.builtin.files() end, { desc = "[S]earch [F]iles" })
@@ -60,6 +58,8 @@ keymap('n', '<leader>ss', function() MiniExtra.pickers.spellsuggest() end, { des
 keymap('n', '<leader>sR', function() MiniPick.builtin.resume() end, { desc = '[S]earch [R]esume' })
 keymap('n', '<leader>s.', function() MiniExtra.pickers.oldfiles() end,
     { desc = '[S]earch Recent Files ("." for repeat)' })
+keymap('n', '<leader>sc', function() MiniExtra.pickers.commands() end,
+    { desc = '[S]earch commands' })
 keymap('n', '<leader>sg', function() MiniPick.builtin.grep_live() end, { desc = '[S]earch by [G]rep' })
 keymap('n', '<leader>sw', function() MiniPick.builtin.grep({ pattern = vim.fn.expand('<cword>') }) end,
     { desc = '[S]earch current [W]ord' })

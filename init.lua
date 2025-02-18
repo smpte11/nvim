@@ -541,6 +541,9 @@ now(function()
 	require("conform").setup({
 		notify_on_error = false,
 		format_on_save = function(bufnr)
+			if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+				return
+			end
 			-- Disable "format_on_save lsp_fallback" for languages that don't
 			-- have a well standardized coding style. You can add additional
 			-- languages here or re-enable it for the disabled ones.
@@ -558,6 +561,7 @@ now(function()
 		end,
 		formatters_by_ft = {
 			lua = { "stylua" },
+			yaml = { "prettierd", "prettier" },
 			-- Conform can also run multiple formatters sequentially
 			-- python = { "isort", "black" },
 			--
@@ -627,10 +631,9 @@ now(function()
 		-- but for many setups, the lsp (`ts_ls`) will work just fine
 		terraformls = {},
 		ts_ls = {},
-		pyright = {
+		basedpyright = {
 			{
-				pyright = { autoimportcompletion = true },
-				python = {
+				basedpyright = {
 					analysis = {
 						autosearchpaths = true,
 						diagnosticmode = "openfilesonly",
