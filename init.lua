@@ -41,6 +41,7 @@ local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 --			          Loading now
 --          └─────────────────────────────────────────────────────────┘
 --
+
 now(function()
     vim.g.have_nerd_font = true
     vim.o.list = true
@@ -888,6 +889,7 @@ later(function()
             "hcl",
             "norg",
             "norg_meta",
+            "gotmpl"
         },
         auto_install = true,
         highlight = { enable = true },
@@ -982,19 +984,12 @@ later(function()
 end)
 
 -- chezmoi
-
-now(function()
-    add({
-        source = "alker0/chezmoi.vim",
-    })
-
-    vim.g["chezmoi#use_tmp_buffer"] = 1
-    vim.g["chezmoi#source_dir_path"] = os.getenv("HOME") .. "/.local/share/chezmoi"
-end)
-
 later(function()
     add({
         source = "xvzc/chezmoi.nvim",
+        depends = {
+            "ngynkvn/gotmpl.nvim"
+        }
     })
 
     require("chezmoi").setup({
@@ -1008,7 +1003,10 @@ later(function()
             on_watch = false,
         },
     })
+
+    require('gotmpl').setup({})
 end)
 
 require("keymaps")
 require("autocmd")
+require("cmd")
