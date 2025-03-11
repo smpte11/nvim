@@ -582,6 +582,7 @@ now(function()
         },
         ruff = {},
         gopls = {},
+        nushell = {},
         dockerls = {},
         bashls = {},
         html = {},
@@ -619,7 +620,8 @@ now(function()
     -- for you, so that they are available from within neovim.
     local ensure_installed = vim.tbl_keys(servers or {})
     vim.list_extend(ensure_installed, {
-        -- "stylua", -- used to format lua code
+        "stylua", -- used to format lua code
+        "nu"
         -- "tflint",
     })
     require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
