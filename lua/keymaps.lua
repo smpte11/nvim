@@ -174,6 +174,7 @@ keymap('n', '<leader>nt', '<cmd>Neorg toc<cr>', {desc = 'Create Table of Content
 keymap('n', '<leader>ni', '<cmd>Neorg inject-metadata<cr>', {desc = 'Create metadata for note' })
 keymap('n', '<leader>nu', '<cmd>Neorg update-metadata<cr>', {desc = 'Update metadata for note' })
 keymap('n', '<leader>nT', '<cmd>Neorg tangle<cr>', {desc = 'Export code block into its own file' })
+keymap('n', '<leader>np', '<cmd>Neogit cwd=%:p:h<cr>', {desc = 'Publish notes (via Git)' })
 
 
 -- ╔═══════════════════════╗

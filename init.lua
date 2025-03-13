@@ -314,8 +314,8 @@ now(function()
 			["core.dirman"] = {
 				config = {
 					workspaces = {
-						notes = "~/notes",
-						work = "~/work",
+						notes = "~/notes/perso",
+						work = "~/notes/work",
 					},
 					default_workspace = "notes",
 					use_popup = false,
