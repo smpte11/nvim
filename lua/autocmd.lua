@@ -72,13 +72,6 @@ vim.api.nvim_create_autocmd("FileType", {
 	end,
 })
 
-vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
-	pattern = { os.getenv("HOME") .. "/.local/share/chezmoi/*" },
-	callback = function()
-		vim.schedule(require("chezmoi.commands.__edit").watch)
-	end,
-})
-
 vim.api.nvim_create_user_command("FormatDisable", function(args)
 	if args.bang then
 		-- FormatDisable! will disable formatting just for this buffer

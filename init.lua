@@ -315,8 +315,10 @@ now(function()
 				config = {
 					workspaces = {
 						notes = "~/notes",
+						work = "~/work",
 					},
 					default_workspace = "notes",
+					use_popup = false,
 				},
 			},
 		},
@@ -344,10 +346,6 @@ now(function()
 			},
 		},
 		content_hooks = {
-			starter.gen_hook.indexing(
-				"Notes",
-				{ "Builtin actions", "Sessions", "Recent files (current directory)", "Recent files" }
-			),
 			starter.gen_hook.aligning("center", "center"),
 			starter.gen_hook.adding_bullet(),
 		},
@@ -582,9 +580,7 @@ now(function()
 		},
 		ruff = {},
 		gopls = {},
-		nushell = {
-			mason = false,
-		},
+		nushell = {},
 		dockerls = {},
 		bashls = {},
 		html = {},
@@ -1018,6 +1014,18 @@ later(function()
 	})
 
 	require("gotmpl").setup({})
+
+	--  e.g. ~/.local/share/chezmoi/*
+	vim.api.nvim_create_autocmd({ "BufRead", "BufNewFile" }, {
+		pattern = { os.getenv("HOME") .. "/.local/share/chezmoi/*" },
+		callback = function(ev)
+			local bufnr = ev.buf
+			local edit_watch = function()
+				require("chezmoi.commands.__edit").watch(bufnr)
+			end
+			vim.schedule(edit_watch)
+		end,
+	})
 end)
 
 require("keymaps")
