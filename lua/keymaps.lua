@@ -190,4 +190,18 @@ end
 
 map_vis('va', 'add_label()', '[A]dd Label')
 map_vis('vr', 'remove_label()', '[R]emove Label')
+
+-- ╔═══════════════════════╗
+-- ║          DAP          ║
+-- ╚═══════════════════════╝
+keymap("n", "<F5>", function() require("dap").continue() end, { desc = "Debug: Start/Continue" })
+keymap("n", "<F1>", function() require("dap").step_into() end, { desc = "Debug: Step Into" })
+keymap("n", "<F2>", function() require("dap").step_over() end, { desc = "Debug: Step Over" })
+keymap("n", "<F3>", function() require("dap").step_out() end, { desc = "Debug: Step Out" })
+-- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
+keymap("n", "<F7>", function() require("dapui").toggle() end, { desc = "Debug: See last session result." })
+keymap("n", "<leader>db", function() require("dap").toggle_breakpoint() end, { desc = "Debug: Toggle Breakpoint" })
+keymap("n", "<leader>dB", function()
+	require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
+end, { desc = "Debug: Set Breakpoint" })
 -- stylua: ignore end
