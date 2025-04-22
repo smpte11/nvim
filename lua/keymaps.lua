@@ -2,6 +2,7 @@
 -- ║    Local Variables    ║
 -- ╚═══════════════════════╝
 local keymap = vim.keymap.set
+local opts = { noremap = true, silent = false }
 
 local insert_password = function()
 	local command = "openssl rand -base64 18"
@@ -168,13 +169,18 @@ keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'Codecompani
 -- ║         Notes         ║
 -- ╚═══════════════════════╝
 
-keymap('n', '<leader>nn', '<cmd>Neorg index<cr>', {desc = 'Open Neorg index' })
-keymap('n', '<leader>nj', '<cmd>Neorg journal<cr>', {desc = 'Open Neorg journal' })
-keymap('n', '<leader>nt', '<cmd>Neorg toc<cr>', {desc = 'Create Table of Contents' })
-keymap('n', '<leader>ni', '<cmd>Neorg inject-metadata<cr>', {desc = 'Create metadata for note' })
-keymap('n', '<leader>nu', '<cmd>Neorg update-metadata<cr>', {desc = 'Update metadata for note' })
-keymap('n', '<leader>nT', '<cmd>Neorg tangle<cr>', {desc = 'Export code block into its own file' })
-keymap('n', '<leader>np', '<cmd>Neogit cwd=%:p:h<cr>', {desc = 'Publish notes (via Git)' })
+-- Create a new note after asking for its title.
+keymap("n", "<leader>nn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", vim.tbl_extend('keep', opts, { desc = "New note" }))
+
+-- Open notes.
+keymap("n", "<leader>no", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", vim.tbl_extend('keep', opts, { desc = "Open notes" }))
+-- Open notes associated with the selected tags.
+keymap("n", "<leader>nt", "<Cmd>ZkTags<CR>", vim.tbl_extend('keep', opts, { desc = "Open notes (tags)" }))
+
+-- Search for the notes matching a given query.
+keymap("n", "<leader>nf", "<Cmd>ZkNotes { sort = { 'modified' }, match = { vim.fn.input('Search: ') } }<CR>", vim.tbl_extend('keep', opts, { desc = "Search notes" }))
+-- Search for the notes matching the current visual selection.
+keymap("v", "<leader>nf", ":'<,'>ZkMatch<CR>", vim.tbl_extend('keep', opts, { desc = 'Search notes'}))
 
 
 -- ╔═══════════════════════╗

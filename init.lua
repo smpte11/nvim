@@ -266,59 +266,12 @@ now(function()
 	})
 end)
 
-now(function()
-	add({
-		source = "nvim-neorg/neorg",
-		checkout = "v9.2.0",
-		depends = {
-			"nvim-neorg/lua-utils.nvim",
-			"pysan3/pathlib.nvim",
-			"nvim-neotest/nvim-nio",
-			"nvim-treesitter",
-		},
-	})
+later(function()
+	add("zk-org/zk-nvim")
 
-	require("neorg").setup({
-		load = {
-			["core.defaults"] = {},
-			["core.neorgcmd"] = {},
-			["core.summary"] = {},
-			["core.journal"] = {},
-			["core.autocommands"] = {},
-			["core.export"] = { config = {} },
-			["core.export.markdown"] = { config = {} },
-			["core.integrations.treesitter"] = { config = {} },
-			["core.ui"] = {},
-			["core.ui.calendar"] = {},
-			["core.qol.todo_items"] = {
-				config = {
-					create_todo_items = true,
-					create_todo_parents = true,
-				},
-			},
-			["core.concealer"] = {
-				config = {
-					icons = {
-						code_block = {
-							conceal = true,
-						},
-					},
-				},
-			},
-			["core.dirman"] = {
-				config = {
-					workspaces = {
-						notes = "~/notes/perso",
-						work = "~/notes/work",
-					},
-					default_workspace = "notes",
-					use_popup = false,
-				},
-			},
-		},
+	require("zk").setup({
+		piker = "minipick",
 	})
-	vim.wo.foldlevel = 99
-	vim.wo.conceallevel = 2
 end)
 
 now(function()
@@ -1112,6 +1065,7 @@ later(function()
 	dap.listeners.before.event_exited["dapui_config"] = dapui.close
 end)
 
+require("plugins.notes")
 require("keymaps")
 require("autocmd")
 require("cmd")
