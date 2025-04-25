@@ -173,6 +173,28 @@ now(function()
 	})
 
 	vim.ui.select = MiniPick.ui_select
+
+	MiniPick.registry.directories = function(path)
+		local dirs = {}
+		local handle = vim.loop.fs_scandir(path or vim.fn.getcwd())
+		if handle then
+			while true do
+				local name, type = vim.loop.fs_scandir_next(handle)
+				if not name then
+					break
+				end
+				if type == "directory" and not name:match("^%.") then
+					table.insert(dirs, name)
+				end
+			end
+		end
+
+		-- TODO: could be useful in other contexts. Check to add to registry
+		return MiniPick.start({ source = {
+			name = "Select destination directory",
+			items = dirs,
+		} })
+	end
 end)
 
 now(function()
@@ -269,9 +291,51 @@ end)
 later(function()
 	add("zk-org/zk-nvim")
 
-	require("zk").setup({
+	local zk = require("zk")
+	zk.setup({
 		piker = "minipick",
+		lsp = {
+			config = {
+				on_attach = function(_, _)
+					local function map(...)
+						vim.api.nvim_buf_set_keymap(0, ...)
+					end
+					local opts = { noremap = true, silent = false }
+					-- Create a new note in the same directory as the current buffer, using the current selection for title.
+					map(
+						"v",
+						"<leader>nnt",
+						":'<,'>ZkNewFromTitleSelection<CR>",
+						vim.tbl_extend("force", opts, { desc = "Create new from selection (Title)" })
+					)
+					-- Create a new note in the same directory as the current buffer, using the current selection for note content and asking for its title.
+					map(
+						"v",
+						"<leader>nnc",
+						":'<,'>ZkNewFromContentSelection { title = vim.fn.input('Title: ') }<CR>",
+						vim.tbl_extend("force", opts, { desc = "Create new from selection (Content)" })
+					)
+				end,
+			},
+		},
 	})
+
+	local commands = require("zk.commands")
+
+	commands.add("ZkNewAtDir", function(options)
+		options = options or {}
+
+		local notedir = vim.env.ZK_NOTEBOOK_DIR
+
+		local dir = MiniPick.registry.directories(notedir)
+
+		if dir ~= nil then
+			vim.notify("Creating new note in" .. dir)
+			zk.new({ dir = dir, title = vim.fn.input("Title: ") })
+		else
+			return
+		end
+	end)
 end)
 
 now(function()
@@ -288,8 +352,8 @@ now(function()
 			starter.sections.recent_files(5, false, true),
 			starter.sections.recent_files(5, true, false),
 			{
-				{ name = "Notes", action = "Neorg index", section = "Notes" },
-				{ name = "Journal", action = "Neorg journal toc open", section = "Notes" },
+				{ name = "Notes", action = "ZkNotes { sort = { 'modified' } }", section = "Notes" },
+				{ name = "Journal", action = "ZkNew { dir = 'journal/daily', date = 'today' }", section = "Notes" },
 			},
 		},
 		content_hooks = {
@@ -788,24 +852,33 @@ end)
 
 later(function()
 	add({
-		source = "neogitorg/neogit",
-		depends = { "nvim-lua/plenary.nvim", "sindrets/diffview.nvim", "echasnovski/mini.pick" },
+		source = "akinsho/git-conflict.nvim",
 	})
-	require("diffview").setup({
-		hooks = {
-			view_opened = function(_)
-				table.insert(MiniClue.config.clues, { mode = "n", keys = "<leader>c", desc = " conflicts" })
-			end,
-			view_closed = function(_)
-				for i, entry in ipairs(MiniClue.config.clues) do
-					if entry.mode == "n" and entry.keys == "<leader>c" and entry.desc == " conflicts" then
-						table.remove(MiniClue.config.clues, i)
-						break
-					end
-				end
-			end,
+	add({
+		source = "neogitorg/neogit",
+		depends = {
+			"nvim-lua/plenary.nvim",
+			-- "sindrets/diffview.nvim",
+			"akinsho/git-conflict.nvim",
+			"echasnovski/mini.pick",
 		},
 	})
+	-- require("diffview").setup({
+	-- 	hooks = {
+	-- 		view_opened = function(_)
+	-- 			table.insert(MiniClue.config.clues, { mode = "n", keys = "<leader>c", desc = " conflicts" })
+	-- 		end,
+	-- 		view_closed = function(_)
+	-- 			for i, entry in ipairs(MiniClue.config.clues) do
+	-- 				if entry.mode == "n" and entry.keys == "<leader>c" and entry.desc == " conflicts" then
+	-- 					table.remove(MiniClue.config.clues, i)
+	-- 					break
+	-- 				end
+	-- 			end
+	-- 		end,
+	-- 	},
+	-- })
+	require("git-conflict").setup()
 
 	require("neogit").setup({
 		integrations = {
@@ -1065,7 +1138,6 @@ later(function()
 	dap.listeners.before.event_exited["dapui_config"] = dapui.close
 end)
 
-require("plugins.notes")
 require("keymaps")
 require("autocmd")
 require("cmd")

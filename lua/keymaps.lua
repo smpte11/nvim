@@ -171,6 +171,8 @@ keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'Codecompani
 
 -- Create a new note after asking for its title.
 keymap("n", "<leader>nn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", vim.tbl_extend('keep', opts, { desc = "New note" }))
+keymap("n", "<leader>nN", "<Cmd>ZkNewAtDir<CR>", vim.tbl_extend('keep', opts, { desc = "New note at dir" }))
+keymap("n", "<leader>nj", "<Cmd>ZkNew { dir = 'journal/daily', date = 'today' }<CR>", vim.tbl_extend('keep', opts, { desc = "New note" }))
 
 -- Open notes.
 keymap("n", "<leader>no", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", vim.tbl_extend('keep', opts, { desc = "Open notes" }))
