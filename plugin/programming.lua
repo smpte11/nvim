@@ -507,6 +507,6 @@ now(function()
 			},
 		})
 
-		vim.api.nvim_set_hl(0, "NeogitChangeDeleted", { fg = palette.base08, bg = "NONE" })
+		vim.api.nvim_set_hl(0, "NeogitChangeDeleted", { fg = Utils.palette.base08, bg = "NONE" })
 	end)
 end)
