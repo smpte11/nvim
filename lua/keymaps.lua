@@ -81,7 +81,7 @@ keymap("n", "<leader>gh", function () MiniExtra.pickers.git_hunks() end, { desc 
 -- ╚═══════════════════════╝
 keymap('n', '<leader>uf', function() MiniFiles.open(vim.api.nvim_buf_get_name(0), true) end, { desc = "[U]I [F]ile Explorer" })
 keymap('n', '<leader>uF', function() MiniFiles.open(vim.uv.cwd(), true) end, { desc = "[U]I [F]ile Explorer (cwd)" })
-keymap('n', '<leader>un', function() MiniExtra.pickers.explorer() end, { desc = "[U]I [F]ile Explorer (cwd)" })
+keymap('n', '<leader>up', function() MiniExtra.pickers.explorer() end, { desc = "[U]I [F]ile Picker" })
 
 -- ╔═══════════════════════╗
 -- ║	     LSP           ║
