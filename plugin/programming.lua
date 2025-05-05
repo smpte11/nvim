@@ -214,6 +214,7 @@ now(function()
 		--    https://github.com/pmizio/typescript-tools.nvim
 		--
 		-- but for many setups, the lsp (`ts_ls`) will work just fine
+		gopls = {},
 		terraformls = {},
 		ts_ls = {},
 		basedpyright = {
@@ -302,7 +303,6 @@ now(function()
 			source = "nvim-treesitter/nvim-treesitter",
 			-- use 'master' while monitoring updates in 'main'
 			checkout = "master",
-			monitor = "main",
 			-- perform action after every checkout
 			hooks = {
 				post_checkout = function()
@@ -350,23 +350,18 @@ now(function()
 		require("render-markdown").setup({})
 	end)
 
-	later(function()
-		add({
-			source = "ray-x/go.nvim",
-			depends = {
-				"ray-x/guihua.lua",
-				"neovim/nvim-lspconfig",
-				"nvim-treesitter/nvim-treesitter",
-			},
-		})
-
-		vim.api.nvim_create_autocmd("CmdlineEnter", {
-			pattern = { "go", "gomod" },
-			callback = function()
-				require("go").setup()
-			end,
-		})
-	end)
+	-- later(function()
+	-- 	add({
+	-- 		source = "ray-x/go.nvim",
+	-- 		depends = {
+	-- 			"ray-x/guihua.lua",
+	-- 			"neovim/nvim-lspconfig",
+	-- 			"nvim-treesitter/nvim-treesitter",
+	-- 		},
+	-- 	})
+	--
+	-- 	require("go").setup()
+	-- end)
 
 	later(function()
 		add({
