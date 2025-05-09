@@ -228,4 +228,11 @@ map_multistep('i', '<Tab>',   { 'blink_next' })
 map_multistep('i', '<S-Tab>', { 'blink_prev' })
 map_multistep('i', '<CR>',    { 'blink_accept', 'minipairs_cr' })
 map_multistep('i', '<BS>',    { 'minipairs_bs' })
+-- Support most common modes. This can also contain 't', but would
+-- only mean to press `<Esc>` inside terminal.
+local mode = { 'i', 'c', 'x', 's' }
+map_combo(mode, 'jk', '<BS><BS><Esc>')
+
+-- To not have to worry about the order of keys, also map "kj"
+map_combo(mode, 'kj', '<BS><BS><Esc>')
 -- stylua: ignore end
