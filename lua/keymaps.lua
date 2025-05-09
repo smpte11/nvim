@@ -212,4 +212,20 @@ keymap("n", "<leader>db", function() require("dap").toggle_breakpoint() end, { d
 keymap("n", "<leader>dB", function()
 	require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
 end, { desc = "Debug: Set Breakpoint" })
+
+-- ╔═══════════════════════╗
+-- ║          DAP          ║
+-- ╚═══════════════════════╝
+local minikeymap = require('mini.keymap')
+local map_combo, map_multistep = minikeymap.map_combo, minikeymap.map_multistep
+map_combo({ 'n', 'x' }, 'll', 'g$')
+map_combo({ 'n', 'x' }, 'hh', 'g^')
+map_combo({ 'n', 'x' }, 'jj', '}')
+map_combo({ 'n', 'x' }, 'kk', '{')
+
+
+map_multistep('i', '<Tab>',   { 'blink_next' })
+map_multistep('i', '<S-Tab>', { 'blink_prev' })
+map_multistep('i', '<CR>',    { 'blink_accept', 'minipairs_cr' })
+map_multistep('i', '<BS>',    { 'minipairs_bs' })
 -- stylua: ignore end

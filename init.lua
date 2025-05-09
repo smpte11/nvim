@@ -301,129 +301,7 @@ now(function()
 	})
 end)
 
---          ┌─────────────────────────────────────────────────────────┐
---			          loading later
---          └─────────────────────────────────────────────────────────┘
-later(function()
-	local gen_ai_spec = MiniExtra.gen_ai_spec
-	require("mini.ai").setup({
-		custom_textobjects = {
-			B = gen_ai_spec.buffer(),
-			D = gen_ai_spec.diagnostic(),
-			I = gen_ai_spec.indent(),
-			L = gen_ai_spec.line(),
-			N = gen_ai_spec.number(),
-		},
-	})
-end)
-
-later(function()
-	require("mini.bracketed").setup()
-end)
-
-later(function()
-	require("mini.operators").setup()
-end)
-
-later(function()
-	require("mini.pairs").setup()
-end)
-
-later(function()
-	require("mini.tabline").setup()
-end)
-
-later(function()
-	require("mini.comment").setup()
-end)
-
-later(function()
-	require("mini.bufremove").setup()
-end)
-
-later(function()
-	require("mini.bracketed").setup()
-end)
-
-later(function()
-	require("mini.diff").setup()
-end)
-
-later(function()
-	require("mini.map").setup()
-end)
-
-later(function()
-	require("mini.misc").setup()
-end)
-
-later(function()
-	require("mini.align").setup()
-end)
-
-later(function()
-	require("mini.visits").setup()
-end)
-
-later(function()
-	require("mini.jump").setup()
-end)
-
-later(function()
-	require("mini.jump2d").setup({
-		allowed_windows = {
-			not_current = false,
-		},
-		mappings = {
-			start_jumping = "<C-j>",
-		},
-	})
-	vim.api.nvim_set_hl(0, "MiniJump2dSpot", { reverse = true })
-end)
-
-later(function()
-	require("mini.indentscope").setup({
-		draw = {
-			animation = function()
-				return 1
-			end,
-		},
-		symbol = "│",
-	})
-end)
-
-later(function()
-	local animate = require("mini.animate")
-	animate.setup({
-		scroll = {
-			-- Disable Scroll Animations, as the can interfer with mouse Scrolling
-			enable = false,
-		},
-		cursor = {
-			timing = animate.gen_timing.cubic({ duration = 50, unit = "total" }),
-		},
-	})
-end)
-
-later(function()
-	require("mini.move").setup({
-		mappings = {
-			-- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
-			left = "<M-S-h>",
-			right = "<M-S-l>",
-			down = "<M-S-j>",
-			up = "<M-S-k>",
-
-			-- Move current line in Normal mode
-			line_left = "<M-S-h>",
-			line_right = "<M-S-l>",
-			line_down = "<M-S-j>",
-			line_up = "<M-S-k>",
-		},
-	})
-end)
-
-later(function()
+now(function()
 	require("mini.clue").setup({
 		triggers = {
 			-- leader triggers
@@ -487,6 +365,134 @@ later(function()
 		},
 		window = {
 			delay = 0,
+		},
+	})
+end)
+
+--          ┌─────────────────────────────────────────────────────────┐
+--			          loading later
+--          └─────────────────────────────────────────────────────────┘
+later(function()
+	local gen_ai_spec = MiniExtra.gen_ai_spec
+	require("mini.ai").setup({
+		custom_textobjects = {
+			B = gen_ai_spec.buffer(),
+			D = gen_ai_spec.diagnostic(),
+			I = gen_ai_spec.indent(),
+			L = gen_ai_spec.line(),
+			N = gen_ai_spec.number(),
+		},
+	})
+end)
+
+later(function()
+	require("mini.operators").setup()
+end)
+
+later(function()
+	require("mini.pairs").setup()
+end)
+
+later(function()
+	local gen_loader = require("mini.snippets").gen_loader
+	require("mini.snippets").setup({
+		snippets = {
+			-- Load custom file with global snippets first (adjust for Windows)
+			gen_loader.from_file("~/.config/nvim/snippets/global.json"),
+
+			-- Load snippets based on current language by reading files from
+			-- "snippets/" subdirectories from 'runtimepath' directories.
+			gen_loader.from_lang(),
+		},
+	})
+end)
+
+later(function()
+	require("mini.comment").setup()
+end)
+
+later(function()
+	require("mini.bufremove").setup()
+end)
+
+later(function()
+	require("mini.bracketed").setup()
+end)
+
+later(function()
+	require("mini.diff").setup()
+end)
+
+later(function()
+	require("mini.map").setup()
+end)
+
+later(function()
+	require("mini.misc").setup()
+end)
+
+later(function()
+	require("mini.align").setup()
+end)
+
+later(function()
+	require("mini.visits").setup()
+end)
+
+later(function()
+	require("mini.jump").setup()
+end)
+
+later(function()
+	require("mini.jump2d").setup({
+		allowed_windows = {
+			not_current = false,
+		},
+		mappings = {
+			start_jumping = "<C-M-j>",
+		},
+	})
+	vim.api.nvim_set_hl(0, "MiniJump2dSpot", { reverse = true })
+end)
+
+later(function()
+	require("mini.indentscope").setup({
+		draw = {
+			animation = function()
+				return 1
+			end,
+		},
+		symbol = "│",
+	})
+end)
+
+later(function()
+	local animate = require("mini.animate")
+	animate.setup({
+		scroll = {
+			-- Disable Scroll Animations, as the can interfer with mouse Scrolling
+			enable = false,
+		},
+		cursor = {
+			timing = animate.gen_timing.cubic({ duration = 50, unit = "total" }),
+		},
+	})
+end)
+
+later(function()
+	require("mini.move").setup({
+		mappings = {
+			-- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
+			left = "<M-S-h>",
+			right = "<M-S-l>",
+			down = "<M-S-j>",
+			up = "<M-S-k>",
+
+			-- Move current line in Normal mode
+			line_left = "<M-S-h>",
+			line_right = "<M-S-l>",
+			line_down = "<M-S-j>",
+			line_up = "<M-S-k>",
 		},
 	})
 end)
