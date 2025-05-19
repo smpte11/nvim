@@ -1,6 +1,39 @@
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
 now(function()
+	-- This is a good place to add any global options you want to set for
+	-- all of the plugins in this file. For example, you could set
+	-- `vim.g.mapleader = " "` here, and it would be available for all
+	-- of the plugins below.
+	vim.diagnostic.config({
+		severity_sort = true,
+		float = { border = "single", source = "if_many" },
+		underline = { severity = vim.diagnostic.severity.ERROR },
+		signs = vim.g.have_nerd_font and {
+			text = {
+				[vim.diagnostic.severity.ERROR] = "󰅚 ",
+				[vim.diagnostic.severity.WARN] = "󰀪 ",
+				[vim.diagnostic.severity.INFO] = "󰋽 ",
+				[vim.diagnostic.severity.HINT] = "󰌶 ",
+			},
+		} or {},
+		virtual_text = {
+			source = "if_many",
+			spacing = 2,
+			format = function(diagnostic)
+				local diagnostic_message = {
+					[vim.diagnostic.severity.ERROR] = diagnostic.message,
+					[vim.diagnostic.severity.WARN] = diagnostic.message,
+					[vim.diagnostic.severity.INFO] = diagnostic.message,
+					[vim.diagnostic.severity.HINT] = diagnostic.message,
+				}
+				return diagnostic_message[diagnostic.severity]
+			end,
+		},
+	})
+end)
+
+now(function()
 	-- Use other plugins with `add()`. It ensures plugin is available in current
 	-- session (installs if absent)
 	add({
@@ -59,8 +92,7 @@ now(function()
 			},
 		},
 		keymap = {
-			preset = "enter",
-			["<C-y>"] = { "select_and_accept" },
+			preset = "default",
 		},
 		signature = { enabled = true, window = { border = "single" } },
 		completion = {
@@ -147,6 +179,7 @@ now(function()
 			lua = { "stylua" },
 			yaml = { "prettierd", "prettier" },
 			markdown = { "prettier" },
+			go = { "goimports", "gofumpt" },
 			-- Conform can also run multiple formatters sequentially
 			-- python = { "isort", "black" },
 			--
@@ -214,7 +247,43 @@ now(function()
 		--    https://github.com/pmizio/typescript-tools.nvim
 		--
 		-- but for many setups, the lsp (`ts_ls`) will work just fine
-		gopls = {},
+		gopls = {
+			settings = {
+				gopls = {
+					gofumpt = true,
+					codelenses = {
+						gc_details = false,
+						generate = true,
+						regenerate_cgo = true,
+						run_govulncheck = true,
+						test = true,
+						tidy = true,
+						upgrade_dependency = true,
+						vendor = true,
+					},
+					hints = {
+						assignVariableTypes = true,
+						compositeLiteralFields = true,
+						compositeLiteralTypes = true,
+						constantValues = true,
+						functionTypeParameters = true,
+						parameterNames = true,
+						rangeVariableTypes = true,
+					},
+					analyses = {
+						nilness = true,
+						unusedparams = true,
+						unusedwrite = true,
+						useany = true,
+					},
+					usePlaceholders = true,
+					completeUnimported = true,
+					staticcheck = true,
+					directoryFilters = { "-.git", "-.vscode", "-.idea", "-.vscode-test", "-node_modules" },
+					semanticTokens = true,
+				},
+			},
+		},
 		terraformls = {},
 		ts_ls = {},
 		basedpyright = {
@@ -246,7 +315,7 @@ now(function()
 						callsnippet = "replace",
 					},
 					-- you can toggle below to ignore lua_ls's noisy `missing-fields` warnings
-					-- diagnostics = { disable = { 'missing-fields' } },
+					diagnostics = { disable = { "missing-fields" } },
 				},
 			},
 		},
@@ -271,6 +340,11 @@ now(function()
 		"shfmt",
 		"shellcheck",
 		"taplo",
+		"goimports",
+		"gofumpt",
+		"gomodifytags",
+		"impl",
+		"delve",
 		-- "tflint",
 	})
 
@@ -297,211 +371,244 @@ now(function()
 			end,
 		},
 	})
+end)
 
-	later(function()
-		add({
-			source = "nvim-treesitter/nvim-treesitter",
-			-- use 'master' while monitoring updates in 'main'
-			checkout = "master",
-			-- perform action after every checkout
-			hooks = {
-				post_checkout = function()
-					vim.cmd("TsUpdate")
-				end,
-			},
-		})
-		-- possible to immediately execute code which depends on the added plugin
-		require("nvim-treesitter.configs").setup({
-			ensure_installed = {
-				"bash",
-				"c",
-				"diff",
-				"html",
-				"lua",
-				"luadoc",
-				"markdown",
-				"markdown_inline",
-				"query",
-				"vim",
-				"vimdoc",
-				"terraform",
-				"hcl",
-				"norg",
-				"norg_meta",
-			},
-			auto_install = true,
-			highlight = { enable = true },
-		})
-	end)
-
-	later(function()
-		add({
-			source = "brenoprata10/nvim-highlight-colors",
-		})
-
-		require("nvim-highlight-colors").setup({})
-	end)
-
-	later(function()
-		add({
-			source = "MeanderingProgrammer/render-markdown.nvim",
-		})
-
-		require("render-markdown").setup({})
-	end)
-
-	-- later(function()
-	-- 	add({
-	-- 		source = "ray-x/go.nvim",
-	-- 		depends = {
-	-- 			"ray-x/guihua.lua",
-	-- 			"neovim/nvim-lspconfig",
-	-- 			"nvim-treesitter/nvim-treesitter",
-	-- 		},
-	-- 	})
-	--
-	-- 	require("go").setup()
-	-- end)
-
-	later(function()
-		add({
-			source = "scalameta/nvim-metals",
-		})
-
-		local metals_config = require("metals").bare_config()
-
-		-- Example of settings
-		metals_config.settings = {
-			showImplicitArguments = true,
-			excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
-		}
-
-		metals_config.init_options.statusBarProvider = "off"
-
-		-- Example if you are using cmp how to make sure the correct capabilities for snippets are set
-		metals_config.capabilities = require("blink.cmp").get_lsp_capabilities()
-
-		vim.api.nvim_create_autocmd("FileType", {
-			group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
-			pattern = { "scala", "sbt", "java" },
-			callback = function()
-				require("metals").initialize_or_attach(metals_config)
+later(function()
+	add({
+		source = "nvim-treesitter/nvim-treesitter",
+		-- use 'master' while monitoring updates in 'main'
+		checkout = "master",
+		-- perform action after every checkout
+		hooks = {
+			post_checkout = function()
+				vim.cmd("TsUpdate")
 			end,
-		})
-	end)
+		},
+	})
+	-- possible to immediately execute code which depends on the added plugin
+	require("nvim-treesitter.configs").setup({
+		ensure_installed = {
+			"bash",
+			"c",
+			"diff",
+			"html",
+			"lua",
+			"luadoc",
+			"markdown",
+			"markdown_inline",
+			"query",
+			"vim",
+			"vimdoc",
+			"terraform",
+			"hcl",
+			"go",
+			"gomod",
+			"gowork",
+			"gosum",
+		},
+		auto_install = true,
+		highlight = { enable = true },
+	})
+end)
 
-	-- dap
-	later(function()
-		add({
-			source = "mfussenegger/nvim-dap",
-			depends = {
-				-- Creates a beautiful debugger UI
-				"rcarriga/nvim-dap-ui",
+later(function()
+	add({
+		source = "brenoprata10/nvim-highlight-colors",
+	})
 
-				-- Required dependency for nvim-dap-ui
-				"nvim-neotest/nvim-nio",
+	require("nvim-highlight-colors").setup({})
+end)
 
-				-- Installs the debug adapters for you
-				"williamboman/mason.nvim",
-				"jay-babu/mason-nvim-dap.nvim",
+later(function()
+	add({
+		source = "MeanderingProgrammer/render-markdown.nvim",
+	})
+
+	require("render-markdown").setup({})
+end)
+
+-- later(function()
+-- 	add({
+-- 		source = "ray-x/go.nvim",
+-- 		depends = {
+-- 			"ray-x/guihua.lua",
+-- 			"neovim/nvim-lspconfig",
+-- 			"nvim-treesitter/nvim-treesitter",
+-- 		},
+-- 	})
+--
+-- 	require("go").setup()
+-- end)
+
+later(function()
+	add({
+		source = "scalameta/nvim-metals",
+	})
+
+	local metals_config = require("metals").bare_config()
+
+	-- Example of settings
+	metals_config.settings = {
+		showImplicitArguments = true,
+		excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
+	}
+
+	metals_config.init_options.statusBarProvider = "off"
+
+	-- Example if you are using cmp how to make sure the correct capabilities for snippets are set
+	metals_config.capabilities = require("blink.cmp").get_lsp_capabilities()
+
+	vim.api.nvim_create_autocmd("FileType", {
+		group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
+		pattern = { "scala", "sbt", "java" },
+		callback = function()
+			require("metals").initialize_or_attach(metals_config)
+		end,
+	})
+end)
+
+later(function()
+	add({
+		source = "pmizio/typescript-tools.nvim",
+		depends = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+	})
+
+	require("typescript-tools").setup({})
+end)
+
+later(function()
+	add({
+		source = "nvim-neotest/neotest",
+		depends = {
+			"nvim-neotest/nvim-nio",
+			"fredrikaverpil/neotest-golang",
+			"leoluz/nvim-dap-go",
+		},
+	})
+
+	require("neotest").setup({
+		adapters = {
+			["neotest-golang"] = {
+				-- Here we can set options for neotest-golang, e.g.
+				-- go_test_args = { "-v", "-race", "-count=1", "-timeout=60s" },
+				dap_go_enabled = true, -- requires leoluz/nvim-dap-go
 			},
-		})
-		local dap = require("dap")
-		local dapui = require("dapui")
+		},
+	})
+end)
 
-		require("mason-nvim-dap").setup({
-			-- Makes a best effort to setup the various debuggers with
-			-- reasonable debug configurations
-			automatic_installation = true,
+-- dap
+later(function()
+	add({
+		source = "mfussenegger/nvim-dap",
+		depends = {
+			-- Creates a beautiful debugger UI
+			"rcarriga/nvim-dap-ui",
 
-			-- You can provide additional configuration to the handlers,
-			-- see mason-nvim-dap README for more information
-			handlers = {},
+			-- Required dependency for nvim-dap-ui
+			"nvim-neotest/nvim-nio",
 
-			-- You'll need to check that you have the required things installed
-			-- online, please don't ask me how to install them :)
-			ensure_installed = {
-				-- Update this to ensure that you have the debuggers for the langs you want
-				"delve",
+			-- Installs the debug adapters for you
+			"williamboman/mason.nvim",
+			"jay-babu/mason-nvim-dap.nvim",
+			"leoluz/nvim-dap-go",
+		},
+	})
+	local dap = require("dap")
+	local dapui = require("dapui")
+
+	require("mason-nvim-dap").setup({
+		-- Makes a best effort to setup the various debuggers with
+		-- reasonable debug configurations
+		automatic_installation = true,
+
+		-- You can provide additional configuration to the handlers,
+		-- see mason-nvim-dap README for more information
+		handlers = {},
+
+		-- You'll need to check that you have the required things installed
+		-- online, please don't ask me how to install them :)
+		ensure_installed = {
+			-- Update this to ensure that you have the debuggers for the langs you want
+			"delve",
+		},
+	})
+
+	-- Dap UI setup
+	-- For more information, see |:help nvim-dap-ui|
+	dapui.setup({
+		-- Set icons to characters that are more likely to work in every terminal.
+		--    Feel free to remove or use ones that you like more! :)
+		--    Don't feel like these are good choices.
+		icons = { expanded = "▾", collapsed = "▸", current_frame = "*" },
+		controls = {
+			icons = {
+				pause = "⏸",
+				play = "▶",
+				step_into = "⏎",
+				step_over = "⏭",
+				step_out = "⏮",
+				step_back = "b",
+				run_last = "▶▶",
+				terminate = "⏹",
+				disconnect = "⏏",
 			},
-		})
+		},
+	})
 
-		-- Dap UI setup
-		-- For more information, see |:help nvim-dap-ui|
-		dapui.setup({
-			-- Set icons to characters that are more likely to work in every terminal.
-			--    Feel free to remove or use ones that you like more! :)
-			--    Don't feel like these are good choices.
-			icons = { expanded = "▾", collapsed = "▸", current_frame = "*" },
-			controls = {
-				icons = {
-					pause = "⏸",
-					play = "▶",
-					step_into = "⏎",
-					step_over = "⏭",
-					step_out = "⏮",
-					step_back = "b",
-					run_last = "▶▶",
-					terminate = "⏹",
-					disconnect = "⏏",
-				},
-			},
-		})
+	-- Change breakpoint icons
+	-- vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
+	-- vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
+	-- local breakpoint_icons = vim.g.have_nerd_font
+	--     and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
+	--   or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
+	-- for type, icon in pairs(breakpoint_icons) do
+	--   local tp = 'Dap' .. type
+	--   local hl = (type == 'Stopped') and 'DapStop' or 'DapBreak'
+	--   vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
+	-- end
 
-		-- Change breakpoint icons
-		-- vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
-		-- vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
-		-- local breakpoint_icons = vim.g.have_nerd_font
-		--     and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
-		--   or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
-		-- for type, icon in pairs(breakpoint_icons) do
-		--   local tp = 'Dap' .. type
-		--   local hl = (type == 'Stopped') and 'DapStop' or 'DapBreak'
-		--   vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
-		-- end
+	dap.listeners.after.event_initialized["dapui_config"] = dapui.open
+	dap.listeners.before.event_terminated["dapui_config"] = dapui.close
+	dap.listeners.before.event_exited["dapui_config"] = dapui.close
+end)
 
-		dap.listeners.after.event_initialized["dapui_config"] = dapui.open
-		dap.listeners.before.event_terminated["dapui_config"] = dapui.close
-		dap.listeners.before.event_exited["dapui_config"] = dapui.close
-	end)
+later(function()
+	add({
+		source = "akinsho/git-conflict.nvim",
+	})
+	add({
+		source = "neogitorg/neogit",
+		depends = {
+			"nvim-lua/plenary.nvim",
+			-- "sindrets/diffview.nvim",
+			"akinsho/git-conflict.nvim",
+			"echasnovski/mini.pick",
+		},
+	})
+	-- require("diffview").setup({
+	-- 	hooks = {
+	-- 		view_opened = function(_)
+	-- 			table.insert(MiniClue.config.clues, { mode = "n", keys = "<leader>c", desc = " conflicts" })
+	-- 		end,
+	-- 		view_closed = function(_)
+	-- 			for i, entry in ipairs(MiniClue.config.clues) do
+	-- 				if entry.mode == "n" and entry.keys == "<leader>c" and entry.desc == " conflicts" then
+	-- 					table.remove(MiniClue.config.clues, i)
+	-- 					break
+	-- 				end
+	-- 			end
+	-- 		end,
+	-- 	},
+	-- })
+	require("git-conflict").setup({})
 
-	later(function()
-		add({
-			source = "akinsho/git-conflict.nvim",
-		})
-		add({
-			source = "neogitorg/neogit",
-			depends = {
-				"nvim-lua/plenary.nvim",
-				-- "sindrets/diffview.nvim",
-				"akinsho/git-conflict.nvim",
-				"echasnovski/mini.pick",
-			},
-		})
-		-- require("diffview").setup({
-		-- 	hooks = {
-		-- 		view_opened = function(_)
-		-- 			table.insert(MiniClue.config.clues, { mode = "n", keys = "<leader>c", desc = " conflicts" })
-		-- 		end,
-		-- 		view_closed = function(_)
-		-- 			for i, entry in ipairs(MiniClue.config.clues) do
-		-- 				if entry.mode == "n" and entry.keys == "<leader>c" and entry.desc == " conflicts" then
-		-- 					table.remove(MiniClue.config.clues, i)
-		-- 					break
-		-- 				end
-		-- 			end
-		-- 		end,
-		-- 	},
-		-- })
-		require("git-conflict").setup()
+	require("neogit").setup({
+		integrations = {
+			mini_pick = true,
+			diffview = true,
+		},
+	})
 
-		require("neogit").setup({
-			integrations = {
-				mini_pick = true,
-				diffview = true,
-			},
-		})
-
-		vim.api.nvim_set_hl(0, "NeogitChangeDeleted", { fg = Utils.palette.base08, bg = "NONE" })
-	end)
+	vim.api.nvim_set_hl(0, "NeogitChangeDeleted", { fg = Utils.palette.base08, bg = "NONE" })
 end)
