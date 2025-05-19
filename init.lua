@@ -229,6 +229,10 @@ now(function()
 			["toml.tmpl"] = { glyph = "", hl = "MiniIconsGrey" },
 			["yaml.tmpl"] = { glyph = "", hl = "MiniIconsGrey" },
 			["zsh.tmpl"] = { glyph = "", hl = "MiniIconsGrey" },
+			[".go-version"] = { glyph = "", hl = "MiniIconsBlue" },
+		},
+		filetype = {
+			gotmpl = { glyph = "󰟓", hl = "MiniIconsGrey" },
 		},
 	})
 end)

@@ -217,19 +217,19 @@ end, { desc = "Debug: Set Breakpoint" })
 -- ║          DAP          ║
 -- ╚═══════════════════════╝
 local minikeymap = require('mini.keymap')
-local map_combo, map_multistep = minikeymap.map_combo, minikeymap.map_multistep
+local map_combo = minikeymap.map_combo
 map_combo({ 'n', 'x' }, 'll', 'g$')
 map_combo({ 'n', 'x' }, 'hh', 'g^')
-map_combo({ 'n', 'x' }, 'jj', '}')
-map_combo({ 'n', 'x' }, 'kk', '{')
-
-
-map_multistep('i', '<Tab>',   { 'blink_next' })
-map_multistep('i', '<S-Tab>', { 'blink_prev' })
-map_multistep('i', '<CR>',    { 'blink_accept', 'minipairs_cr' })
-map_multistep('i', '<BS>',    { 'minipairs_bs' })
--- Support most common modes. This can also contain 't', but would
--- only mean to press `<Esc>` inside terminal.
+-- map_combo({ 'n', 'x' }, 'jj', '}')
+-- map_combo({ 'n', 'x' }, 'kk', '{')
+--
+--
+-- map_multistep('i', '<Tab>',   { 'blink_next' })
+-- map_multistep('i', '<S-Tab>', { 'blink_prev' })
+-- map_multistep('i', '<CR>',    { 'blink_accept' })
+-- map_multistep('i', '<BS>',    { 'minipairs_bs' })
+-- -- Support most common modes. This can also contain 't', but would
+-- -- only mean to press `<Esc>` inside terminal.
 local mode = { 'i', 'c', 'x', 's' }
 map_combo(mode, 'jk', '<BS><BS><Esc>')
 

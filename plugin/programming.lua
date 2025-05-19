@@ -59,8 +59,7 @@ now(function()
 			},
 		},
 		keymap = {
-			preset = "enter",
-			["<C-y>"] = { "select_and_accept" },
+			preset = "default",
 		},
 		signature = { enabled = true, window = { border = "single" } },
 		completion = {
@@ -147,6 +146,7 @@ now(function()
 			lua = { "stylua" },
 			yaml = { "prettierd", "prettier" },
 			markdown = { "prettier" },
+			go = { "goimports", "gofumpt" },
 			-- Conform can also run multiple formatters sequentially
 			-- python = { "isort", "black" },
 			--
@@ -214,7 +214,43 @@ now(function()
 		--    https://github.com/pmizio/typescript-tools.nvim
 		--
 		-- but for many setups, the lsp (`ts_ls`) will work just fine
-		gopls = {},
+		gopls = {
+			settings = {
+				gopls = {
+					gofumpt = true,
+					codelenses = {
+						gc_details = false,
+						generate = true,
+						regenerate_cgo = true,
+						run_govulncheck = true,
+						test = true,
+						tidy = true,
+						upgrade_dependency = true,
+						vendor = true,
+					},
+					hints = {
+						assignVariableTypes = true,
+						compositeLiteralFields = true,
+						compositeLiteralTypes = true,
+						constantValues = true,
+						functionTypeParameters = true,
+						parameterNames = true,
+						rangeVariableTypes = true,
+					},
+					analyses = {
+						nilness = true,
+						unusedparams = true,
+						unusedwrite = true,
+						useany = true,
+					},
+					usePlaceholders = true,
+					completeUnimported = true,
+					staticcheck = true,
+					directoryFilters = { "-.git", "-.vscode", "-.idea", "-.vscode-test", "-node_modules" },
+					semanticTokens = true,
+				},
+			},
+		},
 		terraformls = {},
 		ts_ls = {},
 		basedpyright = {
@@ -246,7 +282,7 @@ now(function()
 						callsnippet = "replace",
 					},
 					-- you can toggle below to ignore lua_ls's noisy `missing-fields` warnings
-					-- diagnostics = { disable = { 'missing-fields' } },
+					diagnostics = { disable = { "missing-fields" } },
 				},
 			},
 		},
@@ -271,6 +307,11 @@ now(function()
 		"shfmt",
 		"shellcheck",
 		"taplo",
+		"goimports",
+		"gofumpt",
+		"gomodifytags",
+		"impl",
+		"delve",
 		-- "tflint",
 	})
 
@@ -326,8 +367,10 @@ now(function()
 				"vimdoc",
 				"terraform",
 				"hcl",
-				"norg",
-				"norg_meta",
+				"go",
+				"gomod",
+				"gowork",
+				"gosum",
 			},
 			auto_install = true,
 			highlight = { enable = true },
@@ -390,6 +433,36 @@ now(function()
 		})
 	end)
 
+	later(function()
+		add({
+			source = "pmizio/typescript-tools.nvim",
+			depends = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
+		})
+
+		require("typescript-tools").setup({})
+	end)
+
+	later(function()
+		add({
+			source = "nvim-neotest/neotest",
+			depends = {
+				"nvim-neotest/nvim-nio",
+				"fredrikaverpil/neotest-golang",
+				"leoluz/nvim-dap-go",
+			},
+		})
+
+		require("neotest").setup({
+			adapters = {
+				["neotest-golang"] = {
+					-- Here we can set options for neotest-golang, e.g.
+					-- go_test_args = { "-v", "-race", "-count=1", "-timeout=60s" },
+					dap_go_enabled = true, -- requires leoluz/nvim-dap-go
+				},
+			},
+		})
+	end)
+
 	-- dap
 	later(function()
 		add({
@@ -404,6 +477,7 @@ now(function()
 				-- Installs the debug adapters for you
 				"williamboman/mason.nvim",
 				"jay-babu/mason-nvim-dap.nvim",
+				"leoluz/nvim-dap-go",
 			},
 		})
 		local dap = require("dap")
@@ -493,7 +567,7 @@ now(function()
 		-- 		end,
 		-- 	},
 		-- })
-		require("git-conflict").setup()
+		require("git-conflict").setup({})
 
 		require("neogit").setup({
 			integrations = {
