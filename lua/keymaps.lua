@@ -172,7 +172,8 @@ keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'Codecompani
 -- Create a new note after asking for its title.
 keymap("n", "<leader>nn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", vim.tbl_extend('keep', opts, { desc = "New note" }))
 keymap("n", "<leader>nN", "<Cmd>ZkNewAtDir<CR>", vim.tbl_extend('keep', opts, { desc = "New note at dir" }))
-keymap("n", "<leader>nj", "<Cmd>ZkNew { dir = 'journal/daily', date = 'today' }<CR>", vim.tbl_extend('keep', opts, { desc = "New note" }))
+keymap("n", "<leader>nj", "<Cmd>ZkNew { dir = 'journal/daily', date = 'today' }<CR>", vim.tbl_extend('keep', opts, { desc = "Open todays plan" }))
+keymap("n", "<leader>nJ", "<Cmd>ZkNew { dir = 'journal/daily', date = 'tomorrow' }<CR>", vim.tbl_extend('keep', opts, { desc = "Open tomorrows plan" }))
 
 -- Open notes.
 keymap("n", "<leader>no", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", vim.tbl_extend('keep', opts, { desc = "Open notes" }))
@@ -218,6 +219,7 @@ end, { desc = "Debug: Set Breakpoint" })
 -- ╚═══════════════════════╝
 local minikeymap = require('mini.keymap')
 local map_combo = minikeymap.map_combo
+
 map_combo({ 'n', 'x' }, 'll', 'g$')
 map_combo({ 'n', 'x' }, 'hh', 'g^')
 -- map_combo({ 'n', 'x' }, 'jj', '}')
