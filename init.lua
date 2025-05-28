@@ -234,6 +234,9 @@ now(function()
 		filetype = {
 			gotmpl = { glyph = "󰟓", hl = "MiniIconsGrey" },
 		},
+		lsp = {
+			copilot = { glyph = "", hl = "MiniIconsOrange" },
+		},
 	})
 end)
 
