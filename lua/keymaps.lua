@@ -32,6 +32,9 @@ end
 -- ╚═══════════════════════╝
 keymap("n", "<leader>mu", function() require("mini.deps").update() end, { desc = "Update Plugins" })
 
+-- Copy
+keymap("n", "<C-s>", "<cmd>:w<cr>", { silent = true })
+
 -- Buffers
 keymap("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer", silent = true })
 keymap("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer", silent = true })
@@ -57,13 +60,10 @@ keymap('n', '<leader>s"', function() MiniExtra.pickers.registers() end, { desc =
 keymap('n', '<leader>st', function() MiniExtra.pickers.treesitter() end, { desc = '[S]earch [T]reesitter' })
 keymap('n', '<leader>ss', function() MiniExtra.pickers.spellsuggest() end, { desc = '[S]pelling [S]uggestions' })
 keymap('n', '<leader>sR', function() MiniPick.builtin.resume() end, { desc = '[S]earch [R]esume' })
-keymap('n', '<leader>s.', function() MiniExtra.pickers.oldfiles() end,
-    { desc = '[S]earch Recent Files ("." for repeat)' })
-keymap('n', '<leader>sc', function() MiniExtra.pickers.commands() end,
-    { desc = '[S]earch commands' })
+keymap('n', '<leader>s.', function() MiniExtra.pickers.oldfiles() end, { desc = '[S]earch Recent Files ("." for repeat)' })
+keymap('n', '<leader>sc', function() MiniExtra.pickers.commands() end, { desc = '[S]earch commands' })
 keymap('n', '<leader>sg', function() MiniPick.builtin.grep_live() end, { desc = '[S]earch by [G]rep' })
-keymap('n', '<leader>sw', function() MiniPick.builtin.grep({ pattern = vim.fn.expand('<cword>') }) end,
-    { desc = '[S]earch current [W]ord' })
+keymap('n', '<leader>sw', function() MiniPick.builtin.grep({ pattern = vim.fn.expand('<cword>') }) end, { desc = '[S]earch current [W]ord' })
 -- keymap('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
 
 -- ╔═══════════════════════╗
@@ -139,12 +139,14 @@ keymap("n", "<leader>Ss", function()
     require('mini.sessions').write()
     require('mini.sessions').select()
 end, { desc = 'Switch Session' })
+
 keymap("n", "<leader>Sw",
     function()
         local cwd = vim.fn.getcwd()
         local last_folder = cwd:match("([^/]+)$")
         require('mini.sessions').write(last_folder)
     end, { desc = 'Save Session' })
+
 keymap("n", "<leader>Sf", function()
     vim.cmd('wa')
     require('mini.sessions').select()
