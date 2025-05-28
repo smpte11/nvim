@@ -86,9 +86,11 @@ now(function()
 					score_offset = 100,
 					async = true,
 					transform_items = function(_, items)
+						local CompletionItemKind = require("blink.cmp.types").CompletionItemKind
+						local kind_idx = #CompletionItemKind + 1
+						CompletionItemKind[kind_idx] = "Copilot"
 						for _, item in ipairs(items) do
-							item.kind_icon = ""
-							item.kind_name = "Copilot"
+							item.kind = kind_idx
 						end
 						return items
 					end,
@@ -112,38 +114,20 @@ now(function()
 					},
 					components = {
 						kind_icon = {
-							-- customize the drawing of kind icons
-							ellipsis = false,
 							text = function(ctx)
-								-- default kind icon
 								local kind_icon, _, _ = require("mini.icons").get("lsp", ctx.kind)
-								-- if LSP source, check for color derived from documentation
-								if ctx.item.source_name == "LSP" then
-									local color_item = require("nvim-highlight-colors").format(
-										ctx.item.documentation,
-										{ kind = ctx.kind }
-									)
-									if color_item and color_item.abbr then
-										kind_icon = color_item.abbr
-									end
-								end
-								return kind_icon .. ctx.icon_gap
+								return kind_icon
 							end,
+							-- (optional) use highlights from mini.icons
 							highlight = function(ctx)
-								-- default highlight group
 								local _, hl, _ = require("mini.icons").get("lsp", ctx.kind)
-								local highlight = "BlinkCmpKind" .. hl
-								-- if LSP source, check for color derived from documentation
-								if ctx.item.source_name == "LSP" then
-									local color_item = require("nvim-highlight-colors").format(
-										ctx.item.documentation,
-										{ kind = ctx.kind }
-									)
-									if color_item and color_item.abbr_hl_group then
-										highlight = color_item.abbr_hl_group
-									end
-								end
-								return highlight
+								return hl
+							end,
+						},
+						kind = {
+							highlight = function(ctx)
+								local _, hl, _ = require("mini.icons").get("lsp", ctx.kind)
+								return hl
 							end,
 						},
 					},

@@ -234,6 +234,9 @@ now(function()
 		filetype = {
 			gotmpl = { glyph = "󰟓", hl = "MiniIconsGrey" },
 		},
+		lsp = {
+			copilot = { glyph = "", hl = "MiniIconsOrange" },
+		},
 	})
 end)
 
@@ -451,9 +454,6 @@ later(function()
 	require("mini.jump2d").setup({
 		allowed_windows = {
 			not_current = false,
-		},
-		mappings = {
-			start_jumping = "<C-M-j>",
 		},
 	})
 	vim.api.nvim_set_hl(0, "MiniJump2dSpot", { reverse = true })

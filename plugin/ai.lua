@@ -5,7 +5,10 @@ later(function()
 		source = "zbirenbaum/copilot.lua",
 	})
 
-	require("copilot").setup({})
+	require("copilot").setup({
+		suggestion = { enabled = false },
+		panel = { enabled = false },
+	})
 
 	add({
 		source = "olimorris/codecompanion.nvim",

@@ -129,8 +129,10 @@ keymap("n", "<leader>lr", vim.lsp.buf.rename, { desc = "[L]sp [R]ename" })
 -- or a suggestion from your LSP for this to activate.
 keymap({ "n", "x" }, "<leader>la", vim.lsp.buf.code_action, { desc = "[C]ode [A]ction" })
 
-keymap("n", "<leader>lf", function() require('conform').format { async = true, lsp_format = "fallback" } end,
-    { desc = "[L]sp [F]ormat" })
+keymap("n", "<leader>lf", function() require('conform').format { async = true, lsp_format = "fallback" } end, { desc = "[L]sp [F]ormat" })
+
+
+keymap("n", "<leader>le", function() vim.diagnostic.open_float() end, { desc = "[L]sp [E]rror" })
 -- ╔═══════════════════════╗
 -- ║    Session Keymaps    ║
 -- ╚═══════════════════════╝
