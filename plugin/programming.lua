@@ -61,6 +61,7 @@ now(function()
 		source = "saghen/blink.cmp",
 		depends = {
 			"giuxtaposition/blink-cmp-copilot",
+			"Kaiser-Yang/blink-cmp-git",
 		},
 		checkout = "v0.11.0",
 	})
@@ -93,6 +94,13 @@ now(function()
 							item.kind = kind_idx
 						end
 						return items
+					end,
+				},
+				git = {
+					module = "blink-cmp-git",
+					name = "Git",
+					enabled = function()
+						return vim.tbl_contains({ "octo", "gitcommit", "markdown" }, vim.bo.filetype)
 					end,
 				},
 			},
@@ -602,4 +610,17 @@ later(function()
 	})
 
 	vim.api.nvim_set_hl(0, "NeogitChangeDeleted", { fg = Utils.palette.base08, bg = "NONE" })
+end)
+
+later(function()
+	add({
+		source = "pwntester/octo.nvim",
+		depends = {
+			"nvim-lua/plenary.nvim",
+			"folke/snacks.nvim",
+		},
+	})
+	require("octo").setup({
+		picker = "snacks",
+	})
 end)

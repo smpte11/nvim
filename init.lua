@@ -24,12 +24,6 @@ require("mini.deps").setup({ path = { package = path_package } })
 -- startup and are optional.
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
--- Add nvim-octo/octo.nvim
-now(function()
-  add("nvim-octo/octo.nvim")
-  require('octo').setup({})
-end)
-
 --          ┌─────────────────────────────────────────────────────────┐
 --			          Loading now
 --          └─────────────────────────────────────────────────────────┘
@@ -360,6 +354,7 @@ now(function()
 			{ mode = "n", keys = "<leader>d", desc = " debug" },
 			{ mode = "n", keys = "<leader>s", desc = " search" },
 			{ mode = "n", keys = "<leader>g", desc = "󰊢 git" },
+			{ mode = "n", keys = "<leader>go", desc = " octo" },
 			{ mode = "n", keys = "<leader>i", desc = "󰏪 insert" },
 			{ mode = "n", keys = "<leader>l", desc = "󰘦 lsp" },
 			{ mode = "n", keys = "<leader>m", desc = " mini" },

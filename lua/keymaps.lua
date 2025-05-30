@@ -227,7 +227,7 @@ keymap("n", "<leader>dB", function()
 end, { desc = "Debug: Set Breakpoint" })
 
 -- ╔═══════════════════════╗
--- ║          DAP          ║
+-- ║        COMBOS         ║
 -- ╚═══════════════════════╝
 local minikeymap = require('mini.keymap')
 local map_combo = minikeymap.map_combo
