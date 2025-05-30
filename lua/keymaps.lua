@@ -75,6 +75,14 @@ keymap("n", "<leader>gb", function () MiniExtra.pickers.git_branches() end, { de
 keymap("n", "<leader>gc", function () MiniExtra.pickers.git_commits() end, { desc = "[Git] [C]ommits" })
 keymap("n", "<leader>gh", function () MiniExtra.pickers.git_hunks() end, { desc = "[Git] [H]unks" })
 
+-- Octo / GitHub
+keymap("n", "<leader>goo", "<cmd>Octo actions<cr>", { desc = "[Git] Octo Actions" })
+keymap("n", "<leader>gop", "<cmd>Octo pr list<cr>", { desc = "[Git] Octo PR List" })
+keymap("n", "<leader>goi", "<cmd>Octo issue list<cr>", { desc = "[Git] Octo Issue List" })
+keymap("n", "<leader>goc", "<cmd>Octo issue create<cr>", { desc = "[Git] Octo Create Issue" })
+keymap("n", "<leader>gor", "<cmd>Octo review list<cr>", { desc = "[Git] Octo Review List" })
+keymap("n", "<leader>goR", "<cmd>Octo review start<cr>", { desc = "[Git] Octo Start Review" })
+keymap("n", "<leader>gos", "<cmd>Octo review submit<cr>", { desc = "[Git] Octo Submit Review" })
 
 -- ╔═══════════════════════╗
 -- ║	      UI           ║
@@ -220,7 +228,7 @@ keymap("n", "<leader>dB", function()
 end, { desc = "Debug: Set Breakpoint" })
 
 -- ╔═══════════════════════╗
--- ║          DAP          ║
+-- ║        COMBOS         ║
 -- ╚═══════════════════════╝
 local minikeymap = require('mini.keymap')
 local map_combo = minikeymap.map_combo
