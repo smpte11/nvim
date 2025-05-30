@@ -133,6 +133,7 @@ keymap('n', '<leader>up', function() MiniExtra.pickers.explorer() end, { desc = 
 
 
 -- keymap("n", "<leader>le", function() vim.diagnostic.open_float() end, { desc = "[L]sp [E]rror" })
+
 -- ╔═══════════════════════╗
 -- ║    Session Keymaps    ║
 -- ╚═══════════════════════╝
