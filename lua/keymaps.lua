@@ -89,50 +89,50 @@ keymap('n', '<leader>up', function() MiniExtra.pickers.explorer() end, { desc = 
 -- Jump to the definition of the word under your cursor.
 --  This is where a variable was first declared, or where a function is defined, etc.
 --  To jump back, press <C-t>.
-keymap("n", "gd", function() MiniExtra.pickers.lsp({ scope = "definition" }) end, { desc = "[G]oto [D]efinition" })
+-- keymap("n", "gd", function() MiniExtra.pickers.lsp({ scope = "definition" }) end, { desc = "[G]oto [D]efinition" })
 
 -- WARN: This is not Goto Definition, this is Goto Declaration.
 --  For example, in C this would take you to the header.
-keymap("n", "gD", vim.lsp.buf.declaration, { desc = "[G]oto [D]eclaration" })
+-- keymap("n", "gD", vim.lsp.buf.declaration, { desc = "[G]oto [D]eclaration" })
 
 -- Find references for the word under your cursor.
-keymap("n", "gr", function() MiniExtra.pickers.lsp({ scope = "references" }) end, { desc = "[G]oto [R]eferences" })
+-- keymap("n", "gr", function() MiniExtra.pickers.lsp({ scope = "references" }) end, { desc = "[G]oto [R]eferences" })
 
 -- jump to the implementation of the word under your cursor.
 --  useful when your language has ways of declaring types without an actual implementation.
-keymap("n", "gi", function() MiniExtra.pickers.lsp({ scope = "implementation" }) end,
-    { desc = "[G]oto [I]mplementation" })
+-- keymap("n", "gi", function() MiniExtra.pickers.lsp({ scope = "implementation" }) end,
+    -- { desc = "[G]oto [I]mplementation" })
 
 -- jump to the type of the word under your cursor.
 --  useful when you're not sure what type a variable is and you want to see
 --  the definition of its *type*, not where it was *defined*.
 
 -- todo: look into keymapping this the same as lazyvim
-keymap("n", "<leader>lD", function() MiniExtra.pickers.lsp({ scope = "type_definition" }) end,
-    { desc = "[L]sp Type [D]efinition" })
+-- keymap("n", "<leader>lD", function() MiniExtra.pickers.lsp({ scope = "type_definition" }) end,
+    -- { desc = "[L]sp Type [D]efinition" })
 
 -- Fuzzy find all the symbols in your current document.
 --  Symbols are things like variables, functions, types, etc.
-keymap("n", "<leader>ls", function() MiniExtra.pickers.lsp({ scope = "document_symbol" }) end,
-    { desc = "[L]sp Document [S]ymbols" })
+-- keymap("n", "<leader>ls", function() MiniExtra.pickers.lsp({ scope = "document_symbol" }) end,
+    -- { desc = "[L]sp Document [S]ymbols" })
 
 -- Fuzzy find all the symbols in your current workspace.
 --  Similar to document symbols, except searches over your entire project.
-keymap("n", "<leader>lW", function() MiniExtra.pickers.lsp({ scope = "workspace_symbol" }) end,
-    { desc = "[L]sp workspace [S]ymbols" })
+-- keymap("n", "<leader>lW", function() MiniExtra.pickers.lsp({ scope = "workspace_symbol" }) end,
+    -- { desc = "[L]sp workspace [S]ymbols" })
 
 -- Rename the variable under your cursor.
 --  Most Language Servers support renaming across files, etc.
-keymap("n", "<leader>lr", vim.lsp.buf.rename, { desc = "[L]sp [R]ename" })
+-- keymap("n", "<leader>lr", vim.lsp.buf.rename, { desc = "[L]sp [R]ename" })
 
 -- Execute a code action, usually your cursor needs to be on top of an error
 -- or a suggestion from your LSP for this to activate.
-keymap({ "n", "x" }, "<leader>la", vim.lsp.buf.code_action, { desc = "[C]ode [A]ction" })
+-- keymap({ "n", "x" }, "<leader>la", vim.lsp.buf.code_action, { desc = "[C]ode [A]ction" })
 
-keymap("n", "<leader>lf", function() require('conform').format { async = true, lsp_format = "fallback" } end, { desc = "[L]sp [F]ormat" })
+-- keymap("n", "<leader>lf", function() require('conform').format { async = true, lsp_format = "fallback" } end, { desc = "[L]sp [F]ormat" })
 
 
-keymap("n", "<leader>le", function() vim.diagnostic.open_float() end, { desc = "[L]sp [E]rror" })
+-- keymap("n", "<leader>le", function() vim.diagnostic.open_float() end, { desc = "[L]sp [E]rror" })
 -- ╔═══════════════════════╗
 -- ║    Session Keymaps    ║
 -- ╚═══════════════════════╝
