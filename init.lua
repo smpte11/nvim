@@ -455,9 +455,6 @@ later(function()
 		allowed_windows = {
 			not_current = false,
 		},
-		mappings = {
-			start_jumping = "<C-M-j>",
-		},
 	})
 	vim.api.nvim_set_hl(0, "MiniJump2dSpot", { reverse = true })
 end)
