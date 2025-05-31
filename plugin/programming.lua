@@ -614,13 +614,14 @@ end)
 
 later(function()
 	add({
-		source = "pwntester/octo.nvim",
+		source = "smpte11/octo.nvim",
 		depends = {
 			"nvim-lua/plenary.nvim",
-			"folke/snacks.nvim",
+			"echasnovski/mini.pick",
 		},
+		checkout = "feat/add-mini-picker-provider",
 	})
 	require("octo").setup({
-		picker = "snacks",
+		picker = "mini_picker",
 	})
 end)
