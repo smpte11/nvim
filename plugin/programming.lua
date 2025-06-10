@@ -372,6 +372,24 @@ now(function()
 	})
 end)
 
+now(function()
+	add({
+		source = "kawre/leetcode.nvim",
+		depends = {
+			"ibhagwan/fzf-lua",
+			"nvim-lua/plenary.nvim",
+			"MunifTanjim/nui.nvim",
+		},
+		hooks = {
+			post_checkout = function()
+				vim.cmd("TsUpdate html")
+			end,
+		},
+	})
+
+	require("leetcode").setup({})
+end)
+
 later(function()
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
