@@ -592,33 +592,29 @@ end)
 
 later(function()
 	add({
-		source = "akinsho/git-conflict.nvim",
-	})
-	add({
 		source = "neogitorg/neogit",
 		depends = {
 			"nvim-lua/plenary.nvim",
-			-- "sindrets/diffview.nvim",
+			"sindrets/diffview.nvim",
 			"akinsho/git-conflict.nvim",
 			"echasnovski/mini.pick",
 		},
 	})
-	-- require("diffview").setup({
-	-- 	hooks = {
-	-- 		view_opened = function(_)
-	-- 			table.insert(MiniClue.config.clues, { mode = "n", keys = "<leader>c", desc = " conflicts" })
-	-- 		end,
-	-- 		view_closed = function(_)
-	-- 			for i, entry in ipairs(MiniClue.config.clues) do
-	-- 				if entry.mode == "n" and entry.keys == "<leader>c" and entry.desc == " conflicts" then
-	-- 					table.remove(MiniClue.config.clues, i)
-	-- 					break
-	-- 				end
-	-- 			end
-	-- 		end,
-	-- 	},
-	-- })
-	require("git-conflict").setup({})
+	require("diffview").setup({
+		hooks = {
+			view_opened = function(_)
+				table.insert(MiniClue.config.clues, { mode = "n", keys = "<leader>c", desc = " conflicts" })
+			end,
+			view_closed = function(_)
+				for i, entry in ipairs(MiniClue.config.clues) do
+					if entry.mode == "n" and entry.keys == "<leader>c" and entry.desc == " conflicts" then
+						table.remove(MiniClue.config.clues, i)
+						break
+					end
+				end
+			end,
+		},
+	})
 
 	require("neogit").setup({
 		integrations = {
