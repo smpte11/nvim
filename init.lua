@@ -361,6 +361,7 @@ now(function()
 			{ mode = "n", keys = "<leader>n", desc = " notes" },
 			{ mode = "n", keys = "<leader>q", desc = " nvim" },
 			{ mode = "n", keys = "<leader>S", desc = "󰆓 session" },
+			{ mode = "n", keys = "<leader>t", desc = " toggles" },
 			{ mode = "n", keys = "<leader>u", desc = "󰔃 ui" },
 			{ mode = "n", keys = "<leader>v", desc = " visit" },
 			{ mode = "n", keys = "<leader>w", desc = " window" },

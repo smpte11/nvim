@@ -1,3 +1,5 @@
+vim.g.copilot_is_active = false -- Ensure this line is present
+
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
 later(function()
@@ -5,6 +7,7 @@ later(function()
 		source = "zbirenbaum/copilot.lua",
 	})
 
+	-- Simplified copilot setup
 	require("copilot").setup({
 		suggestion = { enabled = false },
 		panel = { enabled = false },

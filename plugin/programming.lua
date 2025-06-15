@@ -86,6 +86,12 @@ now(function()
 					module = "blink-cmp-copilot",
 					score_offset = 100,
 					async = true,
+					enabled = function()
+						if vim.g.copilot_is_active == nil then
+							return false
+						end
+						return vim.g.copilot_is_active == true
+					end,
 					transform_items = function(_, items)
 						local CompletionItemKind = require("blink.cmp.types").CompletionItemKind
 						local kind_idx = #CompletionItemKind + 1
