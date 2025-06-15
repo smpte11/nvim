@@ -387,7 +387,9 @@ now(function()
 		},
 	})
 
-	require("leetcode").setup({})
+	require("leetcode").setup({
+		lang = "python3",
+	})
 end)
 
 later(function()
@@ -619,6 +621,9 @@ later(function()
 	require("neogit").setup({
 		integrations = {
 			mini_pick = true,
+			fzf_lua = nil,
+			telescope = nil,
+			snacks = nil,
 			diffview = true,
 		},
 	})
