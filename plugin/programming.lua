@@ -183,7 +183,7 @@ now(function()
 		formatters_by_ft = {
 			lua = { "stylua" },
 			yaml = { "prettierd", "prettier" },
-			markdown = { "prettier" },
+			markdown = { "prettierd", "prettier" },
 			go = { "goimports", "gofumpt" },
 			-- Conform can also run multiple formatters sequentially
 			-- python = { "isort", "black" },

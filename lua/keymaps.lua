@@ -18,20 +18,16 @@ local insert_uuid = function()
 	end
 end
 
-local toggle_copilot_suggestions = function()
-	require("copilot.suggestion").toggle_auto_trigger()
-end
-
 local toggle_blink_copilot_source_func = function()
-    if vim.g.copilot_is_active == nil then
-        vim.g.copilot_is_active = false -- Initialize if nil
-    end
-    vim.g.copilot_is_active = not vim.g.copilot_is_active
-    if vim.g.copilot_is_active then
-        print("blink.cmp Copilot source: Enabled")
-    else
-        print("blink.cmp Copilot source: Disabled")
-    end
+	if vim.g.copilot_is_active == nil then
+		vim.g.copilot_is_active = false -- Initialize if nil
+	end
+	vim.g.copilot_is_active = not vim.g.copilot_is_active
+	if vim.g.copilot_is_active then
+		print("blink.cmp Copilot source: Enabled")
+	else
+		print("blink.cmp Copilot source: Disabled")
+	end
 end
 
 local split_sensibly = function()
@@ -198,7 +194,6 @@ keymap("n", "<leader>t", toggle_blink_copilot_source_func, { desc = "Toggle blin
 -- ╔═══════════════════════╗
 -- ║         Notes         ║
 -- ╚═══════════════════════╝
-
 -- Create a new note after asking for its title.
 keymap("n", "<leader>nn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", vim.tbl_extend('keep', opts, { desc = "New note" }))
 keymap("n", "<leader>nN", "<Cmd>ZkNewAtDir<CR>", vim.tbl_extend('keep', opts, { desc = "New note at dir" }))
@@ -214,6 +209,12 @@ keymap("n", "<leader>nt", "<Cmd>ZkTags<CR>", vim.tbl_extend('keep', opts, { desc
 keymap("n", "<leader>nf", "<Cmd>ZkNotes { sort = { 'modified' }, match = { vim.fn.input('Search: ') } }<CR>", vim.tbl_extend('keep', opts, { desc = "Search notes" }))
 -- Search for the notes matching the current visual selection.
 keymap("v", "<leader>nf", ":'<,'>ZkMatch<CR>", vim.tbl_extend('keep', opts, { desc = 'Search notes'}))
+
+
+-- ╔═══════════════════════╗
+-- ║        Toggle         ║
+-- ╚═══════════════════════╝
+keymap("n", "<leader>tc", function () toggle_blink_copilot_source_func() end, vim.tbl_extend('keep', opts, { desc = "[T]oggle [C]opilot" }))
 
 
 -- ╔═══════════════════════╗
