@@ -18,6 +18,22 @@ local insert_uuid = function()
 	end
 end
 
+local toggle_copilot_suggestions = function()
+	require("copilot.suggestion").toggle_auto_trigger()
+end
+
+local toggle_blink_copilot_source_func = function()
+    if vim.g.copilot_is_active == nil then
+        vim.g.copilot_is_active = false -- Initialize if nil
+    end
+    vim.g.copilot_is_active = not vim.g.copilot_is_active
+    if vim.g.copilot_is_active then
+        print("blink.cmp Copilot source: Enabled")
+    else
+        print("blink.cmp Copilot source: Disabled")
+    end
+end
+
 local split_sensibly = function()
 	if vim.api.nvim_win_get_width(0) > math.floor(vim.api.nvim_win_get_height(0) * 2.3) then
 		vim.cmd("vs")
@@ -177,6 +193,7 @@ keymap("n", "<Esc>", "<cmd>noh<cr>", { desc = 'Clear Search' })
 -- ║          AI           ║
 -- ╚═══════════════════════╝
 keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'Codecompanion [A]i [A]actions'})
+keymap("n", "<leader>t", toggle_blink_copilot_source_func, { desc = "Toggle blink.cmp Copilot Source" })
 
 -- ╔═══════════════════════╗
 -- ║         Notes         ║
