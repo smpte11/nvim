@@ -95,11 +95,34 @@ later(function()
 					end
 				end
 			end
+			table.insert(items, { text = "(Select current: " .. vim.fn.fnamemodify(current_path_abs, ":~") .. ")", path = current_path_abs, is_current_dir_selection = true, is_dir = true })
 			return items
 		end
 
 		local current_picker_path = notedir -- Path the picker is currently showing
-		local chosen_final_dir = nil
+
+		local _handle_final_directory_selection = function(selected_dir_path)
+			if selected_dir_path == nil then
+				vim.notify("No directory selected. Note creation cancelled.", vim.log.levels.INFO)
+				return
+			end
+
+			local dir_to_use = selected_dir_path
+			-- Normalize path (e.g., remove trailing slash)
+			if string.sub(dir_to_use, -1) == "/" and #dir_to_use > 1 then -- Avoid turning "/" into ""
+				dir_to_use = string.sub(dir_to_use, 1, -2)
+			end
+
+			-- This notification can be removed if it's too verbose, or kept for debugging
+			-- vim.notify("Selected directory for zk: '" .. dir_to_use .. "'", vim.log.levels.INFO)
+
+			local note_title = vim.fn.input("Title: ")
+			if note_title == nil or note_title == "" then
+				vim.notify("Title cannot be empty. Note creation cancelled.", vim.log.levels.WARN)
+				return
+			end
+			zk.new({ dir = dir_to_use, title = note_title })
+		end
 
 		-- Recursive function to show picker for a given path
 		local show_picker_for_path
@@ -107,24 +130,6 @@ later(function()
 			current_picker_path = path_to_show -- Update current path being viewed
 
 			local picker_items = get_directory_items(path_to_show)
-			if #picker_items == 0 and path_to_show == notedir then
-				-- If no items at root and we are at root, maybe no subdirs exist.
-				-- Offer to select current notedir or cancel.
-				table.insert(picker_items, {
-					text = "(Select this directory: " .. vim.fn.fnamemodify(path_to_show, ":~") .. ")",
-					path = path_to_show,
-					is_selectable_current = true, -- Special type for this case
-					is_dir = true,
-				})
-			elseif #picker_items == 0 then
-				vim.notify(
-					"No subdirectories found in "
-						.. vim.fn.fnamemodify(path_to_show, ":~")
-						.. ". You can select this directory or go up.",
-					vim.log.levels.INFO
-				)
-				-- User can use Shift-Enter to select current_picker_path or go up if parent link is there.
-			end
 
 			MiniPick.start({
 				source = {
@@ -136,22 +141,21 @@ later(function()
 						-- Our items have a .text and .path field, which default_show can use.
 						MiniPick.default_show(buf_id, items_arr, query, { show_icons = true })
 					end,
-					choose = function(selected_item) -- Called on <CR>
-						if selected_item == nil then
-							return true
-						end -- Abort picker if item is nil (e.g. Esc pressed)
+					choose = function(selected_item)
+						if selected_item == nil then return false end -- Esc pressed, stop picker
 
-						if
-							selected_item.is_parent_link
-							or (selected_item.is_dir and not selected_item.is_selectable_current)
-						then
-							show_picker_for_path(selected_item.path) -- Navigate
-							return false -- Stop current picker, new one will start
-						elseif selected_item.is_selectable_current then -- Selected the '(Select this directory ...)' item
-							chosen_final_dir = selected_item.path
-							return true -- Stop picker, selection made
+						if selected_item.is_current_dir_selection then
+							_handle_final_directory_selection(selected_item.path)
+							return false -- Stop picker, selection processed
+						elseif selected_item.is_parent_link then
+							show_picker_for_path(selected_item.path)
+							return false -- Stop current picker, new one will start for parent path
+						elseif selected_item.is_dir then -- This implies it's a navigable subdirectory
+							show_picker_for_path(selected_item.path)
+							return false -- Stop current picker, new one will start for subdir
 						end
-						return true -- Keep picker open by default if no action taken
+						-- Default action if no specific handling: stop the picker.
+						return false
 					end,
 				},
 				mappings = {
@@ -161,8 +165,8 @@ later(function()
 							-- If current picker view has no items (other than parent link),
 							-- it means we are in an empty dir. Allow selecting it.
 							-- Or if user wants to select the directory they are currently viewing.
-							chosen_final_dir = current_picker_path
-							return true -- Stop picker, selection made
+							_handle_final_directory_selection(current_picker_path)
+							return false -- Stop picker, selection processed
 						end,
 					},
 				},
@@ -170,19 +174,5 @@ later(function()
 		end
 
 		show_picker_for_path(notedir) -- Start the picker
-
-		if chosen_final_dir ~= nil then
-			local dir_to_use = chosen_final_dir
-			-- Normalize path (e.g., remove trailing slash)
-			if string.sub(dir_to_use, -1) == "/" and #dir_to_use > 1 then -- Avoid turning "/" into ""
-				dir_to_use = string.sub(dir_to_use, 1, -2)
-			end
-
-			vim.notify("Final selected dir for zk: '" .. dir_to_use .. "'")
-			zk.new({ dir = dir_to_use, title = vim.fn.input("Title: ") })
-		else
-			vim.notify("Note creation cancelled.", vim.log.levels.INFO)
-			return
-		end
 	end)
 end)
