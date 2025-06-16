@@ -374,12 +374,13 @@ end)
 
 now(function()
 	add({
-		source = "kawre/leetcode.nvim",
+		source = "smpte11/leetcode.nvim",
 		depends = {
-			"ibhagwan/fzf-lua",
+			"echasnovski/mini.pick",
 			"nvim-lua/plenary.nvim",
 			"MunifTanjim/nui.nvim",
 		},
+		checkout = "feat-mini-pick-provider",
 		hooks = {
 			post_checkout = function()
 				vim.cmd("TsUpdate html")
