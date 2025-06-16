@@ -36,15 +36,152 @@ later(function()
 
 	commands.add("ZkNewAtDir", function(options)
 		options = options or {}
-
 		local notedir = vim.env.ZK_NOTEBOOK_DIR
+		if notedir == nil or notedir == "" then
+			vim.notify("ZK_NOTEBOOK_DIR is not set.", vim.log.levels.ERROR)
+			return
+		end
 
-		local dir = MiniPick.registry.directories(notedir)
+		-- Helper function to get directory items for the picker
+		local get_directory_items = function(current_path_abs)
+			local items = {}
+			-- Add ".. (Parent)" navigation item if not at the notedir root
+			-- Ensure paths are compared reliably (e.g. by resolving them)
+			local resolved_current_path = vim.fn.resolve(current_path_abs)
+			local resolved_notedir = vim.fn.resolve(notedir)
 
-		if dir ~= nil then
-			vim.notify("Creating new note in" .. dir)
-			zk.new({ dir = dir, title = vim.fn.input("Title: ") })
+			if resolved_current_path ~= resolved_notedir then
+				local parent_path = vim.fn.fnamemodify(current_path_abs, ":h")
+				local resolved_parent_path = vim.fn.resolve(parent_path) -- Resolve for comparison
+				-- Ensure parent_path is not empty or root before adding, and is above or at notedir
+				if
+					parent_path ~= ""
+					and parent_path ~= current_path_abs
+					and vim.startswith(resolved_current_path, resolved_notedir)
+					and #resolved_parent_path >= #resolved_notedir
+				then
+					table.insert(items, {
+						text = ".. (Parent Directory)",
+						path = parent_path,
+						is_parent_link = true,
+						is_dir = true, -- Treat parent link as a directory for navigation purposes
+					})
+				end
+			end
+
+			-- Read current_path, add subdirectories
+			-- vim.fn.readdir can error if dir is not readable, use pcall
+			local ok, dir_contents = pcall(vim.fn.readdir, current_path_abs)
+			if not ok or dir_contents == nil then
+				vim.notify("Error reading directory: " .. current_path_abs, vim.log.levels.WARN)
+				-- Return items collected so far (e.g., parent link) or empty if none
+				return items
+			end
+
+			-- Sort directory contents for consistent order
+			table.sort(dir_contents)
+
+			for _, name in ipairs(dir_contents) do
+				-- Ignore hidden directories (starting with .)
+				if not vim.startswith(name, ".") then
+					local full_item_path = current_path_abs .. "/" .. name
+					-- Ensure it's actually a directory
+					if vim.fn.isdirectory(full_item_path) == 1 then
+						table.insert(items, {
+							text = name,
+							path = full_item_path,
+							is_dir = true,
+						})
+					end
+				end
+			end
+			return items
+		end
+
+		local current_picker_path = notedir -- Path the picker is currently showing
+		local chosen_final_dir = nil
+
+		-- Recursive function to show picker for a given path
+		local show_picker_for_path
+		show_picker_for_path = function(path_to_show)
+			current_picker_path = path_to_show -- Update current path being viewed
+
+			local picker_items = get_directory_items(path_to_show)
+			if #picker_items == 0 and path_to_show == notedir then
+				-- If no items at root and we are at root, maybe no subdirs exist.
+				-- Offer to select current notedir or cancel.
+				table.insert(picker_items, {
+					text = "(Select this directory: " .. vim.fn.fnamemodify(path_to_show, ":~") .. ")",
+					path = path_to_show,
+					is_selectable_current = true, -- Special type for this case
+					is_dir = true,
+				})
+			elseif #picker_items == 0 then
+				vim.notify(
+					"No subdirectories found in "
+						.. vim.fn.fnamemodify(path_to_show, ":~")
+						.. ". You can select this directory or go up.",
+					vim.log.levels.INFO
+				)
+				-- User can use Shift-Enter to select current_picker_path or go up if parent link is there.
+			end
+
+			MiniPick.start({
+				source = {
+					items = picker_items,
+					name = "Select Directory (Current: " .. vim.fn.fnamemodify(path_to_show, ":~") .. ")",
+					cwd = path_to_show,
+					show = function(buf_id, items_arr, query)
+						-- Use MiniPick.default_show, attempting to show icons.
+						-- Our items have a .text and .path field, which default_show can use.
+						MiniPick.default_show(buf_id, items_arr, query, { show_icons = true })
+					end,
+					choose = function(selected_item) -- Called on <CR>
+						if selected_item == nil then
+							return true
+						end -- Abort picker if item is nil (e.g. Esc pressed)
+
+						if
+							selected_item.is_parent_link
+							or (selected_item.is_dir and not selected_item.is_selectable_current)
+						then
+							show_picker_for_path(selected_item.path) -- Navigate
+							return false -- Stop current picker, new one will start
+						elseif selected_item.is_selectable_current then -- Selected the '(Select this directory ...)' item
+							chosen_final_dir = selected_item.path
+							return true -- Stop picker, selection made
+						end
+						return true -- Keep picker open by default if no action taken
+					end,
+				},
+				mappings = {
+					select_current_dir = {
+						char = "<S-CR>", -- Shift-Enter
+						func = function()
+							-- If current picker view has no items (other than parent link),
+							-- it means we are in an empty dir. Allow selecting it.
+							-- Or if user wants to select the directory they are currently viewing.
+							chosen_final_dir = current_picker_path
+							return true -- Stop picker, selection made
+						end,
+					},
+				},
+			})
+		end
+
+		show_picker_for_path(notedir) -- Start the picker
+
+		if chosen_final_dir ~= nil then
+			local dir_to_use = chosen_final_dir
+			-- Normalize path (e.g., remove trailing slash)
+			if string.sub(dir_to_use, -1) == "/" and #dir_to_use > 1 then -- Avoid turning "/" into ""
+				dir_to_use = string.sub(dir_to_use, 1, -2)
+			end
+
+			vim.notify("Final selected dir for zk: '" .. dir_to_use .. "'")
+			zk.new({ dir = dir_to_use, title = vim.fn.input("Title: ") })
 		else
+			vim.notify("Note creation cancelled.", vim.log.levels.INFO)
 			return
 		end
 	end)
