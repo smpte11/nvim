@@ -34,6 +34,44 @@ now(function()
 end)
 
 now(function()
+	add({
+		source = "nvim-treesitter/nvim-treesitter",
+		-- use 'master' while monitoring updates in 'main'
+		checkout = "master",
+		-- perform action after every checkout
+		hooks = {
+			post_checkout = function()
+				vim.cmd("tsupdate")
+			end,
+		},
+	})
+	-- possible to immediately execute code which depends on the added plugin
+	require("nvim-treesitter.configs").setup({
+		ensure_installed = {
+			"bash",
+			"c",
+			"diff",
+			"html",
+			"lua",
+			"luadoc",
+			"markdown",
+			"markdown_inline",
+			"query",
+			"vim",
+			"vimdoc",
+			"terraform",
+			"hcl",
+			"go",
+			"gomod",
+			"gowork",
+			"gosum",
+		},
+		auto_install = true,
+		highlight = { enable = true },
+	})
+end)
+
+now(function()
 	-- Use other plugins with `add()`. It ensures plugin is available in current
 	-- session (installs if absent)
 	add({
@@ -380,54 +418,16 @@ now(function()
 			"nvim-lua/plenary.nvim",
 			"MunifTanjim/nui.nvim",
 		},
-		checkout = "feat-mini-pick-provider",
+		checkout = "fix/mini-pick-resolution-check",
 		hooks = {
 			post_checkout = function()
-				vim.cmd("TsUpdate html")
+				-- vim.cmd("TsUpdate html")
 			end,
 		},
 	})
 
 	require("leetcode").setup({
 		lang = "python3",
-	})
-end)
-
-later(function()
-	add({
-		source = "nvim-treesitter/nvim-treesitter",
-		-- use 'master' while monitoring updates in 'main'
-		checkout = "master",
-		-- perform action after every checkout
-		hooks = {
-			post_checkout = function()
-				vim.cmd("TsUpdate")
-			end,
-		},
-	})
-	-- possible to immediately execute code which depends on the added plugin
-	require("nvim-treesitter.configs").setup({
-		ensure_installed = {
-			"bash",
-			"c",
-			"diff",
-			"html",
-			"lua",
-			"luadoc",
-			"markdown",
-			"markdown_inline",
-			"query",
-			"vim",
-			"vimdoc",
-			"terraform",
-			"hcl",
-			"go",
-			"gomod",
-			"gowork",
-			"gosum",
-		},
-		auto_install = true,
-		highlight = { enable = true },
 	})
 end)
 
@@ -441,7 +441,7 @@ end)
 
 later(function()
 	add({
-		source = "MeanderingProgrammer/render-markdown.nvim",
+		source = "meanderingprogrammer/render-markdown.nvim",
 	})
 
 	require("render-markdown").setup({})
@@ -467,10 +467,10 @@ later(function()
 
 	local metals_config = require("metals").bare_config()
 
-	-- Example of settings
+	-- example of settings
 	metals_config.settings = {
-		showImplicitArguments = true,
-		excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
+		showimplicitarguments = true,
+		excludedpackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
 	}
 
 	metals_config.init_options.statusBarProvider = "off"
