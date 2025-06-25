@@ -352,6 +352,9 @@ now(function()
 
 		clues = {
 			{ mode = "n", keys = "<leader>a", desc = " ai" },
+			-- CodeCompanion <leader>ac
+			{ mode = "n", keys = "<leader>ac", desc = "▷ CC" },
+			{ mode = "x", keys = "<leader>ac", desc = "▷ CC (Visual)" },
 			{ mode = "n", keys = "<leader>b", desc = " buffer" },
 			{ mode = "n", keys = "<leader>d", desc = " debug" },
 			{ mode = "n", keys = "<leader>s", desc = " search" },
