@@ -178,6 +178,19 @@ keymap("n", "<Esc>", "<cmd>noh<cr>", { desc = 'Clear Search' })
 -- ╚═══════════════════════╝
 keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'Codecompanion [A]i [A]actions'})
 
+-- CodeCompanion specific keymaps
+keymap("n", "<leader>acc", function() require("codecompanion").chat() end, { desc = "[A]I [C]ompanion: Open/New Chat" })
+keymap("n", "<leader>act", function() require("codecompanion").toggle() end, { desc = "[A]I [C]ompanion: Toggle Chat" })
+
+keymap("v", "<leader>acp", ":'<,'>CodeCompanion<Space>", { desc = "[A]I [C]ompanion: Inline Prompt (Visual)" })
+keymap("n", "<leader>acp", ":CodeCompanion<Space>", { desc = "[A]I [C]ompanion: Inline Prompt (Normal)" })
+
+keymap("v", "<leader>ace", ":'<,'>CodeCompanion /explain<cr>", { desc = "[A]I [C]ompanion: Explain Code (Visual)" })
+keymap("v", "<leader>acf", ":'<,'>CodeCompanion /fix_code<cr>", { desc = "[A]I [C]ompanion: Fix Code (Visual)" })
+keymap("v", "<leader>acl", ":'<,'>CodeCompanion /explain_lsp_diagnostics<cr>", { desc = "[A]I [C]ompanion: Explain LSP Diagnostics (Visual)" })
+keymap("v", "<leader>acu", ":'<,'>CodeCompanion /tests<cr>", { desc = "[A]I [C]ompanion: Generate Unit Tests (Visual)" })
+keymap("n", "<leader>acm", ":CodeCompanion /commit_message<cr>", { desc = "[A]I [C]ompanion: Generate Commit Message" })
+
 -- ╔═══════════════════════╗
 -- ║         Notes         ║
 -- ╚═══════════════════════╝
