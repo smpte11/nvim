@@ -34,6 +34,17 @@ now(function()
 end)
 
 now(function()
+	vim.filetype.add({
+		extension = {
+			gotmpl = "gotmpl",
+		},
+		pattern = {
+			[".*/templates/.*%.tpl"] = "helm",
+			[".*/templates/.*%.ya?ml"] = "helm",
+			["helmfile.*%.ya?ml"] = "helm",
+		},
+	})
+
 	add({
 		source = "nvim-treesitter/nvim-treesitter",
 		-- use 'master' while monitoring updates in 'main'
@@ -65,6 +76,8 @@ now(function()
 			"gomod",
 			"gowork",
 			"gosum",
+			"gotmpl",
+			"helm",
 		},
 		auto_install = true,
 		highlight = { enable = true },
