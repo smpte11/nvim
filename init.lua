@@ -216,8 +216,7 @@ now(function()
 end)
 
 now(function()
-	local mini_icons = require("mini.icons")
-	mini_icons.setup({
+	require("mini.icons").setup({
 		file = {
 			[".chezmoiignore"] = { glyph = "", hl = "MiniIconsGrey" },
 			[".chezmoiremove"] = { glyph = "", hl = "MiniIconsGrey" },
@@ -239,7 +238,6 @@ now(function()
 			copilot = { glyph = "", hl = "MiniIconsOrange" },
 		},
 	})
-	mini_icons.mock_nvim_web_devicons()
 end)
 
 now(function()
@@ -352,9 +350,6 @@ now(function()
 
 		clues = {
 			{ mode = "n", keys = "<leader>a", desc = " ai" },
-			-- CodeCompanion <leader>ac
-			{ mode = "n", keys = "<leader>ac", desc = "▷ CC" },
-			{ mode = "x", keys = "<leader>ac", desc = "▷ CC (Visual)" },
 			{ mode = "n", keys = "<leader>b", desc = " buffer" },
 			{ mode = "n", keys = "<leader>d", desc = " debug" },
 			{ mode = "n", keys = "<leader>s", desc = " search" },
