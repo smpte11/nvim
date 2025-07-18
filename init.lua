@@ -216,7 +216,8 @@ now(function()
 end)
 
 now(function()
-	require("mini.icons").setup({
+	local mini_icons = require("mini.icons")
+	mini_icons.setup({
 		file = {
 			[".chezmoiignore"] = { glyph = "", hl = "MiniIconsGrey" },
 			[".chezmoiremove"] = { glyph = "", hl = "MiniIconsGrey" },
@@ -238,6 +239,7 @@ now(function()
 			copilot = { glyph = "", hl = "MiniIconsOrange" },
 		},
 	})
+	mini_icons.mock_nvim_web_devicons()
 end)
 
 now(function()

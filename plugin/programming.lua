@@ -431,7 +431,7 @@ now(function()
 			"nvim-lua/plenary.nvim",
 			"MunifTanjim/nui.nvim",
 		},
-		checkout = "feat-mini-pick-provider",
+		checkout = "fix/mini-pick-resolution-check",
 		hooks = {
 			post_checkout = function()
 				vim.cmd("TsUpdate html")
@@ -452,7 +452,7 @@ later(function()
 		-- perform action after every checkout
 		hooks = {
 			post_checkout = function()
-				vim.cmd("TsUpdate")
+				vim.cmd("TSUpdate")
 			end,
 		},
 	})
