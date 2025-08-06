@@ -352,6 +352,7 @@ now(function()
 
 		clues = {
 			{ mode = "n", keys = "<leader>a", desc = " ai" },
+			{ mode = "n", keys = "<leader>at", desc = "Toggle AI provider" },
 			{ mode = "n", keys = "<leader>b", desc = " buffer" },
 			{ mode = "n", keys = "<leader>d", desc = " debug" },
 			{ mode = "n", keys = "<leader>s", desc = " search" },

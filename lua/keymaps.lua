@@ -177,6 +177,7 @@ keymap("n", "<Esc>", "<cmd>noh<cr>", { desc = 'Clear Search' })
 -- ║          AI           ║
 -- ╚═══════════════════════╝
 keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'Codecompanion [A]i [A]actions'})
+keymap("n", "<leader>at", function() Utils.codecompanion.toggle_adapter() end, { desc = 'Codecompanion [A]i [T]oggle Adapter'})
 
 -- ╔═══════════════════════╗
 -- ║         Notes         ║

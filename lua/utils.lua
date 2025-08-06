@@ -84,4 +84,27 @@ M.palette = {
 	base0F = "#D27E99",
 }
 
+M.codecompanion = {
+	adapter = "copilot",
+	toggle_adapter = function()
+		if M.codecompanion.adapter == "copilot" then
+			M.codecompanion.adapter = "ollama"
+		else
+			M.codecompanion.adapter = "copilot"
+		end
+		print("CodeCompanion adapter: " .. M.codecompanion.adapter)
+
+		require("codecompanion").setup({
+			strategies = {
+				chat = {
+					adapter = M.codecompanion.adapter,
+				},
+				inline = {
+					adapter = M.codecompanion.adapter,
+				},
+			},
+		})
+	end,
+}
+
 _G.Utils = M
