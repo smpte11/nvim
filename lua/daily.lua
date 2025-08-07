@@ -27,7 +27,7 @@ function M.create_daily_note()
 
     local content = ""
     if #unfulfilled_tasks > 0 then
-        content = table.concat(unfulfilled_tasks, "\n")
+        content = "## Carried over from yesterday\n\n" .. table.concat(unfulfilled_tasks, "\n") .. "\n\n"
     end
 
     local zk = require("zk")
