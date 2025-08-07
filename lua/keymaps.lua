@@ -177,6 +177,9 @@ keymap("n", "<Esc>", "<cmd>noh<cr>", { desc = 'Clear Search' })
 -- ║          AI           ║
 -- ╚═══════════════════════╝
 keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'Codecompanion [A]i [A]actions'})
+keymap("n", "<leader>ac", "<cmd>CodeCompanionChat<cr>", { desc = 'CodeCompanion [C]hat'})
+keymap("n", "<leader>ae", "<cmd>CodeCompanionExplain<cr>", { desc = 'CodeCompanion [E]xplain'})
+keymap("n", "<leader>ag", "<cmd>CodeCompanionGenerate<cr>", { desc = 'CodeCompanion [G]enerate'})
 
 -- ╔═══════════════════════╗
 -- ║         Notes         ║

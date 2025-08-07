@@ -434,13 +434,51 @@ now(function()
 		checkout = "fix/mini-pick-resolution-check",
 		hooks = {
 			post_checkout = function()
-				-- vim.cmd("TsUpdate html")
+				vim.cmd("TsUpdate html")
 			end,
 		},
 	})
 
 	require("leetcode").setup({
 		lang = "python3",
+	})
+end)
+
+later(function()
+	add({
+		source = "nvim-treesitter/nvim-treesitter",
+		-- use 'master' while monitoring updates in 'main'
+		checkout = "master",
+		-- perform action after every checkout
+		hooks = {
+			post_checkout = function()
+				vim.cmd("TSUpdate")
+			end,
+		},
+	})
+	-- possible to immediately execute code which depends on the added plugin
+	require("nvim-treesitter.configs").setup({
+		ensure_installed = {
+			"bash",
+			"c",
+			"diff",
+			"html",
+			"lua",
+			"luadoc",
+			"markdown",
+			"markdown_inline",
+			"query",
+			"vim",
+			"vimdoc",
+			"terraform",
+			"hcl",
+			"go",
+			"gomod",
+			"gowork",
+			"gosum",
+		},
+		auto_install = true,
+		highlight = { enable = true },
 	})
 end)
 
@@ -454,7 +492,7 @@ end)
 
 later(function()
 	add({
-		source = "meanderingprogrammer/render-markdown.nvim",
+		source = "MeanderingProgrammer/render-markdown.nvim",
 	})
 
 	require("render-markdown").setup({})
@@ -480,10 +518,10 @@ later(function()
 
 	local metals_config = require("metals").bare_config()
 
-	-- example of settings
+	-- Example of settings
 	metals_config.settings = {
-		showimplicitarguments = true,
-		excludedpackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
+		showImplicitArguments = true,
+		excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
 	}
 
 	metals_config.init_options.statusBarProvider = "off"
