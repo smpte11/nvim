@@ -15,7 +15,7 @@ function M.create_daily_note()
     local file = io.open(yesterday_note_path, "r")
     if file then
         for line in file:lines() do
-            if line:match("%[ %].*") then
+            if line:match("^%s*-%s*%[ %]") then
                 table.insert(unfulfilled_tasks, line)
             end
         end
