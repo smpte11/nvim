@@ -8,7 +8,10 @@ function M.create_daily_note()
     end
 
     -- Get yesterday's date
-    local yesterday = os.date("!%Y-%m-%d", os.time() - 24 * 60 * 60)
+    -- Get yesterday's date robustly
+    local now = os.date("!*t")
+    now.day = now.day - 1
+    local yesterday = os.date("!%Y-%m-%d", os.time(now))
     local yesterday_note_path = notedir .. "/journal/daily/" .. yesterday .. ".md"
 
     local unfulfilled_tasks = {}
