@@ -19,3 +19,6 @@ pick_chezmoi = function()
 end
 
 vim.api.nvim_command("command! ChezmoiPick lua pick_chezmoi()")
+
+local daily = require("daily")
+vim.api.nvim_create_user_command("ZkNewDailyWithUnfulfilledTasks", daily.create_daily_note, {})
