@@ -233,7 +233,14 @@ now(function()
 			lua = { "stylua" },
 			elixir = { "mix_format" },
 			exs = { "mix_format" },
-			heex = { "mix_format" },
+		-- Shared formatter list for Elixir file types
+		---@diagnostic disable-next-line: unused-local
+		elixir_formatters = { "mix_format" },
+		formatters_by_ft = {
+			lua = { "stylua" },
+			elixir = elixir_formatters,
+			exs = elixir_formatters,
+			heex = elixir_formatters,
 			yaml = { "prettierd", "prettier" },
 			markdown = { "prettier" },
 			go = { "goimports", "gofumpt" },
