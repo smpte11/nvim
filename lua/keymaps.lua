@@ -90,6 +90,7 @@ keymap("n", "<leader>gos", "<cmd>Octo review submit<cr>", { desc = "[Git] Octo S
 keymap('n', '<leader>uf', function() MiniFiles.open(vim.api.nvim_buf_get_name(0), true) end, { desc = "[U]I [F]ile Explorer" })
 keymap('n', '<leader>uF', function() MiniFiles.open(vim.uv.cwd(), true) end, { desc = "[U]I [F]ile Explorer (cwd)" })
 keymap('n', '<leader>up', function() MiniExtra.pickers.explorer() end, { desc = "[U]I [F]ile Picker" })
+keymap("n", "<leader>ui", "<cmd>PasteImage<cr>", { desc = "[U]I Paste [I]mage" })
 
 -- ╔═══════════════════════╗
 -- ║	     LSP           ║

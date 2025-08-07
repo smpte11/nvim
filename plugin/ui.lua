@@ -7,3 +7,16 @@ later(function()
 
 	require("no-neck-pain").setup({})
 end)
+
+later(function()
+	add({
+		source = "HakonHarnes/img-clip.nvim",
+		--rocks = { "magick" }, -- Example of rock
+	})
+
+	require("img-clip").setup({
+		-- add options here
+		-- or leave it empty to use the default settings
+	})
+
+end)
