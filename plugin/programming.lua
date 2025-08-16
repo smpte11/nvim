@@ -233,14 +233,7 @@ now(function()
 			lua = { "stylua" },
 			elixir = { "mix_format" },
 			exs = { "mix_format" },
-		-- Shared formatter list for Elixir file types
-		---@diagnostic disable-next-line: unused-local
-		elixir_formatters = { "mix_format" },
-		formatters_by_ft = {
-			lua = { "stylua" },
-			elixir = elixir_formatters,
-			exs = elixir_formatters,
-			heex = elixir_formatters,
+			heex = { "mix_format" },
 			yaml = { "prettierd", "prettier" },
 			markdown = { "prettier" },
 			go = { "goimports", "gofumpt" },
@@ -447,7 +440,6 @@ now(function()
 			"nvim-lua/plenary.nvim",
 			"MunifTanjim/nui.nvim",
 		},
-		checkout = "fix/mini-pick-resolution-check",
 		hooks = {
 			post_checkout = function()
 				vim.cmd("TsUpdate html")
