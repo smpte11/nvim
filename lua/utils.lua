@@ -84,4 +84,47 @@ M.palette = {
 	base0F = "#D27E99",
 }
 
+function M.is_container()
+	-- Check for /.dockerenv file
+	local f_dockerenv = io.open("/.dockerenv", "r")
+	if f_dockerenv then
+		f_dockerenv:close()
+		return true
+	end
+
+	-- Check for /run/.containerenv file (for podman, etc.)
+	local f_containerenv = io.open("/run/.containerenv", "r")
+	if f_containerenv then
+		f_containerenv:close()
+		return true
+	end
+
+	-- Check cgroups
+	local cgroup_file = io.open("/proc/1/cgroup", "r")
+	if cgroup_file then
+		local content = cgroup_file:read("*a")
+		cgroup_file:close()
+		if content and (content:match("docker") or content:match("kubepods")) then
+			return true
+		end
+	end
+
+	-- Check rootless cgroups
+	local cgroup_self_file = io.open("/proc/self/cgroup", "r")
+	if cgroup_self_file then
+		local content = cgroup_self_file:read("*a")
+		cgroup_self_file:close()
+		if content and (content:match("docker") or content:match("kubepods")) then
+			return true
+		end
+	end
+
+	-- Check for container environment variable from podman
+	if os.getenv("container") == "podman" then
+		return true
+	end
+
+	return false
+end
+
 _G.Utils = M
