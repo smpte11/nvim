@@ -317,6 +317,9 @@ now(function()
 			{ mode = "n", keys = "<leader>" },
 			{ mode = "x", keys = "<leader>" },
 
+			{ mode = "n", keys = "<localleader>" },
+			{ mode = "x", keys = "<localleader>" },
+
 			{ mode = "n", keys = "\\" },
 
 			-- built-in completion
