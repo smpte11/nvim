@@ -205,6 +205,14 @@ now(function()
 		},
 	})
 
+	vim.api.nvim_set_hl(0, "BlinkCmpMenu", { link = "Pmenu" })
+	vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { link = "Pmenu" })
+	vim.api.nvim_set_hl(0, "BlinkCmpMenuSelection", { link = "PmenuSel" })
+	vim.api.nvim_set_hl(0, "BlinkCmpDoc", { link = "NormalFloat" })
+	vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { link = "NormalFloat" })
+	vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { link = "NormalFloat" })
+	vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { link = "NormalFloat" })
+
 	add({
 		source = "stevearc/conform.nvim",
 	})
