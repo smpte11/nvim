@@ -300,7 +300,7 @@ now(function()
 			starter.sections.recent_files(5, true, false),
 			{
 				{ name = "Notes", action = "ZkNotes { sort = { 'modified' } }", section = "Notes" },
-				{ name = "Journal", action = "ZkNew { dir = 'journal/daily', date = 'today' }", section = "Notes" },
+				{ name = "Journal", action = "ZkNewDailyWithUnfulfilledTasks", section = "Notes" },
 			},
 		},
 		content_hooks = {
