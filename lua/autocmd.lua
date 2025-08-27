@@ -116,3 +116,45 @@ vim.api.nvim_create_user_command("FormatEnable", function()
 end, {
 	desc = "Re-enable autoformat-on-save",
 })
+
+-- Autocommands for Octo buffers
+local octo_clues_augroup = vim.api.nvim_create_augroup("octo_clues", { clear = true })
+
+local octo_clues = {
+  { mode = "n", keys = ",a", desc = "🐙 assignee" },
+  { mode = "n", keys = ",c", desc = "🐙 comment" },
+  { mode = "n", keys = ",g", desc = "🐙 goto" },
+  { mode = "n", keys = ",i", desc = "🐙 issue" },
+  { mode = "n", keys = ",l", desc = "🐙 label" },
+  { mode = "n", keys = ",p", desc = "🐙 pr" },
+  { mode = "n", keys = ",r", desc = "🐙 reaction" },
+  { mode = "n", keys = ",v", desc = "🐙 review" },
+}
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "octo",
+  group = octo_clues_augroup,
+  callback = function()
+    -- Add clues for octo buffer
+    for _, clue in ipairs(octo_clues) do
+      table.insert(MiniClue.config.clues, clue)
+    end
+
+    -- Autocommand to remove clues when leaving the buffer
+    vim.api.nvim_create_autocmd("BufLeave", {
+      buffer = 0,
+      group = octo_clues_augroup,
+      callback = function()
+        for i = #MiniClue.config.clues, 1, -1 do
+          local clue = MiniClue.config.clues[i]
+          for _, octo_clue in ipairs(octo_clues) do
+            if clue.keys == octo_clue.keys and clue.desc == octo_clue.desc then
+              table.remove(MiniClue.config.clues, i)
+              break
+            end
+          end
+        end
+      end,
+    })
+  end,
+})
