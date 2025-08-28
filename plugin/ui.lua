@@ -5,7 +5,17 @@ later(function()
 		source = "shortcuts/no-neck-pain.nvim",
 	})
 
-	require("no-neck-pain").setup({})
+	require("no-neck-pain").setup({
+		mappings = {
+			enabled = true,
+			toggle = "<leader>uzt",
+			toggleLeftSide = "<leader>uzl",
+			toggleRightSide = "<leader>uzr",
+			widthUp = "<leader>uz=",
+			widthDown = "<leader>uz-",
+			scratchPad = "<leader>uzs",
+		},
+	})
 end)
 
 later(function()
