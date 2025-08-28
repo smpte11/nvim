@@ -369,6 +369,7 @@ now(function()
 			{ mode = "n", keys = "<leader>u", desc = "󰔃 ui" },
 			{ mode = "n", keys = "<leader>v", desc = " visit" },
 			{ mode = "n", keys = "<leader>w", desc = " window" },
+			{ mode = "n", keys = "<leader>f", desc = "󱧷 file" },
 			require("mini.clue").gen_clues.g(),
 			require("mini.clue").gen_clues.builtin_completion(),
 			require("mini.clue").gen_clues.marks(),
@@ -378,6 +379,9 @@ now(function()
 		},
 		window = {
 			delay = 0,
+			config = {
+				width = "auto",
+			},
 		},
 	})
 end)
