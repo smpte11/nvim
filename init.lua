@@ -374,7 +374,11 @@ now(function()
 			require("mini.clue").gen_clues.builtin_completion(),
 			require("mini.clue").gen_clues.marks(),
 			require("mini.clue").gen_clues.registers(),
-			require("mini.clue").gen_clues.windows(),
+			require("mini.clue").gen_clues.windows({
+				submode_move = true,
+				submode_navigate = true,
+				submode_resize = true,
+			}),
 			require("mini.clue").gen_clues.z(),
 		},
 		window = {
