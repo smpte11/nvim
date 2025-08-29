@@ -6,16 +6,15 @@ later(function()
 	})
 
 	require("no-neck-pain").setup({
-		mappings = {
-			enabled = true,
-			toggle = "<leader>uzt",
-			toggleLeftSide = "<leader>uzl",
-			toggleRightSide = "<leader>uzr",
-			widthUp = "<leader>uz=",
-			widthDown = "<leader>uz-",
-			scratchPad = "<leader>uzs",
-		},
+		mappings = { enabled = false },
 	})
+
+	vim.keymap.set("n", "<leader>uzt", "<cmd>NoNeckPain<cr>", { desc = "Toggle" })
+	vim.keymap.set("n", "<leader>uzl", "<cmd>NoNeckPainToggleLeftSide<cr>", { desc = "Toggle Left Side" })
+	vim.keymap.set("n", "<leader>uzr", "<cmd>NoNeckPainToggleRightSide<cr>", { desc = "Toggle Right Side" })
+	vim.keymap.set("n", "<leader>uz=", "<cmd>NoNeckPainWidthUp<cr>", { desc = "Increase Width" })
+	vim.keymap.set("n", "<leader>uz-", "<cmd>NoNeckPainWidthDown<cr>", { desc = "Decrease Width" })
+	vim.keymap.set("n", "<leader>uzs", "<cmd>NoNeckPainScratchPad<cr>", { desc = "Toggle ScratchPad" })
 end)
 
 later(function()
