@@ -1,6 +1,5 @@
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 local keymap = vim.keymap.set
-local opts = { noremap = true, silent = false }
 
 later(function()
 	add("zk-org/zk-nvim")
