@@ -1,4 +1,6 @@
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
+local keymap = vim.keymap.set
+local opts = { noremap = true, silent = false }
 
 later(function()
 	add("zk-org/zk-nvim")
@@ -12,7 +14,6 @@ later(function()
 					local function map(...)
 						vim.api.nvim_buf_set_keymap(0, ...)
 					end
-					local opts = { noremap = true, silent = false }
 					-- Create a new note in the same directory as the current buffer, using the current selection for title.
 					map(
 						"v",
@@ -175,4 +176,20 @@ later(function()
 
 		show_picker_for_path(notedir) -- Start the picker
 	end)
+
+	-- Create a new note after asking for its title.
+	keymap("n", "<leader>nn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", vim.tbl_extend("keep", opts, { desc = "New note" }))
+	keymap("n", "<leader>nN", "<Cmd>ZkNewAtDir<CR>", vim.tbl_extend("keep", opts, { desc = "New note at dir" }))
+	keymap("n", "<leader>nj", "<Cmd>ZkNew { dir = 'journal/daily', date = 'today' }<CR>", vim.tbl_extend("keep", opts, { desc = "Open todays plan" }))
+	keymap("n", "<leader>nJ", "<Cmd>ZkNew { dir = 'journal/daily', date = 'tomorrow' }<CR>", vim.tbl_extend("keep", opts, { desc = "Open tomorrows plan" }))
+
+	-- Open notes.
+	keymap("n", "<leader>no", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", vim.tbl_extend("keep", opts, { desc = "Open notes" }))
+	-- Open notes associated with the selected tags.
+	keymap("n", "<leader>nt", "<Cmd>ZkTags<CR>", vim.tbl_extend("keep", opts, { desc = "Open notes (tags)" }))
+
+	-- Search for the notes matching a given query.
+	keymap("n", "<leader>nf", "<Cmd>ZkNotes { sort = { 'modified' }, match = { vim.fn.input('Search: ') } }<CR>", vim.tbl_extend("keep", opts, { desc = "Search notes" }))
+	-- Search for the notes matching the current visual selection.
+	keymap("v", "<leader>nf", ":'<,'>ZkMatch<CR>", vim.tbl_extend("keep", opts, { desc = "Search notes" }))
 end)

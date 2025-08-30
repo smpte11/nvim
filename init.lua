@@ -24,6 +24,87 @@ require("mini.deps").setup({ path = { package = path_package } })
 -- startup and are optional.
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
+now(function()
+	local keymap = vim.keymap.set
+	keymap("n", "<leader>mu", function()
+		require("mini.deps").update()
+	end, { desc = "Update Plugins" })
+
+	-- Copy
+	keymap("n", "<C-s>", "<cmd>:w<cr>", { silent = true })
+
+	-- Buffers
+	keymap("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer", silent = true })
+	keymap("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer", silent = true })
+	keymap("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer", silent = true })
+	keymap("n", "<leader>bD", "<cmd>:bd<cr>", { desc = "Delete Buffer and Window", silent = true })
+	keymap("n", "<leader>bd", function()
+		MiniBufremove.delete()
+	end, { desc = "Delete Buffer", silent = true })
+
+	-- Search
+	keymap("n", "<leader><leader>", function()
+		MiniPick.builtin.buffers()
+	end, { desc = "[ ] Find existing buffers" })
+	keymap("n", "<leader>sh", function()
+		MiniPick.builtin.help_tags()
+	end, { desc = "[S]earch [H]elp" })
+	keymap("n", "<leader>sf", function()
+		MiniPick.builtin.files()
+	end, { desc = "[S]earch [F]iles" })
+	keymap("n", "<leader>sh", function()
+		MiniPick.builtin.help()
+	end, { desc = "[S]earch [H]elp" })
+	keymap("n", "<leader>sk", function()
+		MiniExtra.pickers.keymaps()
+	end, { desc = "[S]earch [K]eymaps" })
+	keymap("n", "<leader>sd", function()
+		MiniExtra.pickers.diagnostic()
+	end, { desc = "[S]earch [D]iagnostics" })
+	keymap("n", "<leader>so", function()
+		MiniExtra.pickers.options()
+	end, { desc = "[S]earch [O]ptions" })
+	keymap("n", "<leader>s\"", function()
+		MiniExtra.pickers.registers()
+	end, { desc = "[S]earch Registers" })
+	keymap("n", "<leader>st", function()
+		MiniExtra.pickers.treesitter()
+	end, { desc = "[S]earch [T]reesitter" })
+	keymap("n", "<leader>ss", function()
+		MiniExtra.pickers.spellsuggest()
+	end, { desc = "[S]pelling [S]uggestions" })
+	keymap("n", "<leader>sR", function()
+		MiniPick.builtin.resume()
+	end, { desc = "[S]earch [R]esume" })
+	keymap("n", "<leader>s.", function()
+		MiniExtra.pickers.oldfiles()
+	end, { desc = "[S]earch Recent Files (\".\" for repeat)" })
+	keymap("n", "<leader>sc", function()
+		MiniExtra.pickers.commands()
+	end, { desc = "[S]earch commands" })
+	keymap("n", "<leader>sg", function()
+		MiniPick.builtin.grep_live()
+	end, { desc = "[S]earch by [G]rep" })
+	keymap("n", "<leader>sw", function()
+		MiniPick.builtin.grep({ pattern = vim.fn.expand("<cword>") })
+	end, { desc = "[S]earch current [W]ord" })
+
+	-- Editing Keymaps
+	keymap("n", "<Esc>", "<cmd>nohlsearch<CR>")
+	keymap("n", "YY", "<cmd>%y<cr>", { desc = "Yank Buffer" })
+	keymap("n", "<Esc>", "<cmd>noh<cr>", { desc = "Clear Search" })
+
+	-- Combos
+	local minikeymap = require("mini.keymap")
+	local map_combo = minikeymap.map_combo
+
+	map_combo({ "n", "x" }, "ll", "g$")
+	map_combo({ "n", "x" }, "hh", "g^")
+	local mode = { "i", "c", "x", "s" }
+	map_combo(mode, "jk", "<BS><BS><Esc>")
+	map_combo(mode, "kj", "<BS><BS><Esc>")
+end)
+
 --          ┌─────────────────────────────────────────────────────────┐
 --			          Loading now
 --          └─────────────────────────────────────────────────────────┘
@@ -516,6 +597,5 @@ later(function()
 	})
 end)
 
-require("keymaps")
 require("autocmd")
 require("cmd")
