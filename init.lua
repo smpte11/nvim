@@ -90,7 +90,6 @@ now(function()
 	end, { desc = "[S]earch current [W]ord" })
 
 	-- Editing Keymaps
-	keymap("n", "<Esc>", "<cmd>nohlsearch<CR>")
 	keymap("n", "YY", "<cmd>%y<cr>", { desc = "Yank Buffer" })
 	keymap("n", "<Esc>", "<cmd>noh<cr>", { desc = "Clear Search" })
 
