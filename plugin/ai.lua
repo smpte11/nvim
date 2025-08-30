@@ -1,4 +1,5 @@
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
+local keymap = vim.keymap.set
 
 later(function()
 	add({
@@ -54,4 +55,9 @@ later(function()
 	vim.api.nvim_set_hl(0, "CodeCompanionChatToolGroups", { fg = palette.base0C, bg = palette.base01, bold = true })
 	vim.api.nvim_set_hl(0, "CodeCompanionChatVariable", { fg = palette.base09, italic = true })
 	vim.api.nvim_set_hl(0, "CodeCompanionVirtualText", { fg = palette.base04, italic = true })
+
+	keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = "Codecompanion [A]i [A]actions" })
+	keymap("n", "<leader>ac", "<cmd>CodeCompanionChat<cr>", { desc = "CodeCompanion [C]hat" })
+	keymap("n", "<leader>ae", "<cmd>CodeCompanionExplain<cr>", { desc = "CodeCompanion [E]xplain" })
+	keymap("n", "<leader>ag", "<cmd>CodeCompanionGenerate<cr>", { desc = "CodeCompanion [G]enerate" })
 end)
