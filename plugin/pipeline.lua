@@ -4,7 +4,7 @@ later(function()
 	add({
 		source = "topaxi/pipeline.nvim",
 		-- optional, you can also install and use `yq` instead.
-		build = "make",
+		-- build = "make",
 	})
 	require("pipeline").setup({})
 
