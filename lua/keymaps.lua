@@ -193,8 +193,8 @@ keymap("n", "<leader>ag", "<cmd>CodeCompanionGenerate<cr>", { desc = 'CodeCompan
 -- Create a new note after asking for its title.
 keymap("n", "<leader>nn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", vim.tbl_extend('keep', opts, { desc = "New note" }))
 keymap("n", "<leader>nN", "<Cmd>ZkNewAtDir<CR>", vim.tbl_extend('keep', opts, { desc = "New note at dir" }))
-keymap("n", "<leader>nj", "<Cmd>ZkNew { dir = 'journal/daily', date = 'today' }<CR>", vim.tbl_extend('keep', opts, { desc = "Open todays plan" }))
-keymap("n", "<leader>nJ", "<Cmd>ZkNew { dir = 'journal/daily', date = 'tomorrow' }<CR>", vim.tbl_extend('keep', opts, { desc = "Open tomorrows plan" }))
+keymap("n", "<leader>nj", Utils.create_daily_journal_note, { desc = "New daily journal note (carry unfinished tasks)" })
+keymap("n", "<leader>nw", Utils.create_work_daily_journal_note, { desc = "New work daily journal note (carry unfinished tasks)" })
 
 -- Open notes.
 keymap("n", "<leader>no", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", vim.tbl_extend('keep', opts, { desc = "Open notes" }))
