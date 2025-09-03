@@ -158,3 +158,12 @@ vim.api.nvim_create_autocmd("FileType", {
     })
   end,
 })
+
+vim.api.nvim_create_autocmd("BufWritePost", {
+	group = vim.api.nvim_create_augroup("task-scanner", { clear = true }),
+	pattern = { "*/journal/daily/*.md", "*/work/*.md" },
+	callback = function()
+		require("utils").scan_buffer_for_completed_tasks()
+	end,
+	desc = "Scan for completed tasks in journal files",
+})

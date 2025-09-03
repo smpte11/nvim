@@ -24,8 +24,11 @@ require("mini.deps").setup({ path = { package = path_package } })
 -- startup and are optional.
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
-add("lua-sqlite/lsqlite3")
-add("mpx/lua-cjson")
+now(function()
+	add("lua-sqlite/lsqlite3")
+	add("mpx/lua-cjson")
+	add("erento/erento-LUA-RFC-4122-UUID-Generator")
+end)
 
 --          ┌─────────────────────────────────────────────────────────┐
 --			          Loading now
