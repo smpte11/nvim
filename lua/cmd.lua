@@ -19,3 +19,11 @@ pick_chezmoi = function()
 end
 
 vim.api.nvim_command("command! ChezmoiPick lua pick_chezmoi()")
+
+local function show_stats()
+	local db = require("db")
+	local count = db.get_carried_over_tasks_count()
+	vim.notify("Carried over tasks: " .. count)
+end
+
+vim.api.nvim_command("command! ShowStats lua show_stats()")

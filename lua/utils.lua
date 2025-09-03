@@ -1,4 +1,5 @@
 local M = {}
+local db = require("db")
 
 M.starter = {
 	header = function()
@@ -188,6 +189,20 @@ local function create_journal_content_with_carryover(target_dir, task_type)
         if prev_content then
             main_tasks = H.extract_unfinished_tasks(prev_content, "What is my main goal for today?")
             other_tasks = H.extract_unfinished_tasks(prev_content, "What else do I wanna do?")
+
+			for _, task in ipairs(main_tasks) do
+				db.log_event("task_carried_over", {
+					task_content = task,
+					source_note = prev_path,
+				})
+			end
+
+			for _, task in ipairs(other_tasks) do
+				db.log_event("task_carried_over", {
+					task_content = task,
+					source_note = prev_path,
+				})
+			end
 
             -- Show extracted tasks in a notification only if there are tasks to show
             local has_main_tasks = next(main_tasks) ~= nil

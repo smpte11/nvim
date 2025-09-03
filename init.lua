@@ -24,12 +24,19 @@ require("mini.deps").setup({ path = { package = path_package } })
 -- startup and are optional.
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
+add("lua-sqlite/lsqlite3")
+add("mpx/lua-cjson")
+
 --          ┌─────────────────────────────────────────────────────────┐
 --			          Loading now
 --          └─────────────────────────────────────────────────────────┘
 --
 
 require("utils")
+
+now(function()
+	require("db").setup()
+end)
 
 now(function()
 	vim.g.have_nerd_font = true
