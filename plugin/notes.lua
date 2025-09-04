@@ -140,6 +140,46 @@ later(function()
 		}
 	end
 
+	-- Function to create a new task with custom URI
+	local function create_new_task()
+		-- Use the shared UUID generation utility from Utils
+		local uuid = Utils.generate_uuid()
+		local task_line = string.format("- [ ]  [ ](task://%s)", uuid)
+		
+		-- Get current cursor position in the current window
+		-- vim.api.nvim_win_get_cursor(0) returns {row, col} where:
+		-- - 0 means "current window"
+		-- - row is 1-indexed (first line is 1)
+		-- - col is 0-indexed (first column is 0)
+		-- We only need [1] to get the row number
+		local current_line = vim.api.nvim_win_get_cursor(0)[1]
+		
+		-- Insert text into the current buffer after the current line
+		-- vim.api.nvim_buf_set_lines(buffer, start, end, strict_indexing, replacement)
+		-- - 0 means "current buffer"
+		-- - current_line for start: since nvim_buf_set_lines uses 0-indexed lines,
+		--   and current_line is 1-indexed, using current_line as 0-indexed position
+		--   means we insert after the 1-indexed line current_line
+		-- - current_line for end means "don't replace any existing lines"
+		-- - false means "allow out-of-bounds line numbers" (more forgiving)
+		-- - {task_line} is a table of strings to insert (one string = one line)
+		vim.api.nvim_buf_set_lines(0, current_line, current_line, false, {task_line})
+		
+		-- Move the cursor to the task line we just inserted
+		-- vim.api.nvim_win_set_cursor(window, {row, col})
+		-- - 0 means "current window"
+		-- - {current_line + 1, 6} means:
+		--   - current_line + 1 is the new task line (original line + 1 due to insertion)
+		--   - 6 is the column position (0-indexed): "- [ ] " = positions 0,1,2,3,4,5, so 6 is right after the space
+		vim.api.nvim_win_set_cursor(0, {current_line + 1, 6})
+		
+		-- Enter insert mode programmatically
+		-- vim.cmd() executes a Vim command as if you typed it in command mode
+		-- "startinsert" is the Vim command equivalent to pressing 'i' in normal mode
+		-- This puts the cursor in insert mode so the user can immediately start typing
+		vim.cmd("startinsert")
+	end
+
 	-- Journal content creation with task carryover
 	local function create_journal_content_with_carryover(target_dir, task_type)
 		local H = create_journal_helpers()
@@ -381,4 +421,73 @@ later(function()
 			content = content,
 		})
 	end)
+
+	-- Task creation command
+	commands.add("ZkNewTask", function()
+		create_new_task()
+	end)
 end)
+
+-- Add note-specific clues for mini.clue discoverability
+local note_clues = {
+	{ mode = "n", keys = "<leader>nn", desc = " new note" },
+	{ mode = "n", keys = "<leader>nN", desc = " new at dir" },
+	{ mode = "n", keys = "<leader>nj", desc = " daily journal" },
+	{ mode = "n", keys = "<leader>nw", desc = " work journal" },
+	{ mode = "n", keys = "<leader>no", desc = " open notes" },
+	{ mode = "n", keys = "<leader>nt", desc = " tags" },
+	{ mode = "n", keys = "<leader>nf", desc = " find notes" },
+	{ mode = "n", keys = "<leader>nT", desc = " new task" },
+}
+
+-- Add clues when zk-nvim is attached (when working with notes)
+vim.api.nvim_create_autocmd("LspAttach", {
+	callback = function(event)
+		local client = vim.lsp.get_client_by_id(event.data.client_id)
+		if client and client.name == "zk" then
+			-- Add clues for note buffer
+			for _, clue in ipairs(note_clues) do
+				table.insert(require("mini.clue").config.clues, clue)
+			end
+
+			-- Remove clues when leaving the buffer
+			vim.api.nvim_create_autocmd("BufLeave", {
+				buffer = event.buf,
+				once = true,
+				callback = function()
+					local clue_config = require("mini.clue").config.clues
+					for i = #clue_config, 1, -1 do
+						local existing_clue = clue_config[i]
+						for _, note_clue in ipairs(note_clues) do
+							if existing_clue.keys == note_clue.keys and existing_clue.desc == note_clue.desc then
+								table.remove(clue_config, i)
+								break
+							end
+						end
+					end
+				end,
+			})
+		end
+	end,
+})
+
+-- Global note keymaps (moved from keymaps.lua for better organization)
+local keymap = vim.keymap.set
+local opts = { noremap = true, silent = false }
+
+-- Create a new note after asking for its title.
+keymap("n", "<leader>nn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", vim.tbl_extend('keep', opts, { desc = "New note" }))
+keymap("n", "<leader>nN", "<Cmd>ZkNewAtDir<CR>", vim.tbl_extend('keep', opts, { desc = "New note at dir" }))
+
+-- Open notes.
+keymap("n", "<leader>no", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", vim.tbl_extend('keep', opts, { desc = "Open notes" }))
+-- Open notes associated with the selected tags.
+keymap("n", "<leader>nt", "<Cmd>ZkTags<CR>", vim.tbl_extend('keep', opts, { desc = "Open notes (tags)" }))
+
+-- Search for the notes matching a given query.
+keymap("n", "<leader>nf", "<Cmd>ZkNotes { sort = { 'modified' }, match = { vim.fn.input('Search: ') } }<CR>", vim.tbl_extend('keep', opts, { desc = "Search notes" }))
+-- Search for the notes matching the current visual selection.
+keymap("v", "<leader>nf", ":'<,'>ZkMatch<CR>", vim.tbl_extend('keep', opts, { desc = 'Search notes'}))
+
+-- Task creation with custom URI
+keymap("n", "<leader>nT", "<Cmd>ZkNewTask<CR>", vim.tbl_extend('keep', opts, { desc = "New task with custom URI" }))

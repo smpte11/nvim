@@ -84,5 +84,20 @@ M.palette = {
 	base0F = "#D27E99",
 }
 
+-- UUID generation utility
+M.generate_uuid = function()
+	-- Execute a system command and capture output as a list of lines
+	-- vim.fn.systemlist(command) runs the command in the shell and returns:
+	-- - A table where each element is a line of output
+	-- - Empty table if command fails or produces no output
+	-- "uuidgen" generates a UUID, "tr A-F a-f" converts uppercase to lowercase
+	local command = "uuidgen | tr A-F a-f"
+	local result = vim.fn.systemlist(command)
+	
+	-- Return the first line of output, or empty string if no output
+	-- result[1] gets the first element of the table
+	-- "or ''" provides a fallback if result[1] is nil
+	return result[1] or ""
+end
 
 _G.Utils = M

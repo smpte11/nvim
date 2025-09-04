@@ -12,10 +12,8 @@ local insert_password = function()
 end
 
 local insert_uuid = function()
-	local command = "uuidgen | tr A-F a-f"
-	for _, line in ipairs(vim.fn.systemlist(command)) do
-		vim.api.nvim_put({ line }, "", true, true)
-	end
+	local uuid = Utils.generate_uuid()
+	vim.api.nvim_put({ uuid }, "", true, true)
 end
 
 local split_sensibly = function()
@@ -185,25 +183,6 @@ keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'Codecompani
 keymap("n", "<leader>ac", "<cmd>CodeCompanionChat<cr>", { desc = 'CodeCompanion [C]hat'})
 keymap("n", "<leader>ae", "<cmd>CodeCompanionExplain<cr>", { desc = 'CodeCompanion [E]xplain'})
 keymap("n", "<leader>ag", "<cmd>CodeCompanionGenerate<cr>", { desc = 'CodeCompanion [G]enerate'})
-
--- ╔═══════════════════════╗
--- ║         Notes         ║
--- ╚═══════════════════════╝
-
--- Create a new note after asking for its title.
-keymap("n", "<leader>nn", "<Cmd>ZkNew { title = vim.fn.input('Title: ') }<CR>", vim.tbl_extend('keep', opts, { desc = "New note" }))
-keymap("n", "<leader>nN", "<Cmd>ZkNewAtDir<CR>", vim.tbl_extend('keep', opts, { desc = "New note at dir" }))
-
--- Open notes.
-keymap("n", "<leader>no", "<Cmd>ZkNotes { sort = { 'modified' } }<CR>", vim.tbl_extend('keep', opts, { desc = "Open notes" }))
--- Open notes associated with the selected tags.
-keymap("n", "<leader>nt", "<Cmd>ZkTags<CR>", vim.tbl_extend('keep', opts, { desc = "Open notes (tags)" }))
-
--- Search for the notes matching a given query.
-keymap("n", "<leader>nf", "<Cmd>ZkNotes { sort = { 'modified' }, match = { vim.fn.input('Search: ') } }<CR>", vim.tbl_extend('keep', opts, { desc = "Search notes" }))
--- Search for the notes matching the current visual selection.
-keymap("v", "<leader>nf", ":'<,'>ZkMatch<CR>", vim.tbl_extend('keep', opts, { desc = 'Search notes'}))
-
 
 -- ╔═══════════════════════╗
 -- ║         Visit         ║
