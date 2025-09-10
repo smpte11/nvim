@@ -721,6 +721,7 @@ later(function()
 		local events_to_save = {}
 		local new_task_count = 0
 		local carryover_count = 0
+		local completed_count = 0
 		
 		-- INTELLIGENT EVENT CLASSIFICATION: New tasks vs carryovers
 		-- We use cached prepared statements for existence checks, making this loop blazing fast
@@ -736,16 +737,32 @@ later(function()
 				})
 				new_task_count = new_task_count + 1
 			else
-				-- EXISTING TASK: This is a carryover to a new journal
-				-- Pure event sourcing: record the fact that it was carried over
-				table.insert(events_to_save, {
-					task_id = task.uuid,
-					event_type = "task_carried_over",
-					task_text = task.text,
-					state = task.state,
-					journal_file = journal_file,
-				})
-				carryover_count = carryover_count + 1
+				-- EXISTING TASK: Check for state transitions or carryovers
+				local previous_state = get_task_previous_state(db, task.uuid)
+				
+				-- Check if task just got completed (transition to COMPLETE state)
+				if task.state == "COMPLETE" and previous_state ~= "COMPLETE" then
+					-- TASK COMPLETION: Create completion event for significant milestone
+					table.insert(events_to_save, {
+						task_id = task.uuid,
+						event_type = "task_completed",
+						task_text = task.text,
+						state = task.state,
+						journal_file = journal_file,
+					})
+					completed_count = completed_count + 1
+				else
+					-- NORMAL CARRYOVER: Task exists but no significant state change
+					-- Pure event sourcing: record the fact that it was carried over
+					table.insert(events_to_save, {
+						task_id = task.uuid,
+						event_type = "task_carried_over",
+						task_text = task.text,
+						state = task.state,
+						journal_file = journal_file,
+					})
+					carryover_count = carryover_count + 1
+				end
 			end
 		end
 		
@@ -808,6 +825,9 @@ later(function()
 			end
 			if carryover_count > 0 then
 				table.insert(msg_parts, string.format("%d carried over", carryover_count))
+			end
+			if completed_count > 0 then
+				table.insert(msg_parts, string.format("%d completed", completed_count))
 			end
 			if deleted_count > 0 then
 				table.insert(msg_parts, string.format("%d deleted", deleted_count))
