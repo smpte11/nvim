@@ -729,10 +729,10 @@ later(function()
 		-- ⚡ FORCE IMMEDIATE PERSISTENCE: Ensure data is written to disk
 		-- sqlite.lua might buffer writes - force a checkpoint to guarantee persistence  
 		if saved_count > 0 then
-			print("🔍 DEBUG: File size before checkpoint:", vim.fn.getfsize(vim.env.ZK_NOTEBOOK_DIR .. "/.task_tracking.db"), "bytes")
+			print("🔍 DEBUG: File size before checkpoint:", vim.fn.getfsize(cached_db_paths[db_type]), "bytes")
 			local checkpoint_result = db:execute("PRAGMA wal_checkpoint(FULL);")
 			print("🔍 DEBUG: Checkpoint result:", vim.inspect(checkpoint_result))
-			print("🔍 DEBUG: File size after checkpoint:", vim.fn.getfsize(vim.env.ZK_NOTEBOOK_DIR .. "/.task_tracking.db"), "bytes")
+			print("🔍 DEBUG: File size after checkpoint:", vim.fn.getfsize(cached_db_paths[db_type]), "bytes")
 			
 			-- Double-check that data actually exists in the database  
 			print("🔍 DEBUG: Counting records in database...")
