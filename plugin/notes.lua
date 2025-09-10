@@ -627,6 +627,34 @@ later(function()
 		return 0
 	end
 
+	-- Function to get all previously tracked task IDs for a journal file
+	-- This is used to detect deleted tasks (tasks that were tracked but are no longer in the note)
+	local function get_previously_tracked_tasks(db, journal_file)
+		if not db then
+			return {}
+		end
+		
+		-- Get all distinct task IDs that have been tracked for this journal file
+		-- We only look for non-deleted tasks (tasks that don't have a final 'task_deleted' event)
+		local result = db:eval([[
+			SELECT DISTINCT task_id FROM task_events 
+			WHERE journal_file = ? 
+			AND task_id NOT IN (
+				SELECT task_id FROM task_events 
+				WHERE journal_file = ? AND event_type = 'task_deleted'
+			)
+		]], {journal_file, journal_file})
+		
+		local task_ids = {}
+		if result then
+			for _, row in ipairs(result) do
+				table.insert(task_ids, row.task_id)
+			end
+		end
+		
+		return task_ids
+	end
+
 	-- ⚡ BLAZING FAST ASYNCHRONOUS TASK TRACKING WITH ALL OPTIMIZATIONS ⚡
 	--
 	-- This is the main orchestrator function that combines ALL performance optimizations:
@@ -721,6 +749,32 @@ later(function()
 			end
 		end
 		
+		-- ⚡ DELETED TASK DETECTION: Check for tasks that were removed from the note
+		-- Get all previously tracked task IDs for this journal file
+		local previously_tracked_tasks = get_previously_tracked_tasks(db, journal_file)
+		
+		-- Create a set of current task IDs for efficient lookup
+		local current_task_ids = {}
+		for _, task in ipairs(tasks) do
+			current_task_ids[task.uuid] = true
+		end
+		
+		-- Find tasks that were previously tracked but are no longer in the note
+		local deleted_count = 0
+		for _, task_id in ipairs(previously_tracked_tasks) do
+			if not current_task_ids[task_id] then
+				-- This task was removed from the note - create a delete event
+				table.insert(events_to_save, {
+					task_id = task_id,
+					event_type = "task_deleted",
+					task_text = "", -- No text since task was removed
+					state = "deleted", -- Final state
+					journal_file = journal_file,
+				})
+				deleted_count = deleted_count + 1
+			end
+		end
+		
 		-- ⚡ BATCH TRANSACTION: Write all events atomically for maximum performance
 		-- This is where we get our biggest speedup for multi-task scenarios
 		-- Single transaction with cached prepared statements = optimal SQLite performance
@@ -754,6 +808,9 @@ later(function()
 			end
 			if carryover_count > 0 then
 				table.insert(msg_parts, string.format("%d carried over", carryover_count))
+			end
+			if deleted_count > 0 then
+				table.insert(msg_parts, string.format("%d deleted", deleted_count))
 			end
 			local msg = "⚡ Tracked: " .. table.concat(msg_parts, ", ")
 			vim.notify(msg, vim.log.levels.INFO, { title = "Task Tracking" })
