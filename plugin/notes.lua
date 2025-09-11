@@ -402,7 +402,7 @@ later(function()
 				-- Convert checkbox state to our state names
 				local task_state = "CREATED"
 				if state == "x" then
-					task_state = "COMPLETE"
+					task_state = "FINISHED"
 				elseif state == "-" then
 					task_state = "IN_PROGRESS"
 				end
@@ -589,26 +589,18 @@ later(function()
 		
 		-- Get the second most recent event for this task to determine previous state
 		-- This is useful for detecting state changes in true event-sourcing fashion
-		local stmt = db:prepare([[
+		local result = db:eval([[
 			SELECT state FROM task_events 
 			WHERE task_id = ? 
 			ORDER BY timestamp DESC, event_id DESC 
 			LIMIT 1 OFFSET 1
-		]])
+		]], {task_id})
 		
-		if not stmt then
-			return nil
+		if result and type(result) == "table" and result[1] and result[1].state then
+			return result[1].state
 		end
 		
-		local result = nil
-		if stmt:bind_values(task_id) then
-			local sqlite = require("sqlite")
-			if stmt:step() == sqlite.ROW then
-				result = stmt:get_value(0)
-			end
-		end
-		stmt:finalize()
-		return result -- nil if no previous state (first event) or bind failed
+		return nil -- nil if no previous state (first event) or query failed
 	end
 
 	-- Lightning-fast carryover count with cached prepared statements
@@ -646,7 +638,7 @@ later(function()
 		]], {journal_file, journal_file})
 		
 		local task_ids = {}
-		if result then
+		if result and type(result) == "table" then
 			for _, row in ipairs(result) do
 				table.insert(task_ids, row.task_id)
 			end
@@ -722,27 +714,52 @@ later(function()
 		local new_task_count = 0
 		local carryover_count = 0
 		local completed_count = 0
+		local started_count = 0
 		
 		-- INTELLIGENT EVENT CLASSIFICATION: New tasks vs carryovers
 		-- We use cached prepared statements for existence checks, making this loop blazing fast
 		for _, task in ipairs(tasks) do
 			if not task_exists_in_db(db, task.uuid) then
-				-- FIRST TIME SEEING THIS TASK: Record as newly created
+				-- FIRST TIME SEEING THIS TASK: Pure event sourcing with synthetic events
+				-- Always create the "birth" event first (task_created with CREATED state)
 				table.insert(events_to_save, {
 					task_id = task.uuid,
 					event_type = "task_created",
 					task_text = task.text,
-					state = task.state,
+					state = "CREATED",  -- Always CREATED for birth event
 					journal_file = journal_file,
 				})
 				new_task_count = new_task_count + 1
+				
+				-- If task is found in a non-CREATED state, create the transition event
+				if task.state == "IN_PROGRESS" then
+					-- SYNTHETIC TRANSITION: Task started immediately after creation
+					table.insert(events_to_save, {
+						task_id = task.uuid,
+						event_type = "task_started",
+						task_text = task.text,
+						state = "IN_PROGRESS",
+						journal_file = journal_file,
+					})
+					started_count = started_count + 1
+				elseif task.state == "FINISHED" then
+					-- SYNTHETIC TRANSITION: Task completed immediately after creation
+					table.insert(events_to_save, {
+						task_id = task.uuid,
+						event_type = "task_completed",
+						task_text = task.text,
+						state = "FINISHED",
+						journal_file = journal_file,
+					})
+					completed_count = completed_count + 1
+				end
 			else
 				-- EXISTING TASK: Check for state transitions or carryovers
 				local previous_state = get_task_previous_state(db, task.uuid)
 				
-				-- Check if task just got completed (transition to COMPLETE state)
-				if task.state == "COMPLETE" and previous_state ~= "COMPLETE" then
-					-- TASK COMPLETION: Create completion event for significant milestone
+				-- Check for significant state transitions
+				if task.state == "FINISHED" and previous_state ~= "FINISHED" then
+					-- TASK COMPLETION: Transition to FINISHED state
 					table.insert(events_to_save, {
 						task_id = task.uuid,
 						event_type = "task_completed",
@@ -751,9 +768,29 @@ later(function()
 						journal_file = journal_file,
 					})
 					completed_count = completed_count + 1
-				else
-					-- NORMAL CARRYOVER: Task exists but no significant state change
-					-- Pure event sourcing: record the fact that it was carried over
+				elseif task.state == "IN_PROGRESS" and previous_state ~= "IN_PROGRESS" then
+					-- TASK STARTED: Transition to IN_PROGRESS state
+					table.insert(events_to_save, {
+						task_id = task.uuid,
+						event_type = "task_started",
+						task_text = task.text,
+						state = task.state,
+						journal_file = journal_file,
+					})
+					started_count = started_count + 1
+				elseif task.state == "FINISHED" or task.state == "DELETED" then
+					-- FSM VIOLATION: Terminal states reappearing in journal
+					-- This should not happen according to our FSM model
+					vim.notify(
+						string.format("⚠️  FSM Warning: Task '%s' in terminal state %s found in journal", 
+							task.text, task.state),
+						vim.log.levels.WARN,
+						{ title = "Task State Machine" }
+					)
+					-- No event created for terminal state violations
+				elseif task.state == "CREATED" or task.state == "IN_PROGRESS" then
+					-- FSM-ALIGNED CARRYOVER: Only non-terminal states can be carried over
+					-- According to FSM, only CREATED and IN_PROGRESS have carryover transitions
 					table.insert(events_to_save, {
 						task_id = task.uuid,
 						event_type = "task_carried_over",
@@ -785,7 +822,7 @@ later(function()
 					task_id = task_id,
 					event_type = "task_deleted",
 					task_text = "", -- No text since task was removed
-					state = "deleted", -- Final state
+					state = "DELETED", -- Final state (consistent with other states)
 					journal_file = journal_file,
 				})
 				deleted_count = deleted_count + 1
@@ -822,6 +859,9 @@ later(function()
 			local msg_parts = {}
 			if new_task_count > 0 then
 				table.insert(msg_parts, string.format("%d new", new_task_count))
+			end
+			if started_count > 0 then
+				table.insert(msg_parts, string.format("%d started", started_count))
 			end
 			if carryover_count > 0 then
 				table.insert(msg_parts, string.format("%d carried over", carryover_count))
@@ -1171,37 +1211,36 @@ later(function()
 			end)
 		end,
 	})
+
+	-- ⚡ PERFORMANCE OPTIMIZATION #6: PROPER RESOURCE CLEANUP ⚡
+	---
+	-- CRITICAL: Properly release database resources when Neovim exits
+	-- Without this cleanup, we could leave SQLite connections open or prepared statements
+	-- hanging in memory, potentially causing resource leaks or database lock issues.
+	---
+	-- This autocmd ensures clean shutdown and prevents any resource leaks
+	-- that could impact system performance or database integrity.
+	vim.api.nvim_create_autocmd("VimLeavePre", {
+		group = vim.api.nvim_create_augroup("task-tracking-cleanup", { clear = true }),
+		callback = function()
+			-- COMPREHENSIVE CLEANUP: Release all cached database resources
+			-- 🔒 PRIVACY-FIRST CLEANUP: Close both work and personal database connections
+			if task_db_cache.perso then
+				-- Close personal database connection
+				task_db_cache.perso:close()
+				task_db_cache.perso = nil
+				cached_db_paths.perso = nil
+			end
+			
+			if task_db_cache.work then
+				-- Close work database connection  
+				task_db_cache.work:close()
+				task_db_cache.work = nil
+				cached_db_paths.work = nil
+			end
+		end,
+	})
 end)
-
--- ⚡ PERFORMANCE OPTIMIZATION #6: PROPER RESOURCE CLEANUP ⚡
---
--- CRITICAL: Properly release database resources when Neovim exits
--- Without this cleanup, we could leave SQLite connections open or prepared statements
--- hanging in memory, potentially causing resource leaks or database lock issues.
---
--- This autocmd ensures clean shutdown and prevents any resource leaks
--- that could impact system performance or database integrity.
-vim.api.nvim_create_autocmd("VimLeavePre", {
-	group = vim.api.nvim_create_augroup("task-tracking-cleanup", { clear = true }),
-	callback = function()
-		-- COMPREHENSIVE CLEANUP: Release all cached database resources
-		-- 🔒 PRIVACY-FIRST CLEANUP: Close both work and personal database connections
-		if task_db_cache.perso then
-			-- Close personal database connection
-			task_db_cache.perso:close()
-			task_db_cache.perso = nil
-			cached_db_paths.perso = nil
-		end
-		
-		if task_db_cache.work then
-			-- Close work database connection  
-			task_db_cache.work:close()
-			task_db_cache.work = nil
-			cached_db_paths.work = nil
-		end
-	end,
-})
-
 
 -- Add note-specific clues for mini.clue discoverability
 local note_clues = {
