@@ -778,12 +778,31 @@ later(function()
 						journal_file = journal_file,
 					})
 					started_count = started_count + 1
-				elseif task.state == "FINISHED" or task.state == "DELETED" then
-					-- FSM VIOLATION: Terminal states reappearing in journal
-					-- This should not happen according to our FSM model
+				elseif task.state == "FINISHED" and previous_state == "DELETED" then
+					-- VALID TRANSITION: DELETED -> FINISHED (task restored and completed)
+					-- This allows users to restore deleted tasks and mark them as complete
+					table.insert(events_to_save, {
+						task_id = task.uuid,
+						event_type = "task_completed",
+						task_text = task.text,
+						state = task.state,
+						journal_file = journal_file,
+					})
+					completed_count = completed_count + 1
+				elseif task.state == "FINISHED" then
+					-- FSM VIOLATION: FINISHED state reappearing (FINISHED should be terminal)
 					vim.notify(
-						string.format("⚠️  FSM Warning: Task '%s' in terminal state %s found in journal", 
-							task.text, task.state),
+						string.format("⚠️  FSM Warning: Task '%s' already finished found in journal", 
+							task.text),
+						vim.log.levels.WARN,
+						{ title = "Task State Machine" }
+					)
+					-- No event created for terminal state violations
+				elseif task.state == "DELETED" then
+					-- FSM VIOLATION: DELETED state reappearing (DELETED should be terminal)
+					vim.notify(
+						string.format("⚠️  FSM Warning: Task '%s' in deleted state found in journal", 
+							task.text),
 						vim.log.levels.WARN,
 						{ title = "Task State Machine" }
 					)
