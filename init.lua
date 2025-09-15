@@ -520,3 +520,32 @@ end)
 require("keymaps")
 require("autocmd")
 require("cmd")
+
+-- ⚡ NOTES VISUALIZATION SETUP ⚡
+local notes_viz = require("notes")
+notes_viz.setup({
+	-- Chart styling preferences
+	charts = {
+		histogram = { width = 50, show_values = true },
+		pie_chart = { radius = 10, style = "solid", show_legend = true },
+		line_plot = { width = 60, height = 15, show_axes = true },
+		table = { show_borders = true, max_rows = 10 }
+	},
+	
+	-- Data processing preferences
+	data = {
+		date_format = "medium",  -- "Sep 11" format
+		truncate_length = 30,
+		productivity_weights = {
+			created = 1,
+			completed = 2, 
+			carried_over = -1
+		}
+	},
+	
+	-- Display preferences
+	display = {
+		use_emojis = true,
+		show_debug = false
+	}
+})

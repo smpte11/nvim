@@ -1324,3 +1324,70 @@ keymap("v", "<leader>nf", ":'<,'>ZkMatch<CR>", vim.tbl_extend('keep', opts, { de
 
 -- Task creation with custom URI
 keymap("n", "<leader>nT", "<Cmd>ZkNewTask<CR>", vim.tbl_extend('keep', opts, { desc = "New task with custom URI" }))
+
+-- ⚡ TASK VISUALIZATION INTEGRATION ⚡
+-- Integrates with the notes visualization module configured in init.lua
+local function safe_require_notes_viz()
+	local ok, notes_viz = pcall(require, 'notes')
+	if not ok then
+		vim.notify("Notes visualization module not available: " .. notes_viz, vim.log.levels.WARN)
+		return nil
+	end
+	return notes_viz
+end
+
+-- Visualization commands
+commands.add("ZkTaskStats", function(options)
+	local notes_viz = safe_require_notes_viz()
+	if not notes_viz then return end
+	
+	local db_type = (options and options.args) or "perso"
+	notes_viz.dashboard(db_type)
+end)
+
+commands.add("ZkTaskCompletions", function(options) 
+	local notes_viz = safe_require_notes_viz()
+	if not notes_viz then return end
+	
+	local days = tonumber((options and options.args) or "7")
+	notes_viz.daily_completions("perso", days)
+end)
+
+commands.add("ZkTaskStates", function(options)
+	local notes_viz = safe_require_notes_viz()
+	if not notes_viz then return end
+	
+	local db_type = (options and options.args) or "perso" 
+	notes_viz.task_states(db_type)
+end)
+
+commands.add("ZkTaskTrend", function(options)
+	local notes_viz = safe_require_notes_viz()
+	if not notes_viz then return end
+	
+	local days = tonumber((options and options.args) or "14")
+	notes_viz.productivity_trend("perso", days) 
+end)
+
+commands.add("ZkTaskActivity", function(options)
+	local notes_viz = safe_require_notes_viz()
+	if not notes_viz then return end
+	
+	local limit = tonumber((options and options.args) or "10")
+	notes_viz.recent_activity("perso", limit)
+end)
+
+commands.add("ZkWorkStats", function()
+	local notes_viz = safe_require_notes_viz()
+	if not notes_viz then return end
+	
+	notes_viz.dashboard("work")
+end)
+
+-- Visualization keymaps
+keymap("n", "<leader>nts", "<Cmd>ZkTaskStats<CR>", vim.tbl_extend('keep', opts, { desc = "Task statistics dashboard" }))
+keymap("n", "<leader>ntc", "<Cmd>ZkTaskCompletions<CR>", vim.tbl_extend('keep', opts, { desc = "Task completions chart" }))  
+keymap("n", "<leader>ntp", "<Cmd>ZkTaskStates<CR>", vim.tbl_extend('keep', opts, { desc = "Task states pie chart" }))
+keymap("n", "<leader>ntt", "<Cmd>ZkTaskTrend<CR>", vim.tbl_extend('keep', opts, { desc = "Productivity trend" }))
+keymap("n", "<leader>nta", "<Cmd>ZkTaskActivity<CR>", vim.tbl_extend('keep', opts, { desc = "Recent task activity" }))
+keymap("n", "<leader>ntw", "<Cmd>ZkWorkStats<CR>", vim.tbl_extend('keep', opts, { desc = "Work task statistics" }))
