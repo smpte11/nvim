@@ -19,6 +19,17 @@ later(function()
 	})
 
 	require("codecompanion").setup({
+		adapters = {
+			http = {
+				ollama = function()
+					return require("codecompanion.adapters").extend("openai_compatible", {
+						env = {
+							url = "http://localhost:1234",
+						},
+					})
+				end,
+			},
+		},
 		strategies = {
 			chat = {
 				adapter = "copilot",
@@ -40,7 +51,7 @@ later(function()
 			},
 		},
 	})
-	
+
 	-- Set cohesive highlight groups that match mini.nvim and Kanagawa color palette
 	local palette = Utils.palette
 	vim.api.nvim_set_hl(0, "CodeCompanionChatInfo", { fg = palette.base0D, bg = palette.base01 })
