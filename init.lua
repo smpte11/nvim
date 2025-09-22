@@ -363,10 +363,11 @@ now(function()
 			{ mode = "n", keys = "<leader>a", desc = " ai" },
 			{ mode = "n", keys = "<leader>b", desc = " buffer" },
 			{ mode = "n", keys = "<leader>d", desc = " debug" },
-			{ mode = "n", keys = "<leader>s", desc = " search" },
+			{ mode = "n", keys = "<leader>D", desc = "󰆼 database" },
+			{ mode = "n", keys = "<leader>Ds", desc = "󰆼 store results" },
+			{ mode = "n", keys = "<leader>s", desc = " search" },
 			{ mode = "n", keys = "<leader>g", desc = "󰊢 git" },
-			{ mode = "n", keys = "<leader>go", desc = " octo" },
-			{ mode = "n", keys = "<leader>i", desc = "󰏪 insert" },
+			{ mode = "n", keys = "<leader>go", desc = " octo" },
 			{ mode = "n", keys = "<leader>l", desc = "󰘦 lsp" },
 			{ mode = "n", keys = "<leader>m", desc = " mini" },
 			{ mode = "n", keys = "<leader>n", desc = " notes" },
@@ -477,6 +478,10 @@ later(function()
 		allowed_windows = {
 			not_current = false,
 		},
+		-- Remap from <CR> to 'go' to avoid conflicts with nvim-dbee and other plugins
+		mappings = {
+			start_jumping = 'go',
+		},
 	})
 	vim.api.nvim_set_hl(0, "MiniJump2dSpot", { reverse = true })
 end)
@@ -522,7 +527,6 @@ later(function()
 		},
 	})
 end)
-
 
 require("keymaps")
 require("autocmd")
