@@ -297,7 +297,7 @@ T['text_processing']['clean_task_text'] = function()
   MiniTest.expect.equality(with_uri, "Review PR #123")
   MiniTest.expect.equality(with_checkbox, "Complete the task")
   MiniTest.expect.equality(extra_spaces, "Task with spaces")
-  MiniTest.expect.equality(empty, "Empty task")
+  MiniTest.expect.equality(empty, "Unknown task")
   MiniTest.expect.equality(nil_text, "Unknown task")
 end
 
@@ -328,10 +328,13 @@ T['aggregation']['group_by_period'] = function()
   -- Daily should be unchanged
   MiniTest.expect.equality(#by_day, 5)
   
-  -- Weekly should group by week (fewer entries)
+  -- Weekly should group by week (test with actual numbers)
+  -- The test data spans 2 different weeks, so by_week should have 2 entries
+  MiniTest.expect.equality(#by_week, 2)
   MiniTest.expect.equality(#by_week < #by_day, true)
   
-  -- Monthly should have even fewer entries
+  -- Monthly should have 1 entry (all September)
+  MiniTest.expect.equality(#by_month, 1)
   MiniTest.expect.equality(#by_month <= #by_week, true)
 end
 

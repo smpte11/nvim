@@ -281,8 +281,8 @@ function M.table(data, opts)
 
 	local result = {}
 	
-	-- Title
-	if title then
+	-- Title (only when borders are enabled)
+	if title and show_borders then
 		table.insert(result, title)
 		table.insert(result, string.rep("═", #title))
 	end

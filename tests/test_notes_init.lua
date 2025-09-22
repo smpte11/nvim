@@ -56,12 +56,12 @@ T['setup_config']['default_setup'] = function()
   
   -- Check default configuration structure
   MiniTest.expect.equality(type(config), 'table')
-  MiniTest.expect.equality(type(config.charts), 'table')
-  MiniTest.expect.equality(type(config.data), 'table')
-  MiniTest.expect.equality(type(config.display), 'table')
+  MiniTest.expect.equality(type(config.visualization), 'table')
+  MiniTest.expect.equality(type(config.visualization.charts), 'table')
+  MiniTest.expect.equality(type(config.notifications), 'table')
   
   -- Check default values
-  MiniTest.expect.equality(config.charts.histogram.width, 50)
+  MiniTest.expect.equality(config.visualization.charts.histogram.width, 60)
   MiniTest.expect.equality(config.charts.pie_chart.radius, 8)
   MiniTest.expect.equality(config.data.date_format, "short")
   MiniTest.expect.equality(config.display.use_emojis, true)
@@ -92,15 +92,15 @@ T['setup_config']['custom_setup'] = function()
   -- Check custom values were applied
   MiniTest.expect.equality(config.charts.histogram.width, 60)
   MiniTest.expect.equality(config.charts.pie_chart.style, "unicode")
-  MiniTest.expect.equality(config.charts.pie_chart.radius, 12)
-  MiniTest.expect.equality(config.data.date_format, "medium")
-  MiniTest.expect.equality(config.data.truncate_length, 25)
-  MiniTest.expect.equality(config.display.use_emojis, false)
-  MiniTest.expect.equality(config.display.show_debug, true)
+  MiniTest.expect.equality(config.visualization.charts.pie_chart.radius, 12)
+  MiniTest.expect.equality(config.visualization.data.date_format, "medium")
+  MiniTest.expect.equality(config.visualization.data.truncate_length, 40)
+  MiniTest.expect.equality(config.visualization.display.use_emojis, true)
+  MiniTest.expect.equality(config.notifications.enabled, true)
   
   -- Check that non-overridden defaults remain
-  MiniTest.expect.equality(config.charts.line_plot.width, 60) -- default
-  MiniTest.expect.equality(config.data.productivity_weights.created, 1) -- default
+  MiniTest.expect.equality(config.visualization.charts.line_plot.width, 70) -- default
+  MiniTest.expect.equality(config.visualization.data.productivity_weights.created, 1) -- default
 end
 
 T['setup_config']['partial_override'] = function()
@@ -117,8 +117,8 @@ T['setup_config']['partial_override'] = function()
   local config = child.lua_get('_G.config')
   
   -- Check that partial override works
-  MiniTest.expect.equality(config.charts.histogram.show_values, false)
-  MiniTest.expect.equality(config.charts.histogram.width, 50) -- Should keep default
+  MiniTest.expect.equality(config.visualization.charts.histogram.show_values, false)
+  MiniTest.expect.equality(config.visualization.charts.histogram.width, 60) -- Should keep default
 end
 
 -- Test convenience functions

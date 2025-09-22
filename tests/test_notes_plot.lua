@@ -238,12 +238,15 @@ T['table']['no_borders'] = function()
   
   local result = child.lua_get('_G.result')
   
-  -- Should not have border characters
+  -- Should not have border characters (excluding title separators)
   local has_borders = false
   for _, line in ipairs(result) do
-    if line:match("[┌┐└┘│]") then
-      has_borders = true
-      break
+    -- Skip title separator lines (all "═" characters)
+    if not line:match("^═+$") then
+      if line:match("[┌┐└┘│─┼┤├┬┴]") then
+        has_borders = true
+        break
+      end
     end
   end
   MiniTest.expect.equality(has_borders, false)
