@@ -470,6 +470,28 @@ later(function()
 end)
 
 later(function()
+	local hipatterns = require("mini.hipatterns")
+	local hi_words = require("mini.extra").gen_highlighter.words
+	
+	hipatterns.setup({
+		highlighters = {
+			-- Highlight standalone 'FIXME', 'HACK', 'TODO', 'NOTE'
+			fixme     = hi_words({"FIXME"}, "MiniHipatternsFixme"),
+			hack      = hi_words({"HACK"}, "MiniHipatternsHack"), 
+			todo      = hi_words({"TODO"}, "MiniHipatternsTodo"),
+			note      = hi_words({"NOTE"}, "MiniHipatternsNote"),
+			
+			-- Additional useful comment patterns
+			warning   = hi_words({"WARNING", "WARN"}, "DiagnosticWarn"),
+			danger    = hi_words({"DANGER", "BUG"}, "DiagnosticError"),
+			
+			-- Highlight hex color strings (`#rrggbb`) with that color
+			hex_color = hipatterns.gen_highlighter.hex_color(),
+		},
+	})
+end)
+
+later(function()
 	require("mini.jump").setup()
 end)
 
@@ -500,12 +522,31 @@ end)
 later(function()
 	local animate = require("mini.animate")
 	animate.setup({
+		-- Disable scroll animations (as requested)
 		scroll = {
-			-- Disable Scroll Animations, as the can interfer with mouse Scrolling
 			enable = false,
 		},
+		
+		-- Smooth and quick cursor movement
 		cursor = {
-			timing = animate.gen_timing.cubic({ duration = 50, unit = "total" }),
+			enable = true,
+			timing = animate.gen_timing.cubic({ duration = 80, unit = "total" }),
+		},
+		
+		-- Fun window open/close animations
+		open = {
+			enable = true,
+			timing = animate.gen_timing.exponential({ duration = 120, unit = "total" }),
+		},
+		close = {
+			enable = true,
+			timing = animate.gen_timing.exponential({ duration = 100, unit = "total" }),
+		},
+		
+		-- Smooth window resizing
+		resize = {
+			enable = true,
+			timing = animate.gen_timing.cubic({ duration = 150, unit = "total" }),
 		},
 	})
 end)

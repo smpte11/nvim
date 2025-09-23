@@ -95,8 +95,8 @@ now(function()
 		source = "neovim/nvim-lspconfig",
 		-- Supply dependencies near target plugin
 		depends = {
-			"williamboman/mason.nvim",
-			"williamboman/mason-lspconfig.nvim",
+			"mason-org/mason.nvim",
+			"mason-org/mason-lspconfig.nvim",
 			"WhoIsSethDaniel/mason-tool-installer.nvim",
 		},
 	})
@@ -122,9 +122,9 @@ now(function()
 	})
 	require("blink.cmp").setup({
 		appearance = {},
+		cmdline = { enabled = false },
 		sources = {
 			default = { "lsp", "lazydev", "path", "snippets", "buffer", "copilot" },
-			cmdline = {},
 			providers = {
 				lazydev = {
 					name = "LazyDev",
@@ -502,13 +502,6 @@ later(function()
 	})
 end)
 
-later(function()
-	add({
-		source = "brenoprata10/nvim-highlight-colors",
-	})
-
-	require("nvim-highlight-colors").setup({})
-end)
 
 later(function()
 	add({
@@ -600,7 +593,7 @@ later(function()
 			"nvim-neotest/nvim-nio",
 
 			-- Installs the debug adapters for you
-			"williamboman/mason.nvim",
+			"mason-org/mason.nvim",
 			"jay-babu/mason-nvim-dap.nvim",
 			"leoluz/nvim-dap-go",
 		},
@@ -702,4 +695,3 @@ later(function()
 
 	vim.api.nvim_set_hl(0, "NeogitChangeDeleted", { fg = Utils.palette.base08, bg = "NONE" })
 end)
-

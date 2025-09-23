@@ -30,6 +30,10 @@ end
 -- ╚═══════════════════════╝
 keymap("n", "<leader>mu", function() require("mini.deps").update() end, { desc = "Update Plugins" })
 
+-- Quit
+keymap("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit All" })
+keymap("n", "<leader>qw", "<cmd>wqa<cr>", { desc = "Write and Quit All" })
+
 -- Copy
 keymap("n", "<C-s>", "<cmd>:w<cr>", { silent = true })
 
@@ -62,7 +66,33 @@ keymap('n', '<leader>s.', function() MiniExtra.pickers.oldfiles() end, { desc = 
 keymap('n', '<leader>sc', function() MiniExtra.pickers.commands() end, { desc = '[S]earch commands' })
 keymap('n', '<leader>sg', function() MiniPick.builtin.grep_live() end, { desc = '[S]earch by [G]rep' })
 keymap('n', '<leader>sw', function() MiniPick.builtin.grep({ pattern = vim.fn.expand('<cword>') }) end, { desc = '[S]earch current [W]ord' })
+
+-- Fuzzily search in current buffer (mini.pick equivalent of telescope current_buffer_fuzzy_find)
+keymap('n', '<leader>/', function()
+	MiniExtra.pickers.buf_lines({}, {
+		window = {
+			config = function()
+				local height = math.floor(0.4 * vim.o.lines)
+				local width = math.floor(0.8 * vim.o.columns)
+				return {
+					anchor = "NW",
+					height = height,
+					width = width,
+					row = 1,
+					col = math.floor(0.5 * (vim.o.columns - width)),
+				}
+			end
+		}
+	})
+end, { desc = '[/] Fuzzily search in current buffer' })
+
 -- keymap('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
+
+-- ╔═══════════════════════╗
+-- ║   Command Palette     ║
+-- ╚═══════════════════════╝
+
+keymap('n', '<leader>cp', Utils.create_command_palette, { desc = 'Command Palette' })
 
 -- ╔═══════════════════════╗
 -- ║	     Git           ║
