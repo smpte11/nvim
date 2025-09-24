@@ -544,11 +544,167 @@ later(function()
 
 	vim.api.nvim_create_autocmd("FileType", {
 		group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
-		pattern = { "scala", "sbt", "java" },
+		pattern = { "scala", "sbt", "java", "sc" },
 		callback = function()
 			require("metals").initialize_or_attach(metals_config)
+			
+			-- Set buffer-local keymap for metals commands picker
+			if _G.MiniPick and MiniPick.registry.metals then
+				vim.keymap.set("n", "<leader>lm", function() 
+					MiniPick.registry.metals() 
+				end, { 
+					buffer = true, 
+					desc = "[L]sp [M]etals Commands",
+					silent = true 
+				})
+			end
 		end,
 	})
+
+	-- Metals command picker for mini.pick
+	-- Only works in Scala-related files (.scala, .sbt, .java, .sc)
+	-- Dynamically loads available commands from metals.commands module
+	if _G.MiniPick then
+		MiniPick.registry.metals = function(local_opts)
+			-- Check if we're in a Scala-related file
+			local filetype = vim.bo.filetype
+			local scala_filetypes = { "scala", "sbt", "java", "sc" }
+			local is_scala_file = vim.tbl_contains(scala_filetypes, filetype)
+			
+			if not is_scala_file then
+				vim.notify("Metals commands are only available in Scala files (.scala, .sbt, .java, .sc)", vim.log.levels.WARN)
+				return
+			end
+			
+			-- Get commands dynamically from metals
+			local metals_commands = {}
+			
+			-- Try to get commands from metals module
+			local ok, metals = pcall(require, "metals")
+			if ok then
+				-- Check if metals.commands exists and what type it is
+				if metals.commands then
+					if type(metals.commands) == "table" then
+						-- Convert metals commands to picker format
+						for cmd_name, cmd_func in pairs(metals.commands) do
+							-- Skip non-function entries
+							if type(cmd_func) == "function" then
+								-- Create a more readable display name from command name
+								local display_name = cmd_name
+									:gsub("^metals_", "")  -- Remove metals_ prefix if present
+									:gsub("_", " ")        -- Replace underscores with spaces
+									:gsub("(%w)(%w*)", function(first, rest)
+										return first:upper() .. rest:lower()
+									end)
+								
+								table.insert(metals_commands, {
+									name = display_name,
+									command = cmd_name,
+									desc = "Execute " .. display_name:lower(),
+									callback = cmd_func
+								})
+							end
+						end
+						
+						-- Sort commands alphabetically by display name
+						table.sort(metals_commands, function(a, b) return a.name < b.name end)
+					elseif type(metals.commands) == "function" then
+						-- If it's a function, try to call it to get commands
+						local commands_ok, commands_table = pcall(metals.commands)
+						if commands_ok and type(commands_table) == "table" then
+							for cmd_name, cmd_func in pairs(commands_table) do
+								if type(cmd_func) == "function" then
+									local display_name = cmd_name
+										:gsub("^metals_", "")
+										:gsub("_", " ")
+										:gsub("(%w)(%w*)", function(first, rest)
+											return first:upper() .. rest:lower()
+										end)
+									
+									table.insert(metals_commands, {
+										name = display_name,
+										command = cmd_name,
+										desc = "Execute " .. display_name:lower(),
+										callback = cmd_func
+									})
+								end
+							end
+							table.sort(metals_commands, function(a, b) return a.name < b.name end)
+						end
+					end
+				end
+			end
+			
+			-- Fallback to common commands if dynamic loading fails
+			if #metals_commands == 0 then
+				metals_commands = {
+					{ name = "Build Import", command = "metals.build-import", desc = "Import build", 
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.build-import" }) end },
+					{ name = "Build Connect", command = "metals.build-connect", desc = "Connect to build server",
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.build-connect" }) end },
+					{ name = "Build Disconnect", command = "metals.build-disconnect", desc = "Disconnect from build server",
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.build-disconnect" }) end },
+					{ name = "Build Restart", command = "metals.build-restart", desc = "Restart build server",
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.build-restart" }) end },
+					{ name = "Compile Cascade", command = "metals.compile-cascade", desc = "Compile current file and dependencies",
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.compile-cascade" }) end },
+					{ name = "Generate BSP Config", command = "metals.generate-bsp-config", desc = "Generate BSP config files",
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.generate-bsp-config" }) end },
+					{ name = "Doctor Run", command = "metals.doctor-run", desc = "Run metals doctor",
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.doctor-run" }) end },
+					{ name = "Sources Scan", command = "metals.sources-scan", desc = "Scan workspace sources",
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.sources-scan" }) end },
+					{ name = "New Scala File", command = "metals.new-scala-file", desc = "Create new Scala file",
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.new-scala-file" }) end },
+					{ name = "New Java File", command = "metals.new-java-file", desc = "Create new Java file",
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.new-java-file" }) end },
+					{ name = "Restart Server", command = "metals.restart-server", desc = "Restart metals server",
+						callback = function() vim.lsp.buf.execute_command({ command = "metals.restart-server" }) end },
+				}
+			end
+
+			-- Check if metals LSP client is active
+			local function is_metals_active()
+				local clients = vim.lsp.get_clients({ bufnr = 0 })
+				for _, client in ipairs(clients) do
+					if client.name == "metals" then
+						return true
+					end
+				end
+				return false
+			end
+
+			if not is_metals_active() then
+				vim.notify("Metals LSP client is not active in current buffer", vim.log.levels.WARN)
+				return
+			end
+
+			local source = {
+				name = "Metals Commands (" .. #metals_commands .. " available)",
+				items = metals_commands,
+				show = function(buf_id, items, query)
+					local lines = {}
+					for _, item in ipairs(items) do
+						-- Format: "Command Name - Description"
+						table.insert(lines, string.format("%-25s - %s", item.name, item.desc))
+					end
+					vim.api.nvim_buf_set_lines(buf_id, 0, -1, false, lines)
+				end,
+				choose = function(item)
+					if item and item.callback then
+						vim.notify("Executing: " .. item.name, vim.log.levels.INFO)
+						-- Use the callback function if available (for dynamic commands)
+						local success, err = pcall(item.callback)
+						if not success then
+							vim.notify("Error executing " .. item.name .. ": " .. tostring(err), vim.log.levels.ERROR)
+						end
+					end
+				end,
+			}
+
+			return MiniPick.start({ source = source })
+		end
+	end
 end)
 
 later(function()
