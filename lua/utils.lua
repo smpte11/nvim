@@ -84,20 +84,50 @@ M.palette = {
 	base0F = "#D27E99",
 }
 
--- UUID generation utility
+-- Generate a UUID v7 (time-ordered UUID with millisecond precision)
+-- Format: XXXXXXXX-XXXX-7XXX-XXXX-XXXXXXXXXXXX
+-- Where first 48 bits = Unix timestamp (ms), version = 7, rest = random
 M.generate_uuid = function()
-	-- Execute a system command and capture output as a list of lines
-	-- vim.fn.systemlist(command) runs the command in the shell and returns:
-	-- - A table where each element is a line of output
-	-- - Empty table if command fails or produces no output
-	-- "uuidgen" generates a UUID, "tr A-F a-f" converts uppercase to lowercase
-	local command = "uuidgen | tr A-F a-f"
-	local result = vim.fn.systemlist(command)
+	-- Seed random number generator
+	math.randomseed(os.time() + os.clock() * 1000000)
 	
-	-- Return the first line of output, or empty string if no output
-	-- result[1] gets the first element of the table
-	-- "or ''" provides a fallback if result[1] is nil
-	return result[1] or ""
+	-- Get current Unix timestamp in milliseconds
+	local timestamp_ms = math.floor(os.time() * 1000)
+	
+	-- Generate random bytes function
+	local function random_hex_byte()
+		return string.format("%02x", math.random(0, 255))
+	end
+	
+	-- Convert timestamp to hex (48 bits = 6 bytes = 12 hex chars)
+	local timestamp_hex = string.format("%012x", timestamp_ms)
+	
+	-- Generate random data for the UUID
+	local rand1 = random_hex_byte() .. random_hex_byte() .. random_hex_byte()  -- 24 bits
+	local rand2 = random_hex_byte() .. random_hex_byte()                       -- 16 bits
+	local rand3 = ""
+	for i = 1, 6 do
+		rand3 = rand3 .. random_hex_byte()                                    -- 48 bits
+	end
+	
+	-- Set version (4 bits = 7) in the 13th hex digit position
+	local version_rand = "7" .. rand1:sub(2, 3)
+	
+	-- Set variant (2 bits = 10) in the 17th hex digit position  
+	local variant_byte = math.random(128, 191) -- 10xxxxxx in binary
+	local variant_hex = string.format("%02x", variant_byte)
+	local variant_rand = variant_hex .. rand2:sub(3, 4)
+	
+	-- Construct UUID v7: TTTTTTTT-TTTT-7RRR-VRRR-RRRRRRRRRRRR
+	local uuid = string.format("%s-%s-%s-%s-%s",
+		timestamp_hex:sub(1, 8),      -- First 32 bits of timestamp
+		timestamp_hex:sub(9, 12),     -- Next 16 bits of timestamp  
+		version_rand,                 -- Version 7 + 12 bits random
+		variant_rand,                 -- Variant + 14 bits random
+		rand3                         -- Final 48 bits random
+	)
+	
+	return uuid:lower()
 end
 
 -- VSCode-style Command Palette Builder using MiniPick with mini.icons

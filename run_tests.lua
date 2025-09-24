@@ -30,7 +30,8 @@ end
 local test_modules = {
   plot = 'tests.test_notes_plot',
   utils = 'tests.test_notes_utils', 
-  init = 'tests.test_notes_init'
+  init = 'tests.test_notes_init',
+  migrations = 'tests.test_notes_migrations'
 }
 
 -- Get command line argument for specific test
