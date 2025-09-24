@@ -10,7 +10,7 @@ local M = {}
 
 -- Default configuration with comprehensive options
 local default_config = {
-	-- 📁 Directory Configuration (Most Important!)
+	-- 📁 Directory Configuration
 	directories = {
 		notebook = vim.env.ZK_NOTEBOOK_DIR or vim.fn.expand("~/notes"), -- Main notes directory
 		personal_journal = "journal/daily",    -- Personal daily journals subdirectory  
@@ -30,19 +30,12 @@ local default_config = {
 			filename_patterns = { "work%-.*%.md$" },   -- Files to track for work tasks
 			database_path = nil, -- Auto: {notebook}/.work-tasks.db
 		},
-		-- Add custom types here
-		-- research = {
-		--   enabled = true,
-		--   filename_patterns = { "research%-.*%.md$" },
-		--   database_path = nil, -- Auto: {notebook}/.research-tasks.db
-		-- },
 	},
 	
 	-- ⚙️ ZK-nvim Configuration
 	zk = {
 		enabled = true,
 		picker = "minipick", -- or "fzf", "telescope"
-		-- All zk.setup() options can go here
 	},
 	
 	-- 🎨 Visualization Configuration  
@@ -95,8 +88,7 @@ local default_config = {
 			new_note = "n",           -- <leader>nn
 			new_at_dir = "N",         -- <leader>nN  
 			new_task = "T",           -- <leader>nT (creates task with UUID v7)
-			new_note_uuid = "uN",     -- <leader>nuN (note with UUID front matter)
-			add_uuid = "ui",          -- <leader>nui (add UUID to current note)
+			new_child_task = "C",     -- <leader>nC (creates child task)
 			
 			-- Journal creation
 			daily_journal = "j",      -- <leader>nj
@@ -454,6 +446,57 @@ function M._setup_task_tracking()
 	})
 end
 
+-- ═══════════════════════════════════════════════════════════════════════
+-- 🔄 DATABASE MIGRATION SYSTEM
+-- ═══════════════════════════════════════════════════════════════════════
+
+-- Check if a column exists in a table
+-- @param db: database connection
+-- @param table_name: name of the table
+-- @param column_name: name of the column to check
+-- @return: boolean indicating if column exists
+local function column_exists(db, table_name, column_name)
+	local pragma_result = db:eval(string.format("PRAGMA table_info(%s)", table_name))
+	if not pragma_result then
+		return false
+	end
+	
+	for _, column_info in ipairs(pragma_result) do
+		if column_info.name == column_name then
+			return true
+		end
+	end
+	
+	return false
+end
+
+-- Run database migrations to update schema
+-- @param db: database connection
+function M._run_database_migrations(db)
+	if not db then
+		return
+	end
+	
+	-- Migration 1: Add parent_id column if it doesn't exist
+	if not column_exists(db, "task_events", "parent_id") then
+		notify("🔄 Running database migration: Adding parent_id column", "info", "database_operations")
+		
+		-- Add the parent_id column (nullable) and create its index
+		local success, err = pcall(function()
+			db:execute("ALTER TABLE task_events ADD COLUMN parent_id TEXT")
+			db:execute("CREATE INDEX IF NOT EXISTS idx_parent_id ON task_events(parent_id)")
+		end)
+		
+		if success then
+			notify("✅ Database migration completed: parent_id column and index added", "info", "database_operations")
+		else
+			notify(string.format("❌ Database migration failed: %s", tostring(err)), "error", "database_operations")
+		end
+	end
+	
+	-- Future migrations can be added here as needed
+end
+
 -- Get database connection for a tracking type
 function M._get_task_database(track_type)
 	local track_config = config.tracking[track_type]
@@ -506,7 +549,7 @@ function M._get_task_database(track_type)
 		db:execute("PRAGMA temp_store = MEMORY")
 	end
 	
-	-- Create table
+	-- Create table with original schema first (backward compatible)
 	db:execute([[
 		CREATE TABLE IF NOT EXISTS task_events (
 			event_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -520,7 +563,10 @@ function M._get_task_database(track_type)
 		)
 	]])
 	
-	-- Create indexes
+	-- Run database migrations
+	M._run_database_migrations(db)
+	
+	-- Create indexes (parent_id index created in migration if needed)
 	db:execute("CREATE INDEX IF NOT EXISTS idx_task_id ON task_events(task_id)")
 	db:execute("CREATE INDEX IF NOT EXISTS idx_event_type ON task_events(event_type)")
 	db:execute("CREATE INDEX IF NOT EXISTS idx_timestamp ON task_events(timestamp)")
@@ -530,6 +576,32 @@ function M._get_task_database(track_type)
 	cached_db_paths[track_type] = db_path
 	
 	return db
+end
+
+-- Parse task URI to extract UUID and optional parent UUID
+-- Supports formats: "uuid" or "uuid?parent=parent_uuid"
+-- @param task_uri: the URI part after "task://"
+-- @return: task_uuid, parent_uuid (parent_uuid is nil if not present)
+function M._parse_task_uri(task_uri)
+	if not task_uri or task_uri == "" then
+		return nil, nil
+	end
+	
+	-- Check for query parameters
+	local uuid_part, query_part = task_uri:match("^([%w%-]+)%?(.+)$")
+	
+	if uuid_part and query_part then
+		-- Parse query parameters
+		local parent_uuid = query_part:match("parent=([%w%-]+)")
+		return uuid_part, parent_uuid
+	else
+		-- No query parameters, just return the UUID
+		if task_uri:match("^[%w%-]+$") then
+			return task_uri, nil
+		else
+			return nil, nil
+		end
+	end
 end
 
 -- Determine tracking type from filename
@@ -571,42 +643,65 @@ function M._track_tasks_on_save(bufnr)
 	local completed_tasks = 0
 	
 	for line_num, line_content in ipairs(lines) do
-		-- Match task pattern: - [state] text [ ](task://uuid)
-		local state, task_text, task_uuid = line_content:match("^%s*%- %[([%-%sx]?)%] (.-)%s%[ %]%(task://([%w%-]+)%)%s*$")
+		-- First check if line contains a task URI (this is the only guaranteed part)
+		local task_uri = line_content:match("task://([^%)]+)")
 		
-		if task_uuid and task_text then
-			local task_state = "CREATED"
-			if state == "x" then
-				task_state = "FINISHED"
-			elseif state == "-" then
-				task_state = "IN_PROGRESS"
-			end
+		if task_uri then
+			-- Now extract the task state and text (we know there's a URI, so this should work)
+			local state, task_text = line_content:match("^%s*%- %[([%-%sx ]?)%] (.-)%s%[")
 			
-			table.insert(tasks, {
-				uuid = task_uuid,
-				text = task_text:gsub("^%s+", ""):gsub("%s+$", ""),
-				state = task_state,
-				line_number = line_num
-			})
+			if state and task_text then
+				-- Parse the URI to extract task_uuid and optional parent_uuid
+				local task_uuid, parent_uuid = M._parse_task_uri(task_uri)
+				
+				if task_uuid then
+					-- Normalize state: trim whitespace and handle empty/space as CREATED
+					state = (state or ""):gsub("^%s*(.-)%s*$", "%1")
+					
+					local task_state = "CREATED"
+					if state == "x" or state == "X" then
+						task_state = "FINISHED"
+					elseif state == "-" then
+						task_state = "IN_PROGRESS"
+					end
+					
+					table.insert(tasks, {
+						uuid = task_uuid,
+						parent_uuid = parent_uuid,
+						text = task_text:gsub("^%s+", ""):gsub("%s+$", ""),
+						state = task_state,
+						line_number = line_num
+					})
+				end
+			end
 		end
 	end
 	
 	-- Process tasks (simplified - just save new/changed tasks)
 	for _, task in ipairs(tasks) do
-		-- Check if task exists
-		local existing = db:eval("SELECT COUNT(*) as count, state FROM task_events WHERE task_id = ? ORDER BY timestamp DESC LIMIT 1", {task.uuid})
+		-- Check if task exists and get last known state
+		local existing = db:eval("SELECT COUNT(*) as count, state, task_text FROM task_events WHERE task_id = ? ORDER BY timestamp DESC LIMIT 1", {task.uuid})
 		
 		if not existing or #existing == 0 or existing[1].count == 0 then
 			-- New task
 			db:eval([[
-				INSERT INTO task_events (task_id, event_type, timestamp, task_text, state, journal_file)
-				VALUES (?, ?, ?, ?, ?, ?)
-			]], {task.uuid, "task_created", os.date("%Y-%m-%d %H:%M:%S"), task.text, task.state, filepath})
+				INSERT INTO task_events (task_id, event_type, timestamp, task_text, state, journal_file, parent_id)
+				VALUES (?, ?, ?, ?, ?, ?, ?)
+			]], {task.uuid, "task_created", os.date("%Y-%m-%d %H:%M:%S"), task.text, task.state, filepath, task.parent_uuid})
 			new_tasks = new_tasks + 1
 		else
-			-- Check if state changed
+			-- Check if state or text changed
 			local last_state = existing[1].state
-			if last_state and last_state ~= task.state then
+			local last_text = existing[1].task_text
+			
+			-- Normalize for comparison (trim whitespace)
+			local current_text = task.text:gsub("^%s+", ""):gsub("%s+$", "")
+			local stored_text = (last_text or ""):gsub("^%s+", ""):gsub("%s+$", "")
+			
+			local state_changed = last_state ~= task.state
+			local text_changed = stored_text ~= current_text
+			
+			if state_changed or text_changed then
 				local event_type = "task_updated"
 				if task.state == "FINISHED" and last_state ~= "FINISHED" then
 					event_type = "task_completed"
@@ -616,9 +711,9 @@ function M._track_tasks_on_save(bufnr)
 				end
 				
 				db:eval([[
-					INSERT INTO task_events (task_id, event_type, timestamp, task_text, state, journal_file)
-					VALUES (?, ?, ?, ?, ?, ?)
-				]], {task.uuid, event_type, os.date("%Y-%m-%d %H:%M:%S"), task.text, task.state, filepath})
+					INSERT INTO task_events (task_id, event_type, timestamp, task_text, state, journal_file, parent_id)
+					VALUES (?, ?, ?, ?, ?, ?, ?)
+				]], {task.uuid, event_type, os.date("%Y-%m-%d %H:%M:%S"), task.text, task.state, filepath, task.parent_uuid})
 				updated_tasks = updated_tasks + 1
 			end
 		end
@@ -747,14 +842,8 @@ function M._create_journal_content_with_carryover(target_dir, journal_type)
 			prev_filename), "info", "journal_carryover")
 	end
 	
-	-- Build content with UUID header
-	local journal_uuid = utils.generate_uuid_v7()
-	
-	local content_parts = {
-		"<!-- Journal ID: " .. journal_uuid .. " -->",
-		"<!-- Created: " .. os.date("%Y-%m-%d %H:%M:%S") .. " -->",
-		""
-	}
+	-- Generate only body content - ZK handles frontmatter via ~/.config/zk templates  
+	local content_parts = {}
 	
 	for _, section in ipairs(journal_config.sections) do
 		table.insert(content_parts, "## " .. section)
@@ -784,8 +873,14 @@ function M._record_carryover_events(section_tasks, journal_type, prev_filename)
 	for section, tasks in pairs(section_tasks) do
 		if tasks and #tasks > 0 then
 			for _, task_line in ipairs(tasks) do
-				-- Extract task UUID if present, otherwise generate one
-				local task_uuid = task_line:match("%(task://([%w%-]+)%)")
+				-- Extract task UUID and parent UUID if present
+				local task_uri = task_line:match("%(task://([^%)]+)%)")
+				local task_uuid, parent_uuid = nil, nil
+				
+				if task_uri then
+					task_uuid, parent_uuid = M._parse_task_uri(task_uri)
+				end
+				
 				if not task_uuid then
 					-- Generate UUID for tasks that don't have one
 					task_uuid = utils.generate_uuid_v7()
@@ -793,55 +888,34 @@ function M._record_carryover_events(section_tasks, journal_type, prev_filename)
 				
 				-- Extract task text (remove checkbox and UUID parts)
 				local task_text = task_line:gsub("^%s*%- %[.-%] ", "")
-				                           :gsub("%s*%[ %]%(task://[%w%-]+%)%s*$", "")
+				                           :gsub("%s*%[ %]%(task://[^%)]*%)%s*$", "")
 				
 				-- Record the carryover event
 				db:eval([[
-					INSERT INTO task_events (task_id, event_type, timestamp, task_text, state, journal_file)
-					VALUES (?, ?, ?, ?, ?, ?)
+					INSERT INTO task_events (task_id, event_type, timestamp, task_text, state, journal_file, parent_id)
+					VALUES (?, ?, ?, ?, ?, ?, ?)
 				]], {
 					task_uuid, 
 					"task_carried_over", 
 					os.date("%Y-%m-%d %H:%M:%S"), 
 					task_text, 
 					"CARRIED_OVER", 
-					prev_filename
+					prev_filename,
+					parent_uuid
 				})
 			end
 		end
 	end
 	
-	-- Record a summary carryover event for dashboard analytics
-	local total_tasks = 0
-	for _, tasks in pairs(section_tasks) do
-		total_tasks = total_tasks + (tasks and #tasks or 0)
-	end
-	
-	if total_tasks > 0 then
-		local summary_uuid = utils.generate_uuid_v7()
-		db:eval([[
-			INSERT INTO task_events (task_id, event_type, timestamp, task_text, state, journal_file)
-			VALUES (?, ?, ?, ?, ?, ?)
-		]], {
-			summary_uuid,
-			"journal_carryover",
-			os.date("%Y-%m-%d %H:%M:%S"),
-			string.format("Carried over %d tasks from %s", total_tasks, prev_filename),
-			"CARRYOVER_SUMMARY",
-			prev_filename
-		})
-	end
+	-- No need for summary records - analytics aggregate individual records at query time
 end
+
 
 function M._create_basic_journal_content(journal_type)
 	local journal_config = config.journal.daily_template[journal_type]
-	local journal_uuid = utils.generate_uuid_v7()
 	
-	local content_parts = {
-		"<!-- Journal ID: " .. journal_uuid .. " -->",
-		"<!-- Created: " .. os.date("%Y-%m-%d %H:%M:%S") .. " -->",
-		""
-	}
+	-- Generate only body content - ZK handles frontmatter via ~/.config/zk templates
+	local content_parts = {}
 	
 	for _, section in ipairs(journal_config.sections) do
 		table.insert(content_parts, "## " .. section)
@@ -849,6 +923,133 @@ function M._create_basic_journal_content(journal_type)
 	end
 	
 	return table.concat(content_parts, "\n")
+end
+
+-- ═══════════════════════════════════════════════════════════════════════
+-- 🎯 TASK PICKER (MINI.PICK INTEGRATION)  
+-- ═══════════════════════════════════════════════════════════════════════
+
+-- Get available parent tasks for picker
+-- @param track_type: "personal" or "work"
+-- @return: table with picker items
+function M._get_picker_parent_tasks(track_type)
+	local db = M._get_task_database(track_type)
+	if not db then
+		return {}
+	end
+	
+	-- Get recent tasks that could be parents (not completed, from last 30 days)
+	-- Group by task_id to avoid duplicates, getting the most recent event for each task
+	local sql = [[
+		SELECT te.task_id, te.task_text, te.timestamp, te.state
+		FROM task_events te
+		INNER JOIN (
+			SELECT task_id, MAX(timestamp) as max_timestamp
+			FROM task_events
+			WHERE event_type IN ('task_created', 'task_updated')
+			  AND state != 'FINISHED'
+			  AND date(timestamp) >= date('now', '-30 days')
+			  AND task_text IS NOT NULL
+			  AND task_text != ''
+			GROUP BY task_id
+		) latest ON te.task_id = latest.task_id AND te.timestamp = latest.max_timestamp
+		WHERE te.event_type IN ('task_created', 'task_updated')
+		ORDER BY te.timestamp DESC
+		LIMIT 20
+	]]
+	
+	local results = db:eval(sql)
+	if not results or type(results) ~= "table" or #results == 0 then
+		return {}
+	end
+	
+	local items = {}
+	for _, row in ipairs(results) do
+		local truncated_uuid = row.task_id:sub(1, 8)
+		local task_preview = row.task_text:sub(1, 50)
+		if #row.task_text > 50 then
+			task_preview = task_preview .. "..."
+		end
+		
+		local state_emoji = row.state == "IN_PROGRESS" and "🚀" or "📝"
+		local display = string.format("%s %s %s", truncated_uuid, state_emoji, task_preview)
+		
+		table.insert(items, {
+			text = display,
+			uuid = row.task_id,
+			task_text = row.task_text,
+			state = row.state
+		})
+	end
+	
+	return items
+end
+
+-- Show parent task picker with subtle bottom-left positioning
+-- @param callback: function(selected_uuid) called when task is selected
+function M._show_parent_task_picker(callback)
+	-- Determine track type from current context
+	local track_type = "personal" -- Default fallback
+	local current_file = vim.api.nvim_buf_get_name(0)
+	
+	-- Try to determine track type from filename patterns
+	if current_file and current_file ~= "" then
+		for track, track_config in pairs(config.tracking or {}) do
+			if track_config.filename_patterns then
+				for _, pattern in ipairs(track_config.filename_patterns) do
+					local lua_pattern = pattern:gsub("%-", "%%-"):gsub("%*", ".*")
+					if current_file:match(lua_pattern) then
+						track_type = track
+						break
+					end
+				end
+				if track_type ~= "personal" then break end
+			end
+		end
+	end
+	
+	local items = M._get_picker_parent_tasks(track_type)
+	
+	if #items == 0 then
+		notify("📝 No recent tasks found to use as parent", "warn", "task_operations")
+		return
+	end
+	
+	
+	-- Start picker with proper config
+	local MiniPick = require('mini.pick')
+	MiniPick.start({
+		source = {
+			name = "Parent Tasks",
+			items = items,
+			choose = function(item)
+				if item and item.uuid then
+					callback(item.uuid)
+				end
+			end
+		},
+		window = {
+			config = function()
+				local height = math.min(6, #items + 2) -- Compact but readable
+				local width = 45 -- Enough for truncated UUID + task text
+				-- Calculate position for truly bottom-left
+				local has_tabline = vim.o.showtabline == 2 or (vim.o.showtabline == 1 and #vim.api.nvim_list_tabpages() > 1)
+				local has_statusline = vim.o.laststatus > 0
+				local max_height = vim.o.lines - vim.o.cmdheight - (has_tabline and 1 or 0) - (has_statusline and 1 or 0)
+				
+				return {
+					relative = "editor",
+					anchor = "SW", -- Southwest (bottom-left)
+					height = height,
+					width = width,
+					row = max_height + (has_tabline and 1 or 0), -- At bottom
+					col = 0, -- At left edge
+					border = "single",
+					style = "minimal"
+				}
+			end
+		}
+	})
 end
 
 -- ═══════════════════════════════════════════════════════════════════════
@@ -903,13 +1104,82 @@ function M._setup_commands()
 	end)
 	
 	-- Task creation
-	commands.add("ZkNewTask", function()
+	commands.add("ZkNewTask", function(options)
 		local uuid = M._generate_uuid()
-		local task_line = string.format("- [ ]  [ ](task://%s)", uuid)
+		local parent_uuid = options and options.args
+		
+		local task_uri = "task://" .. uuid
+		if parent_uuid and parent_uuid ~= "" then
+			task_uri = task_uri .. "?parent=" .. parent_uuid
+		end
+		
+		local task_line = string.format("- [ ]  [ ](%s)", task_uri)
 		local current_line = vim.api.nvim_win_get_cursor(0)[1]
 		vim.api.nvim_buf_set_lines(0, current_line, current_line, false, {task_line})
+		-- Position cursor right after "- [ ] " (position 6) where task text should go  
 		vim.api.nvim_win_set_cursor(0, {current_line + 1, 6})
 		vim.cmd("startinsert")
+	end)
+	
+	-- Child task creation - creates a task under a parent
+	commands.add("ZkNewChildTask", function()
+		M._show_parent_task_picker(function(parent_uuid)
+			if not parent_uuid then return end
+			
+			local uuid = M._generate_uuid()
+			local task_uri = string.format("task://%s?parent=%s", uuid, parent_uuid)
+			
+			-- Get the target window and buffer from picker state
+			local MiniPick = require('mini.pick')
+			local picker_state = MiniPick.get_picker_state()
+			local target_win = picker_state.windows.target
+			local target_buf = vim.api.nvim_win_get_buf(target_win)
+			
+			-- Get cursor position from target window
+			local current_line_num = vim.api.nvim_win_get_cursor(target_win)[1] -- 1-based line number
+			
+			-- Get the parent task line to determine indentation
+			local parent_line = vim.api.nvim_buf_get_lines(target_buf, current_line_num - 1, current_line_num, false)[1] or ""
+			
+			-- Extract existing indentation from parent line
+			local parent_indent = parent_line:match("^(%s*)") or ""
+			
+			-- Add 2 spaces for child indentation (standard markdown practice)
+			local child_indent = parent_indent .. "  "
+			
+			-- Create child task line with proper indentation
+			local task_line = string.format("%s- [ ]  [ ](%s)", child_indent, task_uri)
+			
+			-- Insert child task on the line AFTER the current line in target buffer
+			vim.api.nvim_buf_set_lines(target_buf, current_line_num, current_line_num, false, {task_line})
+			
+			-- Position cursor on the newly inserted line in target window, at the right position for task text
+			-- Account for the indentation + "- [ ] " = indent + 6 characters
+			local cursor_col = #child_indent + 6
+			vim.api.nvim_win_set_cursor(target_win, {current_line_num + 1, cursor_col})
+			
+			-- Set target window as current and enter insert mode
+			vim.api.nvim_set_current_win(target_win)
+			vim.cmd("startinsert")
+		end)
+	end)
+	
+	-- Show task hierarchy
+	commands.add("ZkTaskHierarchy", function(options)
+		local args = options and options.args or ""
+		local parts = vim.split(args, " ", {trimempty = true})
+		local track_type = parts[1] or "personal"
+		local root_uuid = parts[2]
+		
+		if not root_uuid or root_uuid == "" then
+			root_uuid = vim.fn.input("Root task UUID: ")
+			if root_uuid == "" then
+				vim.notify("❌ Root UUID is required", vim.log.levels.WARN)
+				return
+			end
+		end
+		
+		M.show_task_hierarchy(track_type, root_uuid)
 	end)
 	
 	-- Visualization commands (only if visualization is enabled)
@@ -1015,12 +1285,148 @@ function M._setup_commands()
 		M.recent_activity(track_type)
 	end, { nargs = "?", desc = "Show quick task statistics" })
 	
-	-- Note: ZkToday and ZkWeekly are defined above with the specialized dashboard functions
 end
 
 -- UUID v7 generation (time-ordered, replaces old UUID v4)
 function M._generate_uuid()
 	return utils.generate_uuid_v7()
+end
+
+-- ═══════════════════════════════════════════════════════════════════════
+-- 🔗 PARENT-CHILD TASK RELATIONSHIP UTILITIES
+-- ═══════════════════════════════════════════════════════════════════════
+
+-- Get child tasks for a parent task
+-- @param track_type: "personal", "work", etc.
+-- @param parent_uuid: UUID of the parent task
+-- @return: array of child task data
+function M.get_child_tasks(track_type, parent_uuid)
+	track_type = track_type or "personal"
+	
+	local db = M._get_task_database(track_type)
+	if not db then
+		return {}
+	end
+	
+	local sql = [[
+		SELECT DISTINCT task_id, task_text, state
+		FROM task_events
+		WHERE parent_id = ?
+		ORDER BY timestamp DESC
+	]]
+	
+	local results = db:eval(sql, {parent_uuid})
+	return results or {}
+end
+
+-- Get parent task for a child task
+-- @param track_type: "personal", "work", etc.
+-- @param child_uuid: UUID of the child task
+-- @return: parent task data or nil
+function M.get_parent_task(track_type, child_uuid)
+	track_type = track_type or "personal"
+	
+	local db = M._get_task_database(track_type)
+	if not db then
+		return nil
+	end
+	
+	local sql = [[
+		SELECT DISTINCT te1.task_id as parent_id, te1.task_text, te1.state
+		FROM task_events te1
+		JOIN task_events te2 ON te1.task_id = te2.parent_id
+		WHERE te2.task_id = ?
+		ORDER BY te1.timestamp DESC
+		LIMIT 1
+	]]
+	
+	local results = db:eval(sql, {child_uuid})
+	return results and results[1] or nil
+end
+
+-- Get task hierarchy (parent with all descendants)
+-- @param track_type: "personal", "work", etc.
+-- @param root_uuid: UUID of the root task
+-- @return: hierarchical task structure
+function M.get_task_hierarchy(track_type, root_uuid)
+	track_type = track_type or "personal"
+	
+	local function build_hierarchy(parent_uuid, level)
+		level = level or 0
+		if level > 10 then  -- Prevent infinite recursion
+			return {}
+		end
+		
+		local children = M.get_child_tasks(track_type, parent_uuid)
+		local hierarchy = {}
+		
+		for _, child in ipairs(children) do
+			table.insert(hierarchy, {
+				task_id = child.task_id,
+				task_text = child.task_text,
+				state = child.state,
+				level = level,
+				children = build_hierarchy(child.task_id, level + 1)
+			})
+		end
+		
+		return hierarchy
+	end
+	
+	-- Get root task info
+	local db = M._get_task_database(track_type)
+	if not db then
+		return nil
+	end
+	
+	local root_sql = [[
+		SELECT DISTINCT task_id, task_text, state
+		FROM task_events
+		WHERE task_id = ?
+		ORDER BY timestamp DESC
+		LIMIT 1
+	]]
+	
+	local root_results = db:eval(root_sql, {root_uuid})
+	if not root_results or #root_results == 0 then
+		return nil
+	end
+	
+	local root_task = root_results[1]
+	return {
+		task_id = root_task.task_id,
+		task_text = root_task.task_text,
+		state = root_task.state,
+		level = 0,
+		children = build_hierarchy(root_uuid, 1)
+	}
+end
+
+-- Display task hierarchy in a formatted way
+function M.show_task_hierarchy(track_type, root_uuid)
+	local hierarchy = M.get_task_hierarchy(track_type, root_uuid)
+	
+	if not hierarchy then
+		print("❌ Task not found: " .. root_uuid)
+		return
+	end
+	
+	local function print_task(task, indent)
+		indent = indent or ""
+		local state_emoji = task.state == "FINISHED" and "✅" or 
+		                   task.state == "IN_PROGRESS" and "🚀" or "📝"
+		
+		print(indent .. state_emoji .. " " .. (task.task_text or "Unknown task") .. " (" .. task.task_id:sub(1, 8) .. ")")
+		
+		for _, child in ipairs(task.children or {}) do
+			print_task(child, indent .. "  ")
+		end
+	end
+	
+	print("🌳 TASK HIERARCHY - " .. string.upper(track_type))
+	print("═" .. string.rep("═", 40))
+	print_task(hierarchy)
+	print("")
 end
 
 
@@ -1052,18 +1458,12 @@ function M._setup_keymaps()
 			vim.tbl_extend("force", opts, { desc = "New task" }))
 	end
 	
-	-- UUID-enabled commands  
-	if mappings.new_note_uuid then
-		vim.keymap.set("n", prefix .. mappings.new_note_uuid, 
-			function() require("notes.commands").new_note_with_uuid() end,
-			vim.tbl_extend("force", opts, { desc = "New note with UUID" }))
+	if mappings.new_child_task then
+		vim.keymap.set("n", prefix .. mappings.new_child_task, 
+			"<Cmd>ZkNewChildTask<CR>", 
+			vim.tbl_extend("force", opts, { desc = "New child task" }))
 	end
 	
-	if mappings.add_uuid then
-		vim.keymap.set("n", prefix .. mappings.add_uuid, 
-			function() require("notes.commands").add_uuid_to_current_note() end,
-			vim.tbl_extend("force", opts, { desc = "Add UUID to current note" }))
-	end
 	
 	-- Journal creation
 	if mappings.daily_journal then
@@ -1840,8 +2240,6 @@ function M._get_today_task_breakdown(track_type)
 	return utils.sql_to_chart_data(results, "status", "count")
 end
 
--- Note: _get_yesterday_completion_data and _get_yesterday_metrics were replaced by 
--- the more flexible _get_day_completion_data function used by previous_day_dashboard
 
 -- Get day-of-week productivity patterns
 function M._get_day_of_week_data(track_type)
@@ -1974,7 +2372,6 @@ function M._get_week_best_day(track_type)
 	}
 end
 
--- Note: _get_combined_weekly_insights removed - static insights replaced by dynamic data
 
 -- Enhanced productivity trend data (already exists but let's ensure it works)
 function M._get_productivity_trend_data(track_type, days)
@@ -2252,7 +2649,6 @@ function M.today_dashboard(track_type)
 	M._create_dashboard_buffer(track_type .. "_today", lines)
 end
 
--- Note: yesterday_dashboard was replaced by previous_day_dashboard for smart navigation
 
 -- SMART PREVIOUS DAY Dashboard - Intelligently finds most recent working day
 function M.previous_day_dashboard(track_type)
@@ -2512,7 +2908,6 @@ function M.friday_dashboard(track_type)
 	end
 end
 
--- Note: _add_friday_section removed - no longer needed after dashboard consolidation
 
 -- Convenience functions
 function M.personal()

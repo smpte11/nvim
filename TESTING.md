@@ -9,7 +9,8 @@ tests/
 ├── helpers.lua              # Shared test utilities and mocks
 ├── test_notes_plot.lua      # Tests for plotting functions
 ├── test_notes_utils.lua     # Tests for utility functions  
-└── test_notes_init.lua      # Tests for main module & setup
+├── test_notes_init.lua      # Tests for main module & setup
+└── test_notes_migrations.lua # Tests for database migrations
 
 scripts/
 └── minimal_init.lua         # Minimal config for test environment
@@ -18,7 +19,7 @@ deps/
 └── mini.nvim/              # mini.test dependency (auto-cloned)
 
 # Test runners
-├── Makefile                 # Make targets for easy testing
+├── justfile                 # Just recipes for easy testing
 ├── run_tests.lua           # Lua-based test runner
 └── TESTING.md              # This file
 ```
@@ -27,22 +28,24 @@ deps/
 
 ### Run All Tests
 ```bash
-make test
+just test
 ```
 
 ### Run Specific Test Suites  
 ```bash
-make test-plot      # Plot functions only
-make test-utils     # Utility functions only  
-make test-init      # Main module only
+just test-plot        # Plot functions only
+just test-utils       # Utility functions only  
+just test-init        # Main module only
+just test-migrations  # Database migration system only
 ```
 
 ### Alternative Test Runner
 ```bash
-nvim -l run_tests.lua all        # All tests
-nvim -l run_tests.lua plot       # Plot tests only
-nvim -l run_tests.lua utils      # Utils tests only
-nvim -l run_tests.lua init       # Init tests only
+nvim -l run_tests.lua all          # All tests
+nvim -l run_tests.lua plot         # Plot tests only
+nvim -l run_tests.lua utils        # Utils tests only
+nvim -l run_tests.lua init         # Init tests only
+nvim -l run_tests.lua migrations   # Migration tests only
 ```
 
 ## 📊 Test Coverage
@@ -98,6 +101,30 @@ nvim -l run_tests.lua init       # Init tests only
   - Access to `notes.plot` and `notes.utils`
 
 **Coverage: 10+ functions, 15+ test cases**
+
+### Migration Module (`lua/notes/init.lua` - Migration Functions)
+- ✅ **Schema Detection**
+  - `column_exists()` - Detect missing columns
+  - Simple migration detection
+- ✅ **Migration Execution**  
+  - `M._run_database_migrations()` - Add nullable parent_id column and index
+  - Error handling and notifications
+- ✅ **URI Parsing**
+  - `M._parse_task_uri()` - Parent-child relationships
+  - Query parameter handling
+- ✅ **Task Hierarchy**
+  - `M.get_child_tasks()` - Find child tasks
+  - `M.get_parent_task()` - Find parent task
+  - `M.get_task_hierarchy()` - Full hierarchy trees
+- ✅ **Simple Operations**
+  - Consistent INSERT with parent_id column (nullable)
+  - Old tasks have NULL parent_id, new tasks can have parent
+- ✅ **Backward Compatibility**
+  - Single migration adds nullable column
+  - All INSERTs use same SQL format
+  - Simple and reliable
+
+**Coverage: 6+ functions, 13 test cases**
 
 ## 🔧 Test Utilities
 
@@ -163,25 +190,26 @@ end
 
 ## 🎯 Running Tests
 
-### Make Targets
+### Just Recipes
 ```bash
 # Basic testing
-make test                 # All tests
-make test-plot           # Plot module only
-make test-utils          # Utils module only  
-make test-init           # Init module only
+just test                 # All tests
+just test-plot           # Plot module only
+just test-utils          # Utils module only  
+just test-init           # Init module only
+just test-migrations     # Migration system only
 
 # Advanced options
-make test-interactive    # Open in Neovim
-make test-function       # Test specific pattern
-make verbose             # Verbose output
-make lint-tests          # Lint test files
-make coverage            # Show coverage info
+just test-interactive    # Open in Neovim
+just test-function       # Test specific pattern
+just verbose             # Verbose output
+just lint-tests          # Lint test files
+just coverage            # Show coverage info
 
 # Maintenance  
-make setup-deps          # Set up dependencies
-make clean               # Clean artifacts
-make help                # Show all options
+just setup-deps          # Set up dependencies
+just clean               # Clean artifacts
+just help                # Show all options
 ```
 
 ### Direct Neovim Testing
@@ -199,22 +227,23 @@ nvim -u scripts/minimal_init.lua \
 ## 🐛 Debugging Tests
 
 ### Failed Test Investigation
-1. **Run with verbose output**: `make verbose`
-2. **Test specific function**: `make test-function`
-3. **Interactive mode**: `make test-interactive`
+1. **Run with verbose output**: `just verbose`
+2. **Test specific function**: `just test-function`
+3. **Interactive mode**: `just test-interactive`
 4. **Check logs**: Look for error messages in output
 
 ### Common Issues
-- **Missing dependencies**: Run `make setup-deps`
+- **Missing dependencies**: Run `just setup-deps`
 - **Path issues**: Verify `lua/` directory structure
 - **Mock failures**: Check `tests/helpers.lua` mocks
 - **Environment**: Ensure `/tmp/test_notebooks` exists
+- **MiniTest in headless mode**: Use `MiniTest.run_file()` instead of `MiniTest.execute()` for proper test collection
 
 ## 📈 Test Metrics
 
 ### Performance
-- **~50 total test cases** across all modules
-- **Fast execution** - All tests complete in ~5-10 seconds
+- **~60 total test cases** across all modules
+- **Fast execution** - All tests complete in ~8-12 seconds
 - **Isolated runs** - Each test runs in clean environment
 
 ### Quality Assurance
@@ -234,7 +263,7 @@ nvim -u scripts/minimal_init.lua \
    ```
 
 2. **Update helpers** for new data patterns
-3. **Add to Makefile** for new test categories
+3. **Add to justfile** for new test categories
 4. **Update coverage** metrics
 
 ### Continuous Integration
@@ -250,6 +279,9 @@ The test suite verifies:
 - ✅ **Plot functions generate valid output**
 - ✅ **Utility functions handle edge cases**
 - ✅ **Configuration system works**
+- ✅ **Database migrations work safely**
+- ✅ **Parent-child task relationships function**
+- ✅ **Backward compatibility is maintained**
 - ✅ **Error handling is graceful**
 - ✅ **Integration between modules**
 - ✅ **Performance is acceptable**
