@@ -379,16 +379,18 @@ map_combo('i', '..', '<BS><BS>.')
 -- │ Smart Insert Mode Keys                                          │
 -- │ Context-aware keys that cascade through multiple behaviors      │
 -- │                                                                 │
--- │ <Tab>     → completion → tree-sitter → brackets → indentation   │
--- │ <S-Tab>   → completion ← tree-sitter ← brackets ← indentation   │
+-- │ <Tab>     → expand → snippets → completion → tree → brackets    │
+-- │ <S-Tab>   → snippets ← completion ← tree ← brackets ← indent    │
 -- │ <CR>      → accept completion → handle pairs                    │
 -- │ <BS>      → handle pairs → hungry whitespace deletion           │
--- │ Perfect for: Smart coding workflow with multiple integrations   │
+-- │ Perfect for: Snippets + completion + smart navigation           │
 -- └─────────────────────────────────────────────────────────────────┘
 local map_multistep = minikeymap.map_multistep
 
--- Smart Tab that works with blink.cmp completion, jumping, and indentation
+-- Smart Tab that works with snippets, completion, jumping, and indentation
 local tab_steps = {
+	'minisnippets_expand',     -- Expand snippet at cursor (highest priority)
+	'minisnippets_next',       -- Jump to next snippet tabstop if in snippet
 	'blink_next',              -- Navigate blink.cmp menu if visible
 	'jump_after_tsnode',       -- Jump after current tree-sitter node
 	'jump_after_close',        -- Jump after closing brackets/quotes  
@@ -398,12 +400,24 @@ map_multistep('i', '<Tab>', tab_steps)
 
 -- Smart Shift-Tab for reverse navigation
 local shift_tab_steps = {
+	'minisnippets_prev',       -- Jump to previous snippet tabstop if in snippet
 	'blink_prev',              -- Navigate blink.cmp menu backwards if visible
 	'jump_before_tsnode',      -- Jump before current tree-sitter node
 	'jump_before_open',        -- Jump before opening brackets/quotes
 	'decrease_indent',         -- Decrease indent if cursor is on indentation
 }
 map_multistep('i', '<S-Tab>', shift_tab_steps)
+
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Snippet Navigation in Insert + Select Mode                      │
+-- │ Essential for navigating snippet tabstops with placeholder text │
+-- │                                                                 │
+-- │ Works in both Insert and Select modes for snippet placeholders  │
+-- │ Select mode is activated when snippet has ${1:placeholder}      │
+-- │ Perfect for: Tab-ing through function parameters, etc.          │
+-- └─────────────────────────────────────────────────────────────────┘
+map_multistep({ 'i', 's' }, '<Tab>', { 'minisnippets_next', 'blink_next' })
+map_multistep({ 'i', 's' }, '<S-Tab>', { 'minisnippets_prev', 'blink_prev' })
 
 -- Smart Enter that accepts completion and respects pairs
 map_multistep('i', '<CR>', { 'blink_accept', 'minipairs_cr' })

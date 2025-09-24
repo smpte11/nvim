@@ -39,3 +39,7 @@ luac.out
 *.x86_64
 *.hex
 
+# IDE directories
+.vscode/
+.idea/
+.metals/metals.lock.db
