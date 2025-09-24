@@ -248,15 +248,143 @@ end, { desc = "Debug: Set Breakpoint" })
 local minikeymap = require('mini.keymap')
 local map_combo = minikeymap.map_combo
 
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Navigation Combos (Normal & Visual)                             │
+-- │ Quick line movement shortcuts                                   │
+-- │                                                                 │
+-- │ ll  →  g$ (end of visual line)                                  │
+-- │ hh  →  g^ (start of visual line)                                │
+-- │ Perfect for: Quick line navigation without reaching for $ ^     │
+-- └─────────────────────────────────────────────────────────────────┘
 map_combo({ 'n', 'x' }, 'll', 'g$')
 map_combo({ 'n', 'x' }, 'hh', 'g^')
--- map_combo({ 'n', 'x' }, 'jj', '}')
--- map_combo({ 'n', 'x' }, 'kk', '{')
---
---
+-- map_combo({ 'n', 'x' }, 'jj', '}')  -- Disabled: conflicts with common typing
+-- map_combo({ 'n', 'x' }, 'kk', '{')  -- Disabled: conflicts with common typing
+
+-- ╔═══════════════════════╗
+-- ║   TEXT HELPER COMBOS  ║
+-- ╚═══════════════════════╝
+
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Smart Semicolon (;;)                                            │
+-- │ Add semicolon at end of line and return cursor to position      │
+-- │                                                                 │
+-- │ Examples:                                                       │
+-- │ let count = getMy|Value()  →  let count = getMy|Value();        │
+-- │ println!("Debug: {}", var|) → println!("Debug: {}", var|);      │
+-- │ Perfect for: C/C++/Java/JavaScript/Rust/Erlang                  │
+-- └─────────────────────────────────────────────────────────────────┘
+map_combo('i', ';;', function()
+	local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+	vim.api.nvim_input('<End>;<Esc>')
+	vim.api.nvim_win_set_cursor(0, {row, col})
+	vim.api.nvim_input('a')
+end)
+
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Smart Comma (,,)                                                │
+-- │ Add comma + space for function parameters and lists             │
+-- │                                                                 │
+-- │ Examples:                                                       │
+-- │ def func(arg1|)           →  def func(arg1, |)                  │
+-- │ spawn(Module|, Function   →  spawn(Module, |, Function          │
+-- │ [item1| item2]            →  [item1, | item2]                   │
+-- │ Perfect for: Function params, Erlang lists, JSON objects        │
+-- └─────────────────────────────────────────────────────────────────┘
+map_combo('i', ',,', '<BS><BS>, ')
+
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Smart Assignment (==)                                           │
+-- │ Complete variable assignments with proper spacing               │
+-- │                                                                 │
+-- │ Examples:                                                       │
+-- │ let myVariable|    →  let myVariable = |                        │
+-- │ count|             →  count = |                                 │
+-- │ result|            →  result = |                                │
+-- │ Perfect for: Variable assignments in any language               │
+-- └─────────────────────────────────────────────────────────────────┘
+map_combo('i', '==', '<BS><BS> = ')
+
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Smart Quotes ("")                                               │
+-- │ Context-aware quote wrapping and creation                       │
+-- │                                                                 │
+-- │ Examples:                                                       │
+-- │ Inside word:  hello|world  →  "hello|world"                     │
+-- │ At boundary:  name = |     →  name = "|"                        │
+-- │ Empty space:  |            →  "|"                               │
+-- │ Perfect for: String literals, wrapping existing text            │
+-- └─────────────────────────────────────────────────────────────────┘
+map_combo('i', '""', function()
+	local mode = vim.fn.mode()
+	if mode == 'v' or mode == 'V' then
+		-- Wrap selection in quotes
+		return '<Esc>`<i"<Esc>`>la"<Esc>i'
+	else
+		-- Check if we're at word boundary or inside word
+		local line = vim.api.nvim_get_current_line()
+		local col = vim.api.nvim_win_get_cursor(0)[2]
+		local char_before = col > 0 and line:sub(col, col) or ' '
+		local char_after = col < #line and line:sub(col + 1, col + 1) or ' '
+		
+		if char_before:match('%w') and char_after:match('%w') then
+			-- Inside word - wrap word in quotes
+			return '<BS><BS><Esc>viw<Esc>`<i"<Esc>`>la"<Esc>i'
+		else
+			-- Create quote pair
+			return '<BS><BS>""<Left>'
+		end
+	end
+end)
+
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Type Annotations (::)                                           │
+-- │ Add type annotations with proper spacing                        │
+-- │                                                                 │
+-- │ Examples:                                                       │
+-- │ let count|           →  let count: |                            │
+-- │ function(param|)     →  function(param: |)                      │
+-- │ -spec func(Args|)    →  -spec func(Args: |) [Erlang]            │
+-- │ Perfect for: TypeScript, Rust, Erlang specs                     │
+-- └─────────────────────────────────────────────────────────────────┘
+map_combo('i', '::', '<BS><BS>: ')
+
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Arrow Helper (->)                                               │
+-- │ Add arrows/returns with proper spacing                          │
+-- │                                                                 │
+-- │ Examples:                                                       │
+-- │ fn get_name()|         →  fn get_name() -> |  [Rust]            │
+-- │ case Value of Pattern| →  case Value of Pattern -> | [Erlang]   │
+-- │ (x, y)|               →  (x, y) -> | [Arrow functions]          │
+-- │ Perfect for: Rust returns, Erlang cases, arrow functions        │
+-- └─────────────────────────────────────────────────────────────────┘
+map_combo('i', '->', '<BS><BS> -> ')
+
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Method Chaining (..)                                            │
+-- │ Quick method chaining for fluent interfaces                     │
+-- │                                                                 │
+-- │ Examples:                                                       │
+-- │ myObject|          →  myObject.|                                │
+-- │ builder|           →  builder.|                                 │
+-- │ stream|            →  stream.|                                  │
+-- │ Perfect for: Builder patterns, fluent APIs, method chaining     │
+-- └─────────────────────────────────────────────────────────────────┘
+map_combo('i', '..', '<BS><BS>.')
 -- ╔═══════════════════════╗
 -- ║   MULTI-STEP KEYMAPS  ║
 -- ╚═══════════════════════╝
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Smart Insert Mode Keys                                          │
+-- │ Context-aware keys that cascade through multiple behaviors      │
+-- │                                                                 │
+-- │ <Tab>     → completion → tree-sitter → brackets → indentation   │
+-- │ <S-Tab>   → completion ← tree-sitter ← brackets ← indentation   │
+-- │ <CR>      → accept completion → handle pairs                    │
+-- │ <BS>      → handle pairs → hungry whitespace deletion           │
+-- │ Perfect for: Smart coding workflow with multiple integrations   │
+-- └─────────────────────────────────────────────────────────────────┘
 local map_multistep = minikeymap.map_multistep
 
 -- Smart Tab that works with blink.cmp completion, jumping, and indentation
@@ -282,13 +410,23 @@ map_multistep('i', '<CR>', { 'blink_accept', 'minipairs_cr' })
 
 -- Smart Backspace that respects pairs and does hungry deletion
 map_multistep('i', '<BS>', { 'minipairs_bs', 'hungry_bs' })
--- -- Support most common modes. This can also contain 't', but would
--- -- only mean to press `<Esc>` inside terminal.
-local mode = { 'i', 'c', 'x', 's' }
-map_combo(mode, 'jk', '<BS><BS><Esc>')
 
--- To not have to worry about the order of keys, also map "kj"
-map_combo(mode, 'kj', '<BS><BS><Esc>')
+-- ╔═══════════════════════╗
+-- ║    ESCAPE COMBOS      ║
+-- ╚═══════════════════════╝
+
+-- ┌─────────────────────────────────────────────────────────────────┐
+-- │ Better Escape (jk / kj)                                         │
+-- │ Quick escape from any mode without reaching for Esc key         │
+-- │                                                                 │
+-- │ Works in modes: Insert, Command, Visual, Select                 │
+-- │ jk  →  <Esc> (remove jk and escape)                             │
+-- │ kj  →  <Esc> (remove kj and escape)                             │
+-- │ Perfect for: Fast mode switching, ergonomic typing              │
+-- └─────────────────────────────────────────────────────────────────┘
+local escape_modes = { 'i', 'c', 'x', 's' }
+map_combo(escape_modes, 'jk', '<BS><BS><Esc>')
+map_combo(escape_modes, 'kj', '<BS><BS><Esc>')
 
 -- ╔═══════════════════════╗
 -- ║         Tmux          ║
