@@ -254,10 +254,34 @@ map_combo({ 'n', 'x' }, 'hh', 'g^')
 -- map_combo({ 'n', 'x' }, 'kk', '{')
 --
 --
--- map_multistep('i', '<Tab>',   { 'blink_next' })
--- map_multistep('i', '<S-Tab>', { 'blink_prev' })
--- map_multistep('i', '<CR>',    { 'blink_accept' })
--- map_multistep('i', '<BS>',    { 'minipairs_bs' })
+-- ╔═══════════════════════╗
+-- ║   MULTI-STEP KEYMAPS  ║
+-- ╚═══════════════════════╝
+local map_multistep = minikeymap.map_multistep
+
+-- Smart Tab that works with blink.cmp completion, jumping, and indentation
+local tab_steps = {
+	'blink_next',              -- Navigate blink.cmp menu if visible
+	'jump_after_tsnode',       -- Jump after current tree-sitter node
+	'jump_after_close',        -- Jump after closing brackets/quotes  
+	'increase_indent',         -- Increase indent if cursor is on indentation
+}
+map_multistep('i', '<Tab>', tab_steps)
+
+-- Smart Shift-Tab for reverse navigation
+local shift_tab_steps = {
+	'blink_prev',              -- Navigate blink.cmp menu backwards if visible
+	'jump_before_tsnode',      -- Jump before current tree-sitter node
+	'jump_before_open',        -- Jump before opening brackets/quotes
+	'decrease_indent',         -- Decrease indent if cursor is on indentation
+}
+map_multistep('i', '<S-Tab>', shift_tab_steps)
+
+-- Smart Enter that accepts completion and respects pairs
+map_multistep('i', '<CR>', { 'blink_accept', 'minipairs_cr' })
+
+-- Smart Backspace that respects pairs and does hungry deletion
+map_multistep('i', '<BS>', { 'minipairs_bs', 'hungry_bs' })
 -- -- Support most common modes. This can also contain 't', but would
 -- -- only mean to press `<Esc>` inside terminal.
 local mode = { 'i', 'c', 'x', 's' }

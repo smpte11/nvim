@@ -25,6 +25,7 @@ later(function()
 					return require("codecompanion.adapters").extend("openai_compatible", {
 						env = {
 							url = "http://localhost:1234",
+							api_key = "lm-studio",
 						},
 					})
 				end,

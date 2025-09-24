@@ -164,7 +164,7 @@ now(function()
 			},
 		},
 		keymap = {
-			preset = "enter",
+			preset = "none", -- Disable blink.cmp default keymaps to use mini.keymap
 		},
 		signature = { enabled = true, window = { border = "single" } },
 		completion = {

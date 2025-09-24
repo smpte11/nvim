@@ -365,9 +365,10 @@ now(function()
 			{ mode = "n", keys = "<leader>d", desc = " debug" },
 			{ mode = "n", keys = "<leader>D", desc = "󰆼 database" },
 			{ mode = "n", keys = "<leader>Ds", desc = "󰆼 store results" },
-			{ mode = "n", keys = "<leader>s", desc = " search" },
+			{ mode = "n", keys = "<leader>s", desc = " search" },
 			{ mode = "n", keys = "<leader>g", desc = "󰊢 git" },
-			{ mode = "n", keys = "<leader>go", desc = " octo" },
+			{ mode = "n", keys = "<leader>go", desc = " octo" },
+			{ mode = "n", keys = "<leader>i", desc = " insert" },
 			{ mode = "n", keys = "<leader>l", desc = "󰘦 lsp" },
 			{ mode = "n", keys = "<leader>m", desc = " mini" },
 			{ mode = "n", keys = "<leader>n", desc = " notes" },
@@ -421,6 +422,10 @@ end)
 
 later(function()
 	require("mini.pairs").setup()
+end)
+
+later(function()
+	require("mini.keymap").setup()
 end)
 
 later(function()
