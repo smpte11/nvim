@@ -306,6 +306,26 @@ now(function()
 	local capabilities = vim.lsp.protocol.make_client_capabilities()
 	capabilities = vim.tbl_deep_extend("force", capabilities, require("blink.cmp").get_lsp_capabilities())
 
+	local on_attach = function(client, bufnr)
+		-- Common keybindings
+		local opts = { buffer = bufnr, remap = false }
+		vim.keymap.set("n", "gd", function() vim.lsp.buf.definition() end, opts)
+		vim.keymap.set("n", "K", function() vim.lsp.buf.hover() end, opts)
+		vim.keymap.set("n", "<leader>lws", function() vim.lsp.buf.workspace_symbol() end, opts)
+		vim.keymap.set("n", "<leader>ld", function() vim.diagnostic.open_float() end, opts)
+		vim.keymap.set("n", "[d", function() vim.diagnostic.goto_next() end, opts)
+		vim.keymap.set("n", "]d", function() vim.diagnostic.goto_prev() end, opts)
+		vim.keymap.set("n", "<leader>lca", function() vim.lsp.buf.code_action() end, opts)
+		vim.keymap.set("n", "<leader>lrr", function() vim.lsp.buf.references() end, opts)
+		vim.keymap.set("n", "<leader>lrn", function() vim.lsp.buf.rename() end, opts)
+		vim.keymap.set("i", "<C-h>", function() vim.lsp.buf.signature_help() end, opts)
+
+		-- Add inlay hints for some languages
+		if client.supports_method("textDocument/inlayHint") then
+			vim.lsp.inlay_hint.enable(bufnr, true)
+		end
+	end
+
 	-- enable the following language servers
 	--  feel free to add/remove any lsps that you want here. they will automatically be installed.
 	--
@@ -362,7 +382,6 @@ now(function()
 			},
 		},
 		terraformls = {},
-		ts_ls = {},
 		basedpyright = {
 			settings = {
 				basedpyright = {
@@ -441,12 +460,11 @@ now(function()
 	require("mason-lspconfig").setup({
 		handlers = {
 			function(server_name)
-				local server = servers[server_name] or {}
-				-- this handles overriding only values explicitly passed
-				-- by the server configuration above. useful when disabling
-				-- certain features of an lsp (for example, turning off formatting for ts_ls)
-				server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-				require("lspconfig")[server_name].setup(server)
+				local server_config = servers[server_name] or {}
+				server_config.on_attach = on_attach
+				server_config.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server_config.capabilities or {})
+				vim.lsp.config(server_name, server_config)
+				vim.lsp.enable(server_name)
 			end,
 		},
 	})
