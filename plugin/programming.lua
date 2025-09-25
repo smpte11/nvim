@@ -291,6 +291,14 @@ now(function()
 		end
 	end
 
+	-- Configure LSP handlers to have consistent borders
+	vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+		border = "single",
+	})
+	vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+		border = "single",
+	})
+
 	-- lsp servers and clients are able to communicate to each other what features they support.
 	--  by default, neovim doesn't support everything that is in the lsp specification.
 	--  when you add nvim-cmp, luasnip, etc. neovim now has *more* capabilities.
