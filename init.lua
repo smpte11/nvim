@@ -48,6 +48,21 @@ now(function()
 	vim.opt.complete:append("kspell")
 	vim.o.path = vim.o.path .. ",**"
 	vim.opt.sessionoptions:remove("blank")
+
+	-- Configure LSP handlers when LSP attaches to any buffer
+	-- This ensures borders are applied consistently across all LSP servers
+	vim.api.nvim_create_autocmd("LspAttach", {
+		group = vim.api.nvim_create_augroup("lsp-border-config", { clear = true }),
+		callback = function()
+			-- Set handlers every time LSP attaches to ensure they're not overridden
+			vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+				border = "single",
+			})
+			vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+				border = "single",
+			})
+		end,
+	})
 	vim.o.termguicolors = true
 
 	-- Set <space> as the leader key
