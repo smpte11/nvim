@@ -130,4 +130,18 @@ later(function()
 			debug_mode = false, -- Set to true for verbose logging
 		},
 	})
+
+	-- Org-mode style heading task counters (virtual text)
+	-- General markdown enhancement that works with any markdown files
+	pcall(function()
+		require("notes.task_counter").setup({
+			-- Works with any markdown files, not just notes
+			filetypes = { "markdown", "vimwiki", "quarto", "telekasten" },
+			-- Optional: restrict to notebook directory if desired
+			-- path_patterns = vim.env.ZK_NOTEBOOK_DIR and { vim.env.ZK_NOTEBOOK_DIR .. "/*" } or {},
+			show_percent = true,
+			virt_text_hl = "Comment",
+			priority = 85, -- Lower than render-markdown decorations
+		})
+	end)
 end)
