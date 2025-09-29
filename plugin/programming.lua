@@ -166,9 +166,9 @@ now(function()
 		keymap = {
 			preset = "default", -- Use default preset but disable conflicting keys
 			-- Disable keys that conflict with mini.keymap
-			['<Tab>'] = false,    -- Let mini.keymap handle smart tab
-			['<S-Tab>'] = false,  -- Let mini.keymap handle smart shift-tab
-			['<CR>'] = false,     -- Let mini.keymap handle smart enter (if using enter preset)
+			-- ['<Tab>'] = false,    -- Let mini.keymap handle smart tab
+			-- ['<S-Tab>'] = false,  -- Let mini.keymap handle smart shift-tab
+			-- ['<CR>'] = false,     -- Let mini.keymap handle smart enter (if using enter preset)
 		},
 		signature = { enabled = true, window = { border = "single" } },
 		completion = {

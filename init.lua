@@ -377,9 +377,8 @@ now(function()
 		clues = {
 			{ mode = "n", keys = "<leader>a", desc = " ai" },
 			{ mode = "n", keys = "<leader>b", desc = " buffer" },
+			{ mode = "n", keys = "<leader>c", desc = " command" },
 			{ mode = "n", keys = "<leader>d", desc = " debug" },
-			{ mode = "n", keys = "<leader>D", desc = "󰆼 database" },
-			{ mode = "n", keys = "<leader>Ds", desc = "󰆼 store results" },
 			{ mode = "n", keys = "<leader>s", desc = " search" },
 			{ mode = "n", keys = "<leader>g", desc = "󰊢 git" },
 			{ mode = "n", keys = "<leader>go", desc = " octo" },
