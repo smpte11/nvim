@@ -42,6 +42,8 @@ now(function()
 	vim.o.tabstop = 4
 	vim.o.expandtab = true
 	vim.o.scrolloff = 10
+	-- define global window border style. Ref: https://samuellawrentz.com/blog/vim-lsp-hover-borders/
+	-- vim.o.winborder
 	-- Remove underscore and hyphen from iskeyword to treat snake_case and kebab-case as separate words
 	vim.opt.iskeyword:remove("_")
 	vim.opt.iskeyword:remove("-")
@@ -50,21 +52,6 @@ now(function()
 	vim.opt.complete:append("kspell")
 	vim.o.path = vim.o.path .. ",**"
 	vim.opt.sessionoptions:remove("blank")
-
-	-- Configure LSP handlers when LSP attaches to any buffer
-	-- This ensures borders are applied consistently across all LSP servers
-	vim.api.nvim_create_autocmd("LspAttach", {
-		group = vim.api.nvim_create_augroup("lsp-border-config", { clear = true }),
-		callback = function()
-			-- Set handlers every time LSP attaches to ensure they're not overridden
-			vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-				border = "single",
-			})
-			vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-				border = "single",
-			})
-		end,
-	})
 	vim.o.termguicolors = true
 
 	-- Set <space> as the leader key
@@ -493,19 +480,19 @@ end)
 later(function()
 	local hipatterns = require("mini.hipatterns")
 	local hi_words = require("mini.extra").gen_highlighter.words
-	
+
 	hipatterns.setup({
 		highlighters = {
 			-- Highlight standalone 'FIXME', 'HACK', 'TODO', 'NOTE'
-			fixme     = hi_words({"FIXME"}, "MiniHipatternsFixme"),
-			hack      = hi_words({"HACK"}, "MiniHipatternsHack"), 
-			todo      = hi_words({"TODO"}, "MiniHipatternsTodo"),
-			note      = hi_words({"NOTE"}, "MiniHipatternsNote"),
-			
+			fixme = hi_words({ "FIXME" }, "MiniHipatternsFixme"),
+			hack = hi_words({ "HACK" }, "MiniHipatternsHack"),
+			todo = hi_words({ "TODO" }, "MiniHipatternsTodo"),
+			note = hi_words({ "NOTE" }, "MiniHipatternsNote"),
+
 			-- Additional useful comment patterns
-			warning   = hi_words({"WARNING", "WARN"}, "DiagnosticWarn"),
-			danger    = hi_words({"DANGER", "BUG"}, "DiagnosticError"),
-			
+			warning = hi_words({ "WARNING", "WARN" }, "DiagnosticWarn"),
+			danger = hi_words({ "DANGER", "BUG" }, "DiagnosticError"),
+
 			-- Highlight hex color strings (`#rrggbb`) with that color
 			hex_color = hipatterns.gen_highlighter.hex_color(),
 		},
@@ -523,7 +510,7 @@ later(function()
 		},
 		-- Remap from <CR> to 'go' to avoid conflicts with nvim-dbee and other plugins
 		mappings = {
-			start_jumping = 'go',
+			start_jumping = "go",
 		},
 	})
 	vim.api.nvim_set_hl(0, "MiniJump2dSpot", { reverse = true })
@@ -547,13 +534,13 @@ later(function()
 		scroll = {
 			enable = false,
 		},
-		
+
 		-- Smooth and quick cursor movement
 		cursor = {
 			enable = true,
 			timing = animate.gen_timing.cubic({ duration = 80, unit = "total" }),
 		},
-		
+
 		-- Fun window open/close animations
 		open = {
 			enable = true,
@@ -563,7 +550,7 @@ later(function()
 			enable = true,
 			timing = animate.gen_timing.exponential({ duration = 100, unit = "total" }),
 		},
-		
+
 		-- Smooth window resizing
 		resize = {
 			enable = true,

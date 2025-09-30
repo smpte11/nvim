@@ -208,6 +208,18 @@ add({
 		},
 		signature = { enabled = true, window = { border = "single" } },
 		completion = {
+			accept = {
+				auto_brackets = {
+					enabled = true,
+					default_brackets = { "(", ")" },
+					override_brackets_for_filetypes = {},
+					-- Disable semantic token resolution for Java/Scala to prevent unwanted parentheses on modules
+					semantic_token_resolution = {
+						enabled = true,
+						blocked_filetypes = { "java", "scala" },
+					},
+				},
+			},
 			menu = {
 				border = "single",
 				draw = {
@@ -239,7 +251,7 @@ add({
 			documentation = {
 				window = { border = "single" },
 				auto_show = true,
-				auto_show_delay_ms = 500,
+				auto_show_delay_ms = 200,
 			},
 			ghost_text = { enabled = true },
 		},
@@ -475,16 +487,6 @@ add({
 				-- certain features of an lsp (for example, turning off formatting for ts_ls)
 				server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
 				
-				-- Set up LSP server with custom handlers for consistent borders
-				server.handlers = vim.tbl_deep_extend("force", server.handlers or {}, {
-					["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-						border = "single",
-					}),
-					["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-						border = "single",
-					}),
-				})
-				
 				require("lspconfig")[server_name].setup(server)
 			end,
 		},
@@ -594,16 +596,6 @@ later(function()
 	-- Example if you are using cmp how to make sure the correct capabilities for snippets are set
 	metals_config.capabilities = require("blink.cmp").get_lsp_capabilities()
 
-	-- Configure Metals-specific LSP handlers for consistent borders
-	metals_config.handlers = {
-		["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-			border = "single",
-		}),
-		["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-			border = "single",
-		}),
-	}
-
 	vim.api.nvim_create_autocmd("FileType", {
 		group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
 		pattern = { "scala", "sbt", "java", "sc" },
@@ -705,16 +697,7 @@ later(function()
 		depends = { "nvim-lua/plenary.nvim", "neovim/nvim-lspconfig" },
 	})
 
-	require("typescript-tools").setup({
-		handlers = {
-			["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-				border = "single",
-			}),
-			["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-				border = "single",
-			}),
-		},
-	})
+	require("typescript-tools").setup({})
 end)
 
 later(function()
@@ -851,4 +834,17 @@ later(function()
 	})
 
 	vim.api.nvim_set_hl(0, "NeogitChangeDeleted", { fg = Utils.palette.base08, bg = "NONE" })
+end)
+
+later(function()
+	add({
+		source = "f-person/git-blame.nvim",
+	})
+	
+	require("gitblame").setup({
+		enabled = false, -- Don't enable by default
+		message_template = " <author> • <date> • <summary>",
+		date_format = "%c",
+		virtual_text_column = 2,
+	})
 end)

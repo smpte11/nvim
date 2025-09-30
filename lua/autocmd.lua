@@ -25,7 +25,7 @@ vim.api.nvim_create_autocmd("lspattach", {
 		map("n", "<leader>ls", function() MiniExtra.pickers.lsp({ scope = "document_symbol" }) end, "[L]SP Document [S]ymbols")
 		map("n", "<leader>lW", function() MiniExtra.pickers.lsp({ scope = "workspace_symbol" }) end, "[L]SP [W]orkspace [S]ymbols")
 
-		map("n", "K", vim.lsp.buf.hover, "LSP: Hover Documentation")
+		map("n", "K", function() vim.lsp.buf.hover({ border = 'rounded', max_height = 25, max_width = 120 }) end, "LSP: Hover Documentation")
 		map("n", "<C-k>", vim.lsp.buf.signature_help, "LSP: Signature Help")
 
 		map("n", "<leader>lr", vim.lsp.buf.rename, "[L]SP [R]ename")
@@ -121,40 +121,40 @@ end, {
 local octo_clues_augroup = vim.api.nvim_create_augroup("octo_clues", { clear = true })
 
 local octo_clues = {
-  { mode = "n", keys = ",a", desc = "🐙 assignee" },
-  { mode = "n", keys = ",c", desc = "🐙 comment" },
-  { mode = "n", keys = ",g", desc = "🐙 goto" },
-  { mode = "n", keys = ",i", desc = "🐙 issue" },
-  { mode = "n", keys = ",l", desc = "🐙 label" },
-  { mode = "n", keys = ",p", desc = "🐙 pr" },
-  { mode = "n", keys = ",r", desc = "🐙 reaction" },
-  { mode = "n", keys = ",v", desc = "🐙 review" },
+	{ mode = "n", keys = ",a", desc = "🐙 assignee" },
+	{ mode = "n", keys = ",c", desc = "🐙 comment" },
+	{ mode = "n", keys = ",g", desc = "🐙 goto" },
+	{ mode = "n", keys = ",i", desc = "🐙 issue" },
+	{ mode = "n", keys = ",l", desc = "🐙 label" },
+	{ mode = "n", keys = ",p", desc = "🐙 pr" },
+	{ mode = "n", keys = ",r", desc = "🐙 reaction" },
+	{ mode = "n", keys = ",v", desc = "🐙 review" },
 }
 
 vim.api.nvim_create_autocmd("FileType", {
-  pattern = "octo",
-  group = octo_clues_augroup,
-  callback = function()
-    -- Add clues for octo buffer
-    for _, clue in ipairs(octo_clues) do
-      table.insert(MiniClue.config.clues, clue)
-    end
+	pattern = "octo",
+	group = octo_clues_augroup,
+	callback = function()
+		-- Add clues for octo buffer
+		for _, clue in ipairs(octo_clues) do
+			table.insert(MiniClue.config.clues, clue)
+		end
 
-    -- Autocommand to remove clues when leaving the buffer
-    vim.api.nvim_create_autocmd("BufLeave", {
-      buffer = 0,
-      group = octo_clues_augroup,
-      callback = function()
-        for i = #MiniClue.config.clues, 1, -1 do
-          local clue = MiniClue.config.clues[i]
-          for _, octo_clue in ipairs(octo_clues) do
-            if clue.keys == octo_clue.keys and clue.desc == octo_clue.desc then
-              table.remove(MiniClue.config.clues, i)
-              break
-            end
-          end
-        end
-      end,
-    })
-  end,
+		-- Autocommand to remove clues when leaving the buffer
+		vim.api.nvim_create_autocmd("BufLeave", {
+			buffer = 0,
+			group = octo_clues_augroup,
+			callback = function()
+				for i = #MiniClue.config.clues, 1, -1 do
+					local clue = MiniClue.config.clues[i]
+					for _, octo_clue in ipairs(octo_clues) do
+						if clue.keys == octo_clue.keys and clue.desc == octo_clue.desc then
+							table.remove(MiniClue.config.clues, i)
+							break
+						end
+					end
+				end
+			end,
+		})
+	end,
 })

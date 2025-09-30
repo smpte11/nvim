@@ -24,6 +24,20 @@ local split_sensibly = function()
 	end
 end
 
+local copy_file_path = function()
+	local path = vim.fn.expand('%:.')
+	if path ~= '' then
+		-- Include project name for full context
+		local cwd = vim.fn.getcwd()
+		local project_name = cwd:match("([^/]+)$")
+		path = project_name .. '/' .. path
+		vim.fn.setreg('+', path)
+		vim.notify('Copied path: ' .. path, vim.log.levels.INFO)
+	else
+		vim.notify('No file path to copy', vim.log.levels.WARN)
+	end
+end
+
 -- stylua: ignore start
 -- ╔═══════════════════════╗
 -- ║    General Keymaps    ║
@@ -105,6 +119,7 @@ keymap("n", "<leader>gg", function() require('neogit').open() end, { desc = "[Gi
 keymap("n", "<leader>gb", function () MiniExtra.pickers.git_branches() end, { desc = "[Git] [B]ranches" })
 keymap("n", "<leader>gc", function () MiniExtra.pickers.git_commits() end, { desc = "[Git] [C]ommits" })
 keymap("n", "<leader>gh", function () MiniExtra.pickers.git_hunks() end, { desc = "[Git] [H]unks" })
+keymap("n", "<leader>gB", "<cmd>GitBlameToggle<cr>", { desc = "[Git] [B]lame Toggle" })
 
 -- Octo / GitHub
 keymap("n", "<leader>goo", "<cmd>Octo actions<cr>", { desc = "[Git] Octo Actions" })
@@ -126,6 +141,7 @@ keymap("n", "<leader>ui", "<cmd>PasteImage<cr>", { desc = "[U]I Paste [I]mage" }
 keymap('n', '<leader>fp', function() MiniExtra.pickers.explorer() end, { desc = "[U]I [F]ile Picker" })
 keymap('n', '<leader>ff', function() MiniFiles.open(vim.api.nvim_buf_get_name(0), true) end, { desc = "[U]I [F]ile Explorer" })
 keymap('n', '<leader>fF', function() MiniFiles.open(vim.uv.cwd(), true) end, { desc = "[U]I [F]ile Explorer (cwd)" })
+keymap('n', '<leader>fy', copy_file_path, { desc = "[F]ile [Y]ank Path" })
 
 -- ╔═══════════════════════╗
 -- ║	     LSP           ║
