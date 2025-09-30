@@ -100,7 +100,11 @@ now(function()
 			"WhoIsSethDaniel/mason-tool-installer.nvim",
 		},
 	})
-	require("mason").setup({})
+	require("mason").setup({
+		ui = {
+			border = "single",
+		},
+	})
 
 	add({
 		source = "folke/lazydev.nvim",
@@ -112,18 +116,46 @@ now(function()
 		},
 	})
 
-	add({
-		source = "saghen/blink.cmp",
+local function build_blink(params)
+  vim.notify('Building blink.cmp', vim.log.levels.INFO)
+  local obj = vim.system({ 'cargo', 'build', '--release' }, { cwd = params.path }):wait()
+  if obj.code == 0 then
+    vim.notify('Building blink.cmp done', vim.log.levels.INFO)
+  else
+    vim.notify('Building blink.cmp failed', vim.log.levels.ERROR)
+  end
+end
+
+add({
+  source = 'Saghen/blink.cmp',
 		depends = {
 			"giuxtaposition/blink-cmp-copilot",
 			"Kaiser-Yang/blink-cmp-git",
 		},
-		checkout = "v0.11.0",
-	})
+  hooks = {
+    post_install = build_blink,
+    post_checkout = build_blink,
+  },
+})
 	require("blink.cmp").setup({
-		appearance = {},
-		cmdline = { enabled = false },
+		snippets = { preset = "mini_snippets" },
 		sources = {
+			cmdline = {
+				keymap = {
+					-- recommended, as the default keymap will only show and select the next item
+					["<Tab>"] = { "show", "accept" },
+				},
+				completion = {
+					menu = {
+						border = "single",
+						auto_show = function(ctx)
+							return vim.fn.getcmdtype() == ":"
+							-- enable for inputs as well, with:
+							-- or vim.fn.getcmdtype() == '@'
+						end,
+					},
+				},
+			},
 			default = { "lsp", "lazydev", "path", "snippets", "buffer", "copilot" },
 			providers = {
 				lazydev = {
@@ -164,11 +196,15 @@ now(function()
 			},
 		},
 		keymap = {
-			preset = "default", -- Use default preset but disable conflicting keys
-			-- Disable keys that conflict with mini.keymap
-			-- ['<Tab>'] = false,    -- Let mini.keymap handle smart tab
-			-- ['<S-Tab>'] = false,  -- Let mini.keymap handle smart shift-tab
-			-- ['<CR>'] = false,     -- Let mini.keymap handle smart enter (if using enter preset)
+			preset = "none",
+			["<C-space>"] = { "show", "show_documentation", "hide_documentation" },
+			["<C-b>"] = { "scroll_documentation_up", "fallback" },
+			["<C-f>"] = { "scroll_documentation_down", "fallback" },
+			["<C-n>"] = { "select_next", "fallback" },
+			["<C-p>"] = { "select_prev", "fallback" },
+			["<C-k>"] = { "show_signature", "hide_signature", "fallback" },
+			["<C-e>"] = { "hide", "fallback" },
+			["<C-c>"] = { "hide", "fallback" },
 		},
 		signature = { enabled = true, window = { border = "single" } },
 		completion = {

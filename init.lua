@@ -42,7 +42,9 @@ now(function()
 	vim.o.tabstop = 4
 	vim.o.expandtab = true
 	vim.o.scrolloff = 10
-	vim.opt.iskeyword:append("-")
+	-- Remove underscore and hyphen from iskeyword to treat snake_case and kebab-case as separate words
+	vim.opt.iskeyword:remove("_")
+	vim.opt.iskeyword:remove("-")
 	vim.o.spelllang = "en"
 	vim.o.spelloptions = "camel"
 	vim.opt.complete:append("kspell")

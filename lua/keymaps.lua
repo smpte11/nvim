@@ -28,7 +28,10 @@ end
 -- ╔═══════════════════════╗
 -- ║    General Keymaps    ║
 -- ╚═══════════════════════╝
-keymap("n", "<leader>mu", function() require("mini.deps").update() end, { desc = "Update Plugins" })
+keymap("n", "<leader>mu", function() require("mini.deps").update() end, { desc = "[M]ini [U]pdate Plugins" })
+keymap("n", "<leader>ms", function() require("mini.deps").snap_save() end, { desc = "[M]ini [S]ave Snapshot" })
+keymap("n", "<leader>ml", function() require("mini.deps").snap_load() end, { desc = "[M]ini [L]oad Snapshot" })
+keymap("n", "<leader>mn", function() require("mini.notify").show_history() end, { desc = "[M]ini [N]otification History" })
 
 -- Quit
 keymap("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit All" })
@@ -397,16 +400,17 @@ local map_multistep = minikeymap.map_multistep
 -- └─────────────────────────────────────────────────────────────────┘
 -- Priority order: snippets first, then completion, then other behaviors
 local tab_steps = {
-	'minisnippets_next',       -- Jump to next snippet tabstop if in snippet
 	'blink_next',              -- Navigate blink.cmp menu if visible
+	'minisnippets_next',       -- Jump to next snippet tabstop if in snippet
+	'minisnippets_expand',       -- Jump to next snippet tabstop if in snippet
 	'jump_after_tsnode',       -- Jump after current tree-sitter node
 	'jump_after_close',        -- Jump after closing brackets/quotes  
 	'increase_indent',         -- Increase indent if cursor is on indentation
 }
 
 local shift_tab_steps = {
-	'minisnippets_prev',       -- Jump to previous snippet tabstop if in snippet
 	'blink_prev',              -- Navigate blink.cmp menu backwards if visible
+	'minisnippets_prev',       -- Jump to previous snippet tabstop if in snippet
 	'jump_before_tsnode',      -- Jump before current tree-sitter node
 	'jump_before_open',        -- Jump before opening brackets/quotes
 	'decrease_indent',         -- Decrease indent if cursor is on indentation
