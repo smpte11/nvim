@@ -69,9 +69,9 @@ keymap("n", "<leader>wd", "<C-W>c", { desc = "[W]indow [D]elete", remap = true }
 
 -- Search
 keymap('n', '<leader><leader>', function() MiniPick.builtin.buffers() end, { desc = '[ ] Find existing buffers' })
-keymap("n", "<leader>sh", function() MiniPick.builtin.help_tags() end, { desc = "[S]earch [H]elp" })
+keymap("n", "<leader>sh", function() MiniPick.builtin.help_tags() end, { desc = "[S]earch [H]elp Tags" })
 keymap("n", "<leader>sf", function() MiniPick.builtin.files() end, { desc = "[S]earch [F]iles" })
-keymap("n", "<leader>sh", function() MiniPick.builtin.help() end, { desc = "[S]earch [H]elp" })
+keymap("n", "<leader>sH", function() MiniPick.builtin.help() end, { desc = "[S]earch [H]elp" })
 keymap('n', '<leader>sk', function() MiniExtra.pickers.keymaps() end, { desc = '[S]earch [K]eymaps' })
 keymap('n', '<leader>sd', function() MiniExtra.pickers.diagnostic() end, { desc = '[S]earch [D]iagnostics' })
 keymap('n', '<leader>so', function() MiniExtra.pickers.options() end, { desc = '[S]earch [O]ptions' })
@@ -221,7 +221,6 @@ end, { desc = 'Load Session' })
 -- Insert a Password at point
 keymap("n", "<leader>ip", insert_password, { desc = 'Insert Password' })
 keymap("n", "<leader>iu", insert_uuid, { desc = 'Insert uuid' })
-keymap('n', '<Esc>', '<cmd>nohlsearch<CR>')
 keymap("n", "YY", "<cmd>%y<cr>", { desc = 'Yank Buffer' })
 keymap("n", "<Esc>", "<cmd>noh<cr>", { desc = 'Clear Search' })
 

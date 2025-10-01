@@ -5,6 +5,7 @@
 vim.api.nvim_create_autocmd("lspattach", {
 	group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 	callback = function(event)
+		local window_ui_opts = { border = "rounded", max_height = 25, max_width = 120 }
 		local client = vim.lsp.get_client_by_id(event.data.client_id)
 
 		-- 1. Define the map helper function
@@ -25,8 +26,8 @@ vim.api.nvim_create_autocmd("lspattach", {
 		map("n", "<leader>ls", function() MiniExtra.pickers.lsp({ scope = "document_symbol" }) end, "[L]SP Document [S]ymbols")
 		map("n", "<leader>lW", function() MiniExtra.pickers.lsp({ scope = "workspace_symbol" }) end, "[L]SP [W]orkspace [S]ymbols")
 
-		map("n", "K", function() vim.lsp.buf.hover({ border = 'rounded', max_height = 25, max_width = 120 }) end, "LSP: Hover Documentation")
-		map("n", "<C-k>", vim.lsp.buf.signature_help, "LSP: Signature Help")
+		map("n", "K", function() vim.lsp.buf.hover(window_ui_opts) end, "LSP: Hover Documentation")
+		map("n", "<leader>lk", function () vim.lsp.buf.signature_help(window_ui_opts) end, "[L]SP Signature Help")
 
 		map("n", "<leader>lr", vim.lsp.buf.rename, "[L]SP [R]ename")
 		map({ "n", "x" }, "<leader>la", vim.lsp.buf.code_action, "[L]SP [C]ode [A]ction")
