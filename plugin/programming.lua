@@ -7,7 +7,7 @@ now(function()
 	-- of the plugins below.
 	vim.diagnostic.config({
 		severity_sort = true,
-		float = { border = "single", source = "if_many" },
+		float = { border = Utils.ui.border, source = "if_many" },
 		underline = { severity = vim.diagnostic.severity.ERROR },
 		signs = vim.g.have_nerd_font and {
 			text = {
@@ -102,7 +102,7 @@ now(function()
 	})
 	require("mason").setup({
 		ui = {
-			border = "single",
+			border = Utils.ui.border,
 		},
 	})
 
@@ -147,7 +147,7 @@ add({
 				},
 				completion = {
 					menu = {
-						border = "single",
+						border = Utils.ui.menu_border,
 						auto_show = function(ctx)
 							return vim.fn.getcmdtype() == ":"
 							-- enable for inputs as well, with:
@@ -206,7 +206,7 @@ add({
 			["<C-e>"] = { "hide", "fallback" },
 			["<C-c>"] = { "hide", "fallback" },
 		},
-		signature = { enabled = true, window = { border = "single" } },
+		signature = { enabled = true, window = { border = Utils.ui.border } },
 		completion = {
 			accept = {
 				auto_brackets = {
@@ -221,7 +221,7 @@ add({
 				},
 			},
 			menu = {
-				border = "single",
+				border = Utils.ui.menu_border,
 				draw = {
 					columns = {
 						{ "kind_icon", "label", "label_description", gap = 1 },
@@ -249,7 +249,7 @@ add({
 				},
 			},
 			documentation = {
-				window = { border = "single" },
+				window = { border = Utils.ui.border },
 				auto_show = true,
 				auto_show_delay_ms = 200,
 			},
@@ -257,13 +257,7 @@ add({
 		},
 	})
 
-	vim.api.nvim_set_hl(0, "BlinkCmpMenu", { link = "Pmenu" })
-	vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { link = "Pmenu" })
-	vim.api.nvim_set_hl(0, "BlinkCmpMenuSelection", { link = "PmenuSel" })
-	vim.api.nvim_set_hl(0, "BlinkCmpDoc", { link = "NormalFloat" })
-	vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { link = "NormalFloat" })
-	vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { link = "NormalFloat" })
-	vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { link = "NormalFloat" })
+	-- Highlights are managed in lua/colors.lua
 
 	add({
 		source = "stevearc/conform.nvim",
@@ -833,7 +827,7 @@ later(function()
 		},
 	})
 
-	vim.api.nvim_set_hl(0, "NeogitChangeDeleted", { fg = Utils.palette.base08, bg = "NONE" })
+	-- Highlights are managed in lua/colors.lua
 end)
 
 later(function()

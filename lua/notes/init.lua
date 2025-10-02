@@ -1044,7 +1044,7 @@ function M._show_parent_task_picker(callback)
 					width = width,
 					row = max_height + (has_tabline and 1 or 0), -- At bottom
 					col = 0, -- At left edge
-					border = "single",
+					border = Utils.ui.border,
 					style = "minimal"
 				}
 			end

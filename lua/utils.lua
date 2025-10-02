@@ -1,5 +1,28 @@
 local M = {}
 
+-- Centralized UI border configuration
+-- Change this one value to update all popups/floating windows
+M.border_style = "double"
+
+-- UI configuration that can be used across all plugins
+M.ui = {
+	-- Standard border style for floating windows
+	border = M.border_style,
+	
+	-- Common window options for LSP hover/signature
+	window_opts = function(opts)
+		local defaults = { 
+			border = M.border_style, 
+			max_height = 25, 
+			max_width = 120 
+		}
+		return vim.tbl_extend("force", defaults, opts or {})
+	end,
+	
+	-- Common menu/completion border configuration
+	menu_border = M.border_style,
+}
+
 M.starter = {
 	header = function()
 		local day = os.date("%A")
@@ -192,6 +215,9 @@ M.create_command_palette = function()
 		{ name = "AI: Explain", category = "default", icon = "󰙎", action = function() vim.cmd('CodeCompanionExplain') end },
 		{ name = "AI: Generate", category = "default", icon = "󰦨", action = function() vim.cmd('CodeCompanionGenerate') end },
 		
+		-- Color Palette operations (hierarchical - opens subpicker)
+		{ name = "🎨 Colors", category = "default", icon = "🎨", action = function() require("colors").pick_palette() end },
+		
 		-- Visits
 		{ name = "Visit: Paths", category = "directory", action = function() MiniExtra.pickers.visit_paths() end },
 		{ name = "Visit: Labels", category = "default", icon = "󰃃", action = function() MiniExtra.pickers.visit_labels() end },
@@ -268,6 +294,7 @@ M.create_command_palette = function()
 					width = width,
 					row = math.floor(0.1 * vim.o.lines),
 					col = math.floor(0.5 * (vim.o.columns - width)),
+					border = M.ui.border,
 				}
 			end
 		}

@@ -5,7 +5,7 @@
 vim.api.nvim_create_autocmd("lspattach", {
 	group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
 	callback = function(event)
-		local window_ui_opts = { border = "rounded", max_height = 25, max_width = 120 }
+		local window_ui_opts = Utils.ui.window_opts()
 		local client = vim.lsp.get_client_by_id(event.data.client_id)
 
 		-- 1. Define the map helper function
@@ -38,7 +38,7 @@ vim.api.nvim_create_autocmd("lspattach", {
 		map("n", "<leader>lwl", function() print(vim.inspect(vim.lsp.buf.list_workspace_folders())) end, "LSP: [W]orkspace [L]ist Folders")
 
 		if client and client.server_capabilities and client.server_capabilities.documentFormattingProvider then
-			map("n", "<leader>lfc", function() require("conform").format({ bufnr = event.buf, lsp_format = "fallback" }) end, "[L]SP [F]ormat with [C]onform")
+			map("n", "<leader>lf", function() require("conform").format({ bufnr = event.buf, lsp_format = "fallback" }) end, "[L]SP [F]ormat with [C]onform")
 		end
 		map("n", "<leader>lF", function() vim.lsp.buf.format({ async = true, bufnr = event.buf }) end, "[L]SP direct [F]ormat")
 
@@ -159,3 +159,45 @@ vim.api.nvim_create_autocmd("FileType", {
 		})
 	end,
 })
+
+-- Reapply custom highlights when colorscheme changes (simplified approach)
+vim.api.nvim_create_autocmd("ColorScheme", {
+	group = vim.api.nvim_create_augroup("custom-highlights", { clear = true }),
+	callback = function()
+		-- Always reapply custom highlights after any colorscheme change
+		require("colors").apply_highlights()
+	end,
+})
+
+-- User commands for color palette management
+vim.api.nvim_create_user_command("ColorPalettes", function()
+	require("colors").pick_palette()
+end, { desc = "Open color palette picker" })
+
+vim.api.nvim_create_user_command("ColorPalette", function(opts)
+	local palette_name = opts.args
+	if palette_name == "" then
+		require("colors").pick_palette()
+	else
+		require("colors").switch_palette(palette_name)
+	end
+end, { 
+	desc = "Switch color palette or open picker",
+	nargs = '?',
+	complete = function()
+		return require("colors").list_palettes()
+	end
+})
+
+vim.api.nvim_create_user_command("ColorToggle", function()
+	require("colors").toggle_favorite_palettes()
+end, { desc = "Toggle between favorite color palettes" })
+
+-- Short aliases for quick access
+vim.api.nvim_create_user_command("CP", function()
+	require("colors").pick_palette()
+end, { desc = "Color Palette picker (alias)" })
+
+vim.api.nvim_create_user_command("CT", function()
+	require("colors").toggle_favorite_palettes()
+end, { desc = "Color Toggle (alias)" })

@@ -138,9 +138,7 @@ now(function()
 end)
 
 now(function()
-	require("mini.base16").setup({
-		palette = Utils.palette,
-	})
+	require("colors").setup()
 end)
 
 now(function()
@@ -158,6 +156,7 @@ now(function()
 			width = width,
 			row = math.floor(0.5 * (vim.o.lines - height)),
 			col = math.floor(0.5 * (vim.o.columns - width)),
+			border = Utils.ui.border,
 		}
 	end
 	local window = { config = win_config }
@@ -513,7 +512,6 @@ later(function()
 			start_jumping = "go",
 		},
 	})
-	vim.api.nvim_set_hl(0, "MiniJump2dSpot", { reverse = true })
 end)
 
 later(function()

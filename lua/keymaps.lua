@@ -110,6 +110,7 @@ end, { desc = '[/] Fuzzily search in current buffer' })
 -- ╚═══════════════════════╝
 
 keymap('n', '<leader>cp', Utils.create_command_palette, { desc = '[C]ommand [P]alette' })
+keymap("n", "<leader>cc", function() require("colors").pick_palette() end, { desc = "[C]olor Palette Picker" })
 
 -- ╔═══════════════════════╗
 -- ║	     Git           ║
@@ -134,6 +135,15 @@ keymap("n", "<leader>gos", "<cmd>Octo review submit<cr>", { desc = "[Git] Octo S
 -- ║	      UI           ║
 -- ╚═══════════════════════╝
 keymap("n", "<leader>ui", "<cmd>PasteImage<cr>", { desc = "[U]I Paste [I]mage" })
+
+-- Color Palette Switching - Essential only
+keymap("n", "<leader>uc", function() require("colors").pick_palette() end, { desc = "[U]I [C]olor Palette Picker" })
+keymap("n", "<leader>ut", function() require("colors").toggle_favorite_palettes() end, { desc = "[U]I [T]oggle Favorite Palettes" })
+
+-- Alternative quick access keymaps
+keymap("n", "<leader>ct", "<cmd>ColorToggle<cr>", { desc = "[C]olor [T]oggle" })
+keymap("n", "<F10>", function() require("colors").toggle_favorite_palettes() end, { desc = "Quick Color Toggle" })
+keymap("n", "<F11>", function() require("colors").pick_palette() end, { desc = "Quick Color Picker" })
 
 -- ╔═══════════════════════╗
 -- ║	     File          ║

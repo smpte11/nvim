@@ -52,18 +52,4 @@ later(function()
 			},
 		},
 	})
-
-	-- Set cohesive highlight groups that match mini.nvim and Kanagawa color palette
-	local palette = Utils.palette
-	vim.api.nvim_set_hl(0, "CodeCompanionChatInfo", { fg = palette.base0D, bg = palette.base01 })
-	vim.api.nvim_set_hl(0, "CodeCompanionChatError", { fg = palette.base08, bg = palette.base01, bold = true })
-	vim.api.nvim_set_hl(0, "CodeCompanionChatWarn", { fg = palette.base0A, bg = palette.base01 })
-	vim.api.nvim_set_hl(0, "CodeCompanionChatSubtext", { fg = palette.base03, italic = true })
-	vim.api.nvim_set_hl(0, "CodeCompanionChatHeader", { fg = palette.base0E, bold = true })
-	vim.api.nvim_set_hl(0, "CodeCompanionChatSeparator", { fg = palette.base02 })
-	vim.api.nvim_set_hl(0, "CodeCompanionChatTokens", { fg = palette.base06, italic = true })
-	vim.api.nvim_set_hl(0, "CodeCompanionChatTool", { fg = palette.base0B, bg = palette.base01 })
-	vim.api.nvim_set_hl(0, "CodeCompanionChatToolGroups", { fg = palette.base0C, bg = palette.base01, bold = true })
-	vim.api.nvim_set_hl(0, "CodeCompanionChatVariable", { fg = palette.base09, italic = true })
-	vim.api.nvim_set_hl(0, "CodeCompanionVirtualText", { fg = palette.base04, italic = true })
 end)
