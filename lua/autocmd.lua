@@ -69,7 +69,7 @@ vim.api.nvim_create_autocmd("lspattach", {
 		-- 5. Keymap for toggling inlay hints
 		if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
 			map("n", "<leader>uh", function()
-				vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }))
+				vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({ bufnr = event.buf }), { bufnr = event.buf })
 			end, "LSP: Toggle Inlay Hints")
 		end
 
