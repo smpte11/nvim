@@ -301,4 +301,156 @@ M.create_command_palette = function()
 	})
 end
 
+-- SSH Mode Detection for containerized environments
+M.ssh = {
+	-- Detect if we're in an SSH session or container
+	is_ssh_session = function()
+		-- Check for manual override first
+		if vim.env.NVIM_SSH_MODE == "1" or vim.env.NVIM_SSH_MODE == "true" then
+			return true
+		end
+		
+		if vim.env.NVIM_SSH_MODE == "0" or vim.env.NVIM_SSH_MODE == "false" then
+			return false
+		end
+		
+		-- Check SSH environment variables
+		if vim.env.SSH_CLIENT or vim.env.SSH_TTY or vim.env.SSH_CONNECTION then
+			return true
+		end
+		
+		-- Check for container environments
+		-- Docker container detection
+		if vim.fn.filereadable("/.dockerenv") == 1 then
+			return true
+		end
+		
+		-- Podman container detection
+		if vim.fn.filereadable("/run/.containerenv") == 1 then
+			return true
+		end
+		
+		-- Check cgroup for container indication
+		local cgroup_file = "/proc/1/cgroup"
+		if vim.fn.filereadable(cgroup_file) == 1 then
+			local cgroup_content = vim.fn.readfile(cgroup_file)
+			for _, line in ipairs(cgroup_content) do
+				if line:match("docker") or line:match("lxc") or line:match("containerd") or line:match("podman") then
+					return true
+				end
+			end
+		end
+		
+		-- Check for Podman-specific environment variables
+		if vim.env.PODMAN_SYSTEMD_UNIT or vim.env.container == "podman" then
+			return true
+		end
+		
+		-- Check for common CI/remote environments
+		if vim.env.CI or vim.env.GITHUB_ACTIONS or vim.env.GITLAB_CI then
+			return true
+		end
+		
+		-- Check if we're in a remote development environment
+		if vim.env.CODESPACES or vim.env.GITPOD_WORKSPACE_ID then
+			return true
+		end
+		
+		return false
+	end,
+	
+	-- Get current mode for display/debugging
+	get_mode = function()
+		return M.ssh.is_ssh_session() and "SSH" or "LOCAL"
+	end,
+	
+	-- Show detailed SSH mode status
+	show_status = function()
+		local status = {
+			"🖥️  SSH Mode Detection Status",
+			"================================",
+			"",
+			"Current Mode: " .. (M.ssh.is_ssh_session() and "🌐 SSH Mode" or "💻 Local Mode"),
+			"",
+			"Detection Results:",
+		}
+		
+		-- Check individual detection methods
+		local checks = {
+			{ "Manual Override (NVIM_SSH_MODE)", vim.env.NVIM_SSH_MODE },
+			{ "SSH Client", vim.env.SSH_CLIENT },
+			{ "SSH TTY", vim.env.SSH_TTY }, 
+			{ "SSH Connection", vim.env.SSH_CONNECTION },
+			{ "Docker Container (/.dockerenv)", vim.fn.filereadable("/.dockerenv") == 1 },
+			{ "Podman Container (/run/.containerenv)", vim.fn.filereadable("/run/.containerenv") == 1 },
+			{ "Podman Environment", vim.env.PODMAN_SYSTEMD_UNIT or vim.env.container == "podman" },
+			{ "CI Environment", vim.env.CI or vim.env.GITHUB_ACTIONS or vim.env.GITLAB_CI },
+			{ "Remote Dev Environment", vim.env.CODESPACES or vim.env.GITPOD_WORKSPACE_ID },
+		}
+		
+		for _, check in ipairs(checks) do
+			local icon = check[2] and "✅" or "❌"
+			table.insert(status, string.format("  %s %s: %s", icon, check[1], check[2] or "not set"))
+		end
+		
+		table.insert(status, "")
+		table.insert(status, "Plugin Configuration:")
+		table.insert(status, "  📦 Core plugins: " .. (M.ssh.is_ssh_session() and "minimal set" or "full set"))
+		table.insert(status, "  🔧 LSP servers: " .. table.concat(M.ssh.is_ssh_session() and M.ssh.get_ssh_lsp_servers() or {"all servers"}, ", "))
+		table.insert(status, "  🌳 Treesitter parsers: " .. (M.ssh.is_ssh_session() and "essential only" or "full set"))
+		
+		vim.notify(table.concat(status, "\n"), vim.log.levels.INFO, { title = "SSH Mode Status" })
+	end,
+	
+	-- Conditional plugin loading helper
+	should_load_plugin = function(plugin_type)
+		if not M.ssh.is_ssh_session() then
+			return true -- Load everything in local mode
+		end
+		
+		-- Define plugin categories for SSH mode
+		local ssh_allowed = {
+			-- Core mini.nvim plugins
+			"mini_core",
+			"mini_basics", "mini_sessions", "mini_pick", "mini_files", 
+			"mini_clue", "mini_icons", "mini_statusline", "mini_tabline",
+			"mini_surround", "mini_starter", "mini_notify",
+			"mini_ai", "mini_operators", "mini_pairs", "mini_keymap",
+			"mini_snippets", "mini_comment", "mini_bufremove",
+			"mini_bracketed", "mini_diff", "mini_git", "mini_misc",
+			"mini_align", "mini_visits", "mini_hipatterns",
+			"mini_jump", "mini_jump2d", "mini_indentscope",
+			"mini_extra",
+			
+			-- Essential programming tools
+			"lsp_core", "treesitter_core", "completion", "conform",
+			
+			-- Basic utilities
+			"utils", "keymaps", "autocmd", "colors",
+		}
+		
+		return vim.tbl_contains(ssh_allowed, plugin_type)
+	end,
+	
+	-- Get minimal LSP servers for SSH mode
+	get_ssh_lsp_servers = function()
+		return {
+			"lua_ls",     -- Neovim config editing
+			"bashls",     -- Shell scripts
+			"jsonls",     -- Config files
+			"yamlls",     -- Config files  
+			"marksman",   -- Documentation
+		}
+	end,
+	
+	-- Get minimal treesitter parsers for SSH mode
+	get_ssh_treesitter_parsers = function()
+		return {
+			"lua", "luadoc", "vim", "vimdoc", "query",
+			"bash", "json", "yaml", "markdown", "markdown_inline",
+			"c", "diff", -- Essential for basic functionality
+		}
+	end,
+}
+
 _G.Utils = M

@@ -457,6 +457,12 @@ later(function()
 end)
 
 later(function()
+	if Utils.ssh.should_load_plugin("mini_git") then
+		require("mini.git").setup()
+	end
+end)
+
+later(function()
 	require("mini.diff").setup()
 end)
 
