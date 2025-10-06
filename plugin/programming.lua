@@ -786,9 +786,73 @@ later(function()
 	--   vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
 	-- end
 
-	dap.listeners.after.event_initialized["dapui_config"] = dapui.open
-	dap.listeners.before.event_terminated["dapui_config"] = dapui.close
-	dap.listeners.before.event_exited["dapui_config"] = dapui.close
+	-- Dynamic debug keymap management
+	local function setup_debug_keymaps()
+		-- Core debugging flow
+		vim.keymap.set("n", "<leader>dc", function() require("dap").continue() end, 
+			{ desc = "[D]ebug [C]ontinue/Start" })
+		vim.keymap.set("n", "<leader>di", function() require("dap").step_into() end, 
+			{ desc = "[D]ebug Step [I]nto" })
+		vim.keymap.set("n", "<leader>do", function() require("dap").step_over() end, 
+			{ desc = "[D]ebug Step [O]ver" })
+		vim.keymap.set("n", "<leader>dO", function() require("dap").step_out() end, 
+			{ desc = "[D]ebug Step [O]ut" })
+		vim.keymap.set("n", "<leader>du", function() require("dapui").toggle() end, 
+			{ desc = "[D]ebug [U]I Toggle" })
+		
+		-- Session management
+		vim.keymap.set("n", "<leader>dr", function() require("dap").restart() end, 
+			{ desc = "[D]ebug [R]estart" })
+		vim.keymap.set("n", "<leader>dt", function() require("dap").terminate() end, 
+			{ desc = "[D]ebug [T]erminate" })
+		vim.keymap.set("n", "<leader>dp", function() require("dap").pause() end, 
+			{ desc = "[D]ebug [P]ause" })
+		
+		-- Evaluation & inspection  
+		vim.keymap.set("n", "<leader>de", function() require("dapui").eval() end, 
+			{ desc = "[D]ebug [E]valuate Expression" })
+		vim.keymap.set("v", "<leader>de", function() require("dapui").eval() end, 
+			{ desc = "[D]ebug [E]valuate Selection" })
+		
+		-- Add debug session clue to mini.clue
+		table.insert(MiniClue.config.clues, { mode = "n", keys = "<leader>d", desc = "🐛 debug session" })
+	end
+
+	local function teardown_debug_keymaps()
+		-- Remove debug session clue from mini.clue
+		for i, entry in ipairs(MiniClue.config.clues) do
+			if entry.mode == "n" and entry.keys == "<leader>d" and entry.desc == "🐛 debug session" then
+				table.remove(MiniClue.config.clues, i)
+				break
+			end
+		end
+		
+		-- Remove dynamic keymaps
+		pcall(vim.keymap.del, "n", "<leader>dc")
+		pcall(vim.keymap.del, "n", "<leader>di") 
+		pcall(vim.keymap.del, "n", "<leader>do")
+		pcall(vim.keymap.del, "n", "<leader>dO")
+		pcall(vim.keymap.del, "n", "<leader>du")
+		pcall(vim.keymap.del, "n", "<leader>dr")
+		pcall(vim.keymap.del, "n", "<leader>dt")
+		pcall(vim.keymap.del, "n", "<leader>dp")
+		pcall(vim.keymap.del, "n", "<leader>de")
+		pcall(vim.keymap.del, "v", "<leader>de")
+	end
+
+	-- Event listeners with keymap management
+	dap.listeners.after.event_initialized["dapui_config"] = function()
+		dapui.open()
+		setup_debug_keymaps()
+	end
+	dap.listeners.before.event_terminated["dapui_config"] = function()
+		dapui.close()
+		teardown_debug_keymaps()
+	end
+	dap.listeners.before.event_exited["dapui_config"] = function()
+		dapui.close()
+		teardown_debug_keymaps()
+	end
 end)
 
 later(function()

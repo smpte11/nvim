@@ -209,11 +209,10 @@ M.create_command_palette = function()
 		{ name = "Window: Split Vertically", category = "default", icon = "󱂫", action = function() vim.cmd('vsplit') end },
 		{ name = "Window: Close Window", category = "default", icon = "󰖭", action = function() vim.cmd('close') end },
 		
-		-- AI operations
+		-- AI operations (verified commands only)
 		{ name = "AI: Chat", category = "default", icon = "󰚩", action = function() vim.cmd('CodeCompanionChat') end },
 		{ name = "AI: Actions", category = "default", icon = "󰒓", action = function() vim.cmd('CodeCompanionActions') end },
-		{ name = "AI: Explain", category = "default", icon = "󰙎", action = function() vim.cmd('CodeCompanionExplain') end },
-		{ name = "AI: Generate", category = "default", icon = "󰦨", action = function() vim.cmd('CodeCompanionGenerate') end },
+		{ name = "AI: Inline Assistant", category = "default", icon = "󰙎", action = function() vim.cmd('CodeCompanion') end },
 		
 		-- Color Palette operations (hierarchical - opens subpicker)
 		{ name = "🎨 Colors", category = "default", icon = "🎨", action = function() require("colors").pick_palette() end },

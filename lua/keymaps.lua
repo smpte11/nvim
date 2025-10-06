@@ -68,7 +68,7 @@ keymap("n", "<leader>wv", "<C-W>v", { desc = "Split [W]indow [V]ertically", rema
 keymap("n", "<leader>wd", "<C-W>c", { desc = "[W]indow [D]elete", remap = true })
 
 -- Search
-keymap('n', '<leader><leader>', function() MiniPick.builtin.buffers() end, { desc = '[ ] Find existing buffers' })
+keymap('n', '<leader>sb', function() MiniPick.builtin.buffers() end, { desc = '[S]earch [B]uffers' })
 keymap("n", "<leader>sh", function() MiniPick.builtin.help_tags() end, { desc = "[S]earch [H]elp Tags" })
 keymap("n", "<leader>sf", function() MiniPick.builtin.files() end, { desc = "[S]earch [F]iles" })
 keymap("n", "<leader>sH", function() MiniPick.builtin.help() end, { desc = "[S]earch [H]elp" })
@@ -109,8 +109,7 @@ end, { desc = '[/] Fuzzily search in current buffer' })
 -- ║   Command Palette     ║
 -- ╚═══════════════════════╝
 
-keymap('n', '<leader>cp', Utils.create_command_palette, { desc = '[C]ommand [P]alette' })
-keymap("n", "<leader>cc", function() require("colors").pick_palette() end, { desc = "[C]olor Palette Picker" })
+keymap('n', '<leader><leader>', Utils.create_command_palette, { desc = 'Command Palette' })
 
 -- ╔═══════════════════════╗
 -- ║	     Git           ║
@@ -141,16 +140,16 @@ keymap("n", "<leader>uc", function() require("colors").pick_palette() end, { des
 keymap("n", "<leader>ut", function() require("colors").toggle_favorite_palettes() end, { desc = "[U]I [T]oggle Favorite Palettes" })
 
 -- Alternative quick access keymaps
-keymap("n", "<leader>ct", "<cmd>ColorToggle<cr>", { desc = "[C]olor [T]oggle" })
+keymap("n", "<leader>uC", "<cmd>ColorToggle<cr>", { desc = "[U]I [C]olor Toggle" })
 keymap("n", "<F10>", function() require("colors").toggle_favorite_palettes() end, { desc = "Quick Color Toggle" })
 keymap("n", "<F11>", function() require("colors").pick_palette() end, { desc = "Quick Color Picker" })
 
 -- ╔═══════════════════════╗
 -- ║	     File          ║
 -- ╚═══════════════════════╝
-keymap('n', '<leader>fp', function() MiniExtra.pickers.explorer() end, { desc = "[U]I [F]ile Picker" })
-keymap('n', '<leader>ff', function() MiniFiles.open(vim.api.nvim_buf_get_name(0), true) end, { desc = "[U]I [F]ile Explorer" })
-keymap('n', '<leader>fF', function() MiniFiles.open(vim.uv.cwd(), true) end, { desc = "[U]I [F]ile Explorer (cwd)" })
+keymap('n', '<leader>fp', function() MiniExtra.pickers.explorer() end, { desc = "[F]ile [P]icker" })
+keymap('n', '<leader>ff', function() MiniFiles.open(vim.api.nvim_buf_get_name(0), true) end, { desc = "[F]ile Explorer" })
+keymap('n', '<leader>fF', function() MiniFiles.open(vim.uv.cwd(), true) end, { desc = "[F]ile Explorer (cwd)" })
 keymap('n', '<leader>fy', copy_file_path, { desc = "[F]ile [Y]ank Path" })
 
 -- ╔═══════════════════════╗
@@ -237,10 +236,11 @@ keymap("n", "<Esc>", "<cmd>noh<cr>", { desc = 'Clear Search' })
 -- ╔═══════════════════════╗
 -- ║          AI           ║
 -- ╚═══════════════════════╝
-keymap("n", "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'Codecompanion [A]i [A]actions'})
-keymap("n", "<leader>ac", "<cmd>CodeCompanionChat<cr>", { desc = 'CodeCompanion [C]hat'})
-keymap("n", "<leader>ae", "<cmd>CodeCompanionExplain<cr>", { desc = 'CodeCompanion [E]xplain'})
-keymap("n", "<leader>ag", "<cmd>CodeCompanionGenerate<cr>", { desc = 'CodeCompanion [G]enerate'})
+
+-- AI operations (only verified commands from documentation)
+keymap({"n", "v"}, "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'CodeCompanion [A]ctions'})
+keymap({"n", "v" }, "<leader>ac", "<cmd>CodeCompanionChat<cr>", { desc = 'CodeCompanion [C]hat'})
+keymap({"n", "v"}, "<leader>ai", "<cmd>CodeCompanion<cr>", { desc = 'CodeCompanion [I]nline Assistant'})
 
 -- ╔═══════════════════════╗
 -- ║         Visit         ║
@@ -259,16 +259,15 @@ map_vis('vr', 'remove_label()', '[R]emove Label')
 -- ╔═══════════════════════╗
 -- ║          DAP          ║
 -- ╚═══════════════════════╝
-keymap("n", "<F5>", function() require("dap").continue() end, { desc = "Debug: Start/Continue" })
-keymap("n", "<F1>", function() require("dap").step_into() end, { desc = "Debug: Step Into" })
-keymap("n", "<F2>", function() require("dap").step_over() end, { desc = "Debug: Step Over" })
-keymap("n", "<F3>", function() require("dap").step_out() end, { desc = "Debug: Step Out" })
--- Toggle to see last session result. Without this, you can't see session output in case of unhandled exception.
-keymap("n", "<F7>", function() require("dapui").toggle() end, { desc = "Debug: See last session result." })
-keymap("n", "<leader>db", function() require("dap").toggle_breakpoint() end, { desc = "Debug: Toggle Breakpoint" })
+
+-- Global breakpoint keymaps (always available for setting up debug sessions)
+keymap("n", "<leader>db", function() require("dap").toggle_breakpoint() end, { desc = "[D]ebug Toggle [B]reakpoint" })
 keymap("n", "<leader>dB", function()
 	require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
-end, { desc = "Debug: Set Breakpoint" })
+end, { desc = "[D]ebug Set Conditional [B]reakpoint" })
+keymap("n", "<leader>dC", function() require("dap").clear_breakpoints() end, { desc = "[D]ebug [C]lear All Breakpoints" })
+
+-- Dynamic debug keymaps are managed in plugin/programming.lua with DAP setup
 
 -- ╔═══════════════════════╗
 -- ║        COMBOS         ║
