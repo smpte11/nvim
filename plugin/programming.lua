@@ -358,43 +358,6 @@ add({
 		--    https://github.com/pmizio/typescript-tools.nvim
 		--
 		-- but for many setups, the lsp (`ts_ls`) will work just fine
-		gopls = {
-			settings = {
-				gopls = {
-					gofumpt = true,
-					codelenses = {
-						gc_details = false,
-						generate = true,
-						regenerate_cgo = true,
-						run_govulncheck = true,
-						test = true,
-						tidy = true,
-						upgrade_dependency = true,
-						vendor = true,
-					},
-					hints = {
-						assignVariableTypes = true,
-						compositeLiteralFields = true,
-						compositeLiteralTypes = true,
-						constantValues = true,
-						functionTypeParameters = true,
-						parameterNames = true,
-						rangeVariableTypes = true,
-					},
-					analyses = {
-						nilness = true,
-						unusedparams = true,
-						unusedwrite = true,
-						useany = true,
-					},
-					usePlaceholders = true,
-					completeUnimported = true,
-					staticcheck = true,
-					directoryFilters = { "-.git", "-.vscode", "-.idea", "-.vscode-test", "-node_modules" },
-					semanticTokens = true,
-				},
-			},
-		},
 		terraformls = {},
 		ts_ls = {},
 		basedpyright = {
@@ -411,7 +374,34 @@ add({
 		ruff = {},
 		nushell = {},
 		dockerls = {},
-		elixirls = {},
+		-- Erlang Language Platform (ELP) - WhatsApp's advanced Erlang/Elixir LSP
+		-- Provides superior semantic analysis, go-to-definition, find references, call hierarchy
+		-- Designed to be scalable and fully incremental, inspired by rust-analyzer
+		elp = {
+			cmd = { "elp", "server" },
+			filetypes = { "erlang", "elixir" },
+			root_dir = function(fname)
+				-- Look for rebar.config, mix.exs, or .git directory
+				return require("lspconfig.util").find_git_ancestor(fname)
+					or require("lspconfig.util").root_pattern("rebar.config", "mix.exs", "OTP_VERSION")(fname)
+			end,
+			settings = {
+				elp = {
+					-- Enable incremental compilation for better performance
+					incremental = true,
+					-- Enable all diagnostics
+					diagnostics = {
+						enabled = true,
+						-- Show warnings and errors
+						disabled = {},
+					},
+					-- Enable code lens for additional information
+					codeLens = {
+						enabled = true,
+					},
+				},
+			},
+		},
 		bashls = {},
 		html = {},
 		jsonls = {},
@@ -452,12 +442,10 @@ add({
 		"shfmt",
 		"shellcheck",
 		"taplo",
-		"elixirls",
-		"goimports",
-		"gofumpt",
-		"gomodifytags",
-		"impl",
-		"delve",
+		-- ELP (Erlang Language Platform) for Erlang/Elixir
+		-- Note: May need manual installation if not available in Mason registry
+		-- Installation: cargo install --git https://github.com/whatsapp/erlang-language-platform --bin elp
+		-- Go tools are handled by ray-x/go.nvim
 		-- "tflint",
 	})
 
@@ -559,18 +547,57 @@ later(function()
 	require("render-markdown").setup({})
 end)
 
--- later(function()
--- 	add({
--- 		source = "ray-x/go.nvim",
--- 		depends = {
--- 			"ray-x/guihua.lua",
--- 			"neovim/nvim-lspconfig",
--- 			"nvim-treesitter/nvim-treesitter",
--- 		},
--- 	})
---
--- 	require("go").setup()
--- end)
+later(function()
+	-- Comprehensive Go development plugin
+	-- Includes LSP (gopls), DAP debugging, testing, formatting, and more
+	add({
+		source = "ray-x/go.nvim",
+		depends = {
+			"ray-x/guihua.lua", -- optional float term, codeaction gui support
+			"nvim-treesitter/nvim-treesitter",
+		},
+	})
+
+	require("go").setup({
+		goimports = 'gopls', -- use gopls for import management
+		gofmt = 'gopls', -- use gopls for formatting
+		max_line_len = 120,
+		tag_transform = false,
+		test_dir = '',
+		comment_placeholder = '   ',
+		lsp_cfg = true, -- true: use go.nvim's gopls setup
+		lsp_gofumpt = true, -- enable gofumpt formatting in gopls
+		lsp_on_attach = true, -- use go.nvim's default on_attach
+		lsp_keymaps = true, -- set to false if you want to use your own lsp keymaps
+		lsp_codelens = true, -- enable code lens
+		lsp_diag_hdlr = true, -- hook diagnostic handler
+		lsp_diag_underline = true,
+		lsp_diag_virtual_text = { space = 0, prefix = "󰠠" }, -- show diagnostic virtual text
+		lsp_diag_signs = true,
+		lsp_diag_update_in_insert = false,
+		lsp_document_formatting = true,
+		-- DAP debug setup
+		dap_debug = true, -- enable dap debug
+		dap_debug_keymap = true, -- true: use default keymap
+		dap_debug_gui = true, -- enable dap gui
+		dap_debug_vt = true, -- enable dap virtual text
+		-- Test setup
+		test_runner = 'go', -- use go test command
+		run_in_floaterm = true, -- run tests in floating terminal
+		-- Formatter
+		trouble = true, -- trouble integration
+		test_efm = false, -- errorformat
+		luasnip = true, -- enable luasnip integration
+		-- Build system
+		build_tags = '', -- build tags
+		textobjects = true, -- enable text objects
+		-- Icons
+		icons_cfg = {
+			breakpoint = '󰏃',
+			currentpos = '󰁕',
+		},
+	})
+end)
 
 later(function()
 	add({
@@ -579,7 +606,7 @@ later(function()
 
 	local metals_config = require("metals").bare_config()
 
-	-- Example of settings
+	-- Metals settings
 	metals_config.settings = {
 		showImplicitArguments = true,
 		excludedPackages = { "akka.actor.typed.javadsl", "com.github.swagger.akka.javadsl" },
@@ -587,14 +614,14 @@ later(function()
 
 	metals_config.init_options.statusBarProvider = "off"
 
-	-- Example if you are using cmp how to make sure the correct capabilities for snippets are set
+	-- Set capabilities for completion
 	metals_config.capabilities = require("blink.cmp").get_lsp_capabilities()
 
-	vim.api.nvim_create_autocmd("FileType", {
-		group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
-		pattern = { "scala", "sbt", "java", "sc" },
-		callback = function()
-			require("metals").initialize_or_attach(metals_config)
+	-- Configure on_attach to setup DAP integration
+	metals_config.on_attach = function(client, bufnr)
+		-- Set up nvim-dap integration with metals
+		-- This enables Scala debugging through nvim-metals
+		require("metals").setup_dap()
 			
 			-- Set buffer-local keymap for metals commands picker
 			if _G.MiniPick and MiniPick.registry.metals then
@@ -606,6 +633,22 @@ later(function()
 					silent = true 
 				})
 			end
+		
+		-- Additional Scala-specific debug keymaps
+		vim.keymap.set("n", "<leader>dt", function()
+			require("metals").run_test()
+		end, { buffer = true, desc = "[D]ebug Run [T]est" })
+		
+		vim.keymap.set("n", "<leader>dT", function()
+			require("metals").test_target()
+		end, { buffer = true, desc = "[D]ebug [T]est Target" })
+	end
+
+	vim.api.nvim_create_autocmd("FileType", {
+		group = vim.api.nvim_create_augroup("nvim-metals", { clear = true }),
+		pattern = { "scala", "sbt", "java", "sc" },
+		callback = function()
+			require("metals").initialize_or_attach(metals_config)
 		end,
 	})
 
@@ -699,23 +742,37 @@ later(function()
 		source = "nvim-neotest/neotest",
 		depends = {
 			"nvim-neotest/nvim-nio",
-			"fredrikaverpil/neotest-golang",
-			"leoluz/nvim-dap-go",
 		},
 	})
 
 	require("neotest").setup({
 		adapters = {
-			["neotest-golang"] = {
-				-- Here we can set options for neotest-golang, e.g.
-				-- go_test_args = { "-v", "-race", "-count=1", "-timeout=60s" },
-				dap_go_enabled = true, -- requires leoluz/nvim-dap-go
-			},
+			-- Go testing is handled by ray-x/go.nvim
+			-- Add other test adapters here as needed
 		},
 	})
 end)
 
--- dap
+-- =====================================================
+-- Comprehensive Debug Adapter Protocol (DAP) Setup
+-- =====================================================
+-- Supports: Python, JavaScript/TypeScript, Lua, Bash, Elixir, Erlang + Scala (via nvim-metals)
+-- Features: 
+-- - Auto-installation of debug adapters via Mason
+-- - Comprehensive debug configurations for each language
+-- - Dynamic keymaps during debug sessions  
+-- - Virtual text showing variable values
+-- - Enhanced UI with nvim-dap-ui
+-- - Breakpoint management with custom icons
+-- - Scala debugging via official nvim-metals DAP integration
+-- - TypeScript/JavaScript debugging complements typescript-tools.nvim
+-- - Elixir debugging via elixir-ls (complements ELP LSP server)
+-- - Erlang: Full DAP support via Erlang LS els_dap (https://erlang-ls.github.io/articles/tutorial-debugger/)
+--
+-- Note: Go is handled by ray-x/go.nvim (includes LSP + DAP + testing)
+-- TypeScript LSP features are handled by typescript-tools.nvim
+-- Elixir/Erlang LSP features are handled by ELP (Erlang Language Platform)
+-- =====================================================
 later(function()
 	add({
 		source = "mfussenegger/nvim-dap",
@@ -729,7 +786,6 @@ later(function()
 			-- Installs the debug adapters for you
 			"mason-org/mason.nvim",
 			"jay-babu/mason-nvim-dap.nvim",
-			"leoluz/nvim-dap-go",
 		},
 	})
 	local dap = require("dap")
@@ -744,12 +800,431 @@ later(function()
 		-- see mason-nvim-dap README for more information
 		handlers = {},
 
-		-- You'll need to check that you have the required things installed
-		-- online, please don't ask me how to install them :)
+		-- Core language debuggers
+		-- Note: Go uses nvim-dap-go, Scala uses nvim-metals built-in DAP
+		-- TypeScript uses typescript-tools.nvim for LSP but needs separate DAP setup
+		-- Elixir uses ELP for LSP and elixir-ls for DAP
 		ensure_installed = {
-			-- Update this to ensure that you have the debuggers for the langs you want
-			"delve",
+			-- Python
+			"debugpy",
+			-- JavaScript/TypeScript/Node.js (complements typescript-tools.nvim)
+			"js-debug-adapter",
+			-- Lua
+			"local-lua-debugger-vscode",
+			-- Bash
+			"bash-debug-adapter",
+			-- Elixir (DAP support - LSP handled by ELP)
+			"elixir-ls",
+			-- Erlang DAP support via Erlang LS (els_dap)
+			"erlang-debugger",
 		},
+	})
+
+	-- =====================================================
+	-- Manual DAP Adapter and Configuration Setup
+	-- =====================================================
+	-- Some adapters may need manual configuration for optimal functionality
+	-- These complement the mason-nvim-dap automatic setup
+
+	-- Python Configuration (debugpy)
+	-- Works with basedpyright and ruff LSPs
+	dap.adapters.python = function(cb, config)
+		if config.request == 'attach' then
+			---@diagnostic disable-next-line: undefined-field
+			local port = (config.connect or config).port
+			---@diagnostic disable-next-line: undefined-field
+			local host = (config.connect or config).host or '127.0.0.1'
+			cb({
+				type = 'server',
+				port = assert(port, '`connect.port` is required for a python `attach` configuration'),
+				host = host,
+				options = { source_filetype = 'python' },
+			})
+		else
+			cb({
+				type = 'executable',
+				command = 'python3',
+				args = { '-m', 'debugpy.adapter' },
+				options = { source_filetype = 'python' },
+			})
+		end
+	end
+
+	dap.configurations.python = {
+		{
+			type = 'python',
+			request = 'launch',
+			name = 'Launch file',
+			program = '${file}', -- Current file
+			console = 'integratedTerminal',
+			cwd = '${workspaceFolder}',
+		},
+		{
+			type = 'python',
+			request = 'launch',
+			name = 'Launch file with arguments',
+			program = '${file}',
+			args = function()
+				local args_string = vim.fn.input('Arguments: ')
+				return vim.split(args_string, " +")
+			end,
+			console = 'integratedTerminal',
+			cwd = '${workspaceFolder}',
+		},
+		{
+			type = 'python',
+			request = 'launch',
+			name = 'Launch module',
+			module = function()
+				return vim.fn.input('Module name: ')
+			end,
+			console = 'integratedTerminal',
+			cwd = '${workspaceFolder}',
+		},
+		{
+			type = 'python',
+			request = 'attach',
+			name = 'Attach remote',
+			connect = function()
+				local host = vim.fn.input('Host [127.0.0.1]: ')
+				host = host ~= '' and host or '127.0.0.1'
+				local port = tonumber(vim.fn.input('Port [5678]: ')) or 5678
+				return { host = host, port = port }
+			end,
+		},
+	}
+
+	-- JavaScript/TypeScript/Node.js Configuration
+	-- Complements typescript-tools.nvim (which handles LSP) with debugging capabilities
+	dap.adapters['pwa-node'] = {
+		type = 'server',
+		host = 'localhost',
+		port = '${port}',
+		executable = {
+			command = 'js-debug-adapter',
+			args = { '${port}' },
+		},
+	}
+
+	dap.configurations.javascript = {
+		{
+			type = 'pwa-node',
+			request = 'launch',
+			name = 'Launch file',
+			program = '${file}',
+			cwd = '${workspaceFolder}',
+		},
+		{
+			type = 'pwa-node',
+			request = 'launch',
+			name = 'Launch with npm script',
+			runtimeExecutable = 'npm',
+			runtimeArgs = function()
+				local script = vim.fn.input('npm script: ')
+				return { 'run', script }
+			end,
+			rootPath = '${workspaceFolder}',
+			cwd = '${workspaceFolder}',
+			console = 'integratedTerminal',
+			internalConsoleOptions = 'neverOpen',
+		},
+		{
+			type = 'pwa-node',
+			request = 'attach',
+			name = 'Attach to process',
+			processId = require('dap.utils').pick_process,
+			cwd = '${workspaceFolder}',
+		},
+	}
+
+	dap.configurations.typescript = {
+		{
+			type = 'pwa-node',
+			request = 'launch',
+			name = 'Launch file',
+			program = '${file}',
+			cwd = '${workspaceFolder}',
+			sourceMaps = true,
+			protocol = 'inspector',
+			console = 'integratedTerminal',
+		},
+		{
+			type = 'pwa-node',
+			request = 'launch',
+			name = 'Launch with ts-node',
+			runtimeExecutable = 'npx',
+			runtimeArgs = { 'ts-node', '${file}' },
+			cwd = '${workspaceFolder}',
+			sourceMaps = true,
+			protocol = 'inspector',
+			console = 'integratedTerminal',
+		},
+		{
+			type = 'pwa-node',
+			request = 'launch',
+			name = 'Launch with tsx',
+			runtimeExecutable = 'npx',
+			runtimeArgs = { 'tsx', '${file}' },
+			cwd = '${workspaceFolder}',
+			sourceMaps = true,
+			protocol = 'inspector',
+			console = 'integratedTerminal',
+		},
+		{
+			type = 'pwa-node',
+			request = 'attach',
+			name = 'Attach to process',
+			processId = require('dap.utils').pick_process,
+			cwd = '${workspaceFolder}',
+		},
+	}
+
+	-- Lua Configuration (local-lua-debugger-vscode)
+	-- Works with lua_ls LSP
+	dap.adapters['local-lua'] = {
+		type = 'executable',
+		command = 'local-lua-debugger-vscode',
+		enrich_config = function(config, on_config)
+			if not config['extensionPath'] then
+				local c = vim.deepcopy(config)
+				-- 💀 If you have trouble with the debugger adapter, try specifying the full path
+				c.extensionPath = vim.fn.stdpath('data') .. '/mason/packages/local-lua-debugger-vscode/'
+				on_config(c)
+			else
+				on_config(config)
+			end
+		end,
+	}
+
+	dap.configurations.lua = {
+		{
+			type = 'local-lua',
+			request = 'launch',
+			name = 'Debug current file (local-lua-dbg, lua)',
+			program = {
+				lua = 'lua',
+				file = '${file}',
+			},
+			cwd = '${workspaceFolder}',
+			args = {},
+		},
+		{
+			type = 'local-lua',
+			request = 'launch',
+			name = 'Debug current file (local-lua-dbg, luajit)',
+			program = {
+				lua = 'luajit',
+				file = '${file}',
+			},
+			cwd = '${workspaceFolder}',
+			args = {},
+		},
+		{
+			type = 'local-lua',
+			request = 'launch',
+			name = 'Debug with arguments',
+			program = {
+				lua = 'lua',
+				file = '${file}',
+			},
+			args = function()
+				local args_string = vim.fn.input('Arguments: ')
+				return vim.split(args_string, " +")
+			end,
+			cwd = '${workspaceFolder}',
+		},
+	}
+
+	-- Elixir Configuration (elixir-ls debug adapter)
+	-- Complements ELP LSP server with debugging capabilities
+	-- Uses elixir-ls debug_adapter.sh for DAP support
+	dap.adapters.mix_task = {
+		type = 'executable',
+		command = vim.fn.stdpath("data") .. '/mason/packages/elixir-ls/debug_adapter.sh',
+		args = {}
+	}
+
+	-- Erlang Configuration (using Erlang LS DAP support)
+	-- Uses els_dap from Erlang LS for full Debug Adapter Protocol support
+	-- See: https://erlang-ls.github.io/articles/tutorial-debugger/
+	dap.adapters.erlang = {
+		type = 'executable',
+		command = vim.fn.stdpath("data") .. '/mason/packages/erlang-debugger/els_dap',
+		args = {},
+	}
+
+	dap.configurations.elixir = {
+		{
+			type = "mix_task",
+			name = "mix test",
+			task = 'test',
+			taskArgs = {"--trace"},
+			request = "launch",
+			startApps = true, -- for Phoenix projects
+			projectDir = "${workspaceFolder}",
+			requireFiles = {
+				"test/**/test_helper.exs",
+				"test/**/*_test.exs"
+			}
+		},
+		{
+			type = "mix_task",
+			name = "mix test (current file)",
+			task = 'test',
+			taskArgs = {"${file}", "--trace"},
+			request = "launch",
+			startApps = true,
+			projectDir = "${workspaceFolder}",
+			requireFiles = {
+				"test/**/test_helper.exs",
+			}
+		},
+		{
+			type = "mix_task",
+			name = "mix run",
+			task = 'run',
+			taskArgs = {"--no-halt"},
+			request = "launch",
+			startApps = true,
+			projectDir = "${workspaceFolder}",
+		},
+		{
+			type = "mix_task",
+			name = "mix phx.server",
+			task = 'phx.server',
+			request = "launch",
+			startApps = true,
+			projectDir = "${workspaceFolder}",
+		},
+		{
+			type = "mix_task",
+			name = "mix run (with args)",
+			task = 'run',
+			taskArgs = function()
+				local args_string = vim.fn.input('Arguments: ')
+				return vim.split(args_string, " +")
+			end,
+			request = "launch",
+			startApps = true,
+			projectDir = "${workspaceFolder}",
+		},
+	}
+
+	-- Erlang debug configurations (using Erlang LS DAP)
+	-- Full Debug Adapter Protocol support via els_dap
+	-- Supports breakpoints, variable inspection, conditional breakpoints, logpoints, etc.
+	-- See: https://erlang-ls.github.io/articles/tutorial-debugger/
+	dap.configurations.erlang = {
+		{
+			type = "erlang",
+			name = "Launch Erlang Project",
+			request = "launch",
+			cwd = "${workspaceFolder}",
+			timeout = 300,
+		},
+		{
+			type = "erlang", 
+			name = "Attach to Existing Node",
+			request = "attach",
+			projectnode = function()
+				return vim.fn.input('Node name (without @hostname): ')
+			end,
+			cookie = function()
+				return vim.fn.input('Cookie (or press Enter for default): ')
+			end,
+			timeout = 300,
+			cwd = "${workspaceFolder}",
+		},
+		{
+			type = "erlang",
+			name = "Debug Rebar3 Project",
+			request = "launch",
+			projectnode = "debug_session",
+			cookie = "debug_cookie", 
+			timeout = 300,
+			cwd = "${workspaceFolder}",
+			-- This will launch a node that can be attached to
+			preLaunchTask = {
+				type = "shell",
+				command = "rebar3",
+				args = {"shell", "--name", "debug_session@localhost", "--setcookie", "debug_cookie"},
+			},
+		},
+		{
+			type = "erlang",
+			name = "Debug EUnit Tests",
+			request = "launch",
+			projectnode = "eunit_debug",
+			cookie = "eunit_cookie",
+			timeout = 300,
+			cwd = "${workspaceFolder}",
+			-- Setup for debugging EUnit tests
+			preLaunchTask = {
+				type = "shell", 
+				command = "rebar3",
+				args = {"shell", "--name", "eunit_debug@localhost", "--setcookie", "eunit_cookie"},
+			},
+		},
+	}
+
+	-- Bash Configuration (bash-debug-adapter)
+	-- Works with bashls LSP
+	dap.adapters.bashdb = {
+		type = 'executable',
+		command = 'bash-debug-adapter',
+		name = 'bashdb',
+	}
+
+	dap.configurations.sh = {
+		{
+			type = 'bashdb',
+			request = 'launch',
+			name = 'Launch file',
+			showDebugOutput = true,
+			pathBashdb = vim.fn.stdpath('data') .. '/mason/packages/bash-debug-adapter/extension/bashdb_dir/bashdb',
+			pathBashdbLib = vim.fn.stdpath('data') .. '/mason/packages/bash-debug-adapter/extension/bashdb_dir',
+			trace = true,
+			file = '${file}',
+			program = '${file}',
+			cwd = '${workspaceFolder}',
+			pathCat = 'cat',
+			pathBash = '/bin/bash',
+			pathMkfifo = 'mkfifo',
+			pathPkill = 'pkill',
+			args = {},
+			env = {},
+			terminalKind = 'integrated',
+		},
+	}
+
+
+
+	-- Advanced configuration for better debugging experience
+	-- Enable virtual text for debugging (shows variable values inline)
+	add({
+		source = "theHamsta/nvim-dap-virtual-text",
+	})
+	require("nvim-dap-virtual-text").setup({
+		enabled = true,
+		enabled_commands = true,
+		highlight_changed_variables = true,
+		highlight_new_as_changed = false,
+		show_stop_reason = true,
+		commented = false,
+		only_first_definition = true,
+		all_references = false,
+		clear_on_continue = false,
+		display_callback = function(variable, buf, stackframe, node, options)
+			if options.virt_text_pos == 'inline' then
+				return ' = ' .. variable.value
+			else
+				return variable.name .. ' = ' .. variable.value
+			end
+		end,
+		virt_text_pos = vim.fn.has 'nvim-0.10' == 1 and 'inline' or 'eol',
+		all_frames = false,
+		virt_lines = false,
+		virt_text_win_col = nil
 	})
 
 	-- Dap UI setup
@@ -786,6 +1261,32 @@ later(function()
 	--   vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
 	-- end
 
+	-- Configure breakpoint icons and highlights
+	vim.api.nvim_set_hl(0, 'DapBreakpoint', { fg = '#e51400' })
+	vim.api.nvim_set_hl(0, 'DapBreakpointCondition', { fg = '#e51400' })
+	vim.api.nvim_set_hl(0, 'DapBreakpointRejected', { fg = '#888888' })
+	vim.api.nvim_set_hl(0, 'DapLogPoint', { fg = '#61afef' })
+	vim.api.nvim_set_hl(0, 'DapStopped', { fg = '#ffcc00' })
+	
+	local breakpoint_icons = vim.g.have_nerd_font
+	    and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
+	  or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
+	for type, icon in pairs(breakpoint_icons) do
+	  local tp = 'Dap' .. type
+	  local hl = (type == 'Stopped') and 'DapStopped' or 'Dap' .. type
+	  vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
+	end
+
+	-- Static breakpoint keymaps (always available)
+	vim.keymap.set("n", "<leader>db", function() require("dap").toggle_breakpoint() end, 
+		{ desc = "[D]ebug Toggle [B]reakpoint" })
+	vim.keymap.set("n", "<leader>dB", function() 
+		require("dap").set_breakpoint(vim.fn.input('Breakpoint condition: '))
+	end, { desc = "[D]ebug Conditional [B]reakpoint" })
+	vim.keymap.set("n", "<leader>dl", function() 
+		require("dap").set_breakpoint(nil, nil, vim.fn.input('Log point message: '))
+	end, { desc = "[D]ebug [L]og Point" })
+
 	-- Dynamic debug keymap management
 	local function setup_debug_keymaps()
 		-- Core debugging flow
@@ -808,11 +1309,35 @@ later(function()
 		vim.keymap.set("n", "<leader>dp", function() require("dap").pause() end, 
 			{ desc = "[D]ebug [P]ause" })
 		
+		-- Advanced debugging
+		vim.keymap.set("n", "<leader>dS", function() require("dap").run_to_cursor() end, 
+			{ desc = "[D]ebug Run to Cursor [S]top" })
+		vim.keymap.set("n", "<leader>dU", function() require("dap").up() end, 
+			{ desc = "[D]ebug Stack [U]p" })
+		vim.keymap.set("n", "<leader>dD", function() require("dap").down() end, 
+			{ desc = "[D]ebug Stack [D]own" })
+		
 		-- Evaluation & inspection  
 		vim.keymap.set("n", "<leader>de", function() require("dapui").eval() end, 
 			{ desc = "[D]ebug [E]valuate Expression" })
 		vim.keymap.set("v", "<leader>de", function() require("dapui").eval() end, 
 			{ desc = "[D]ebug [E]valuate Selection" })
+		vim.keymap.set("n", "<leader>dh", function() require("dap.ui.widgets").hover() end, 
+			{ desc = "[D]ebug [H]over Variables" })
+		vim.keymap.set("n", "<leader>ds", function() 
+			local widgets = require("dap.ui.widgets")
+			widgets.centered_float(widgets.scopes)
+		end, { desc = "[D]ebug [S]copes" })
+		vim.keymap.set("n", "<leader>df", function() 
+			local widgets = require("dap.ui.widgets")
+			widgets.centered_float(widgets.frames)
+		end, { desc = "[D]ebug [F]rames" })
+		
+		-- REPL
+		vim.keymap.set("n", "<leader>dR", function() require("dap").repl.open() end, 
+			{ desc = "[D]ebug [R]EPL Open" })
+		vim.keymap.set("n", "<leader>dk", function() require("dap").repl.run_last() end, 
+			{ desc = "[D]ebug REPL Run Last [K]ommand" })
 		
 		-- Add debug session clue to mini.clue
 		table.insert(MiniClue.config.clues, { mode = "n", keys = "<leader>d", desc = "🐛 debug session" })
@@ -828,16 +1353,33 @@ later(function()
 		end
 		
 		-- Remove dynamic keymaps
+		-- Core debugging flow
 		pcall(vim.keymap.del, "n", "<leader>dc")
 		pcall(vim.keymap.del, "n", "<leader>di") 
 		pcall(vim.keymap.del, "n", "<leader>do")
 		pcall(vim.keymap.del, "n", "<leader>dO")
 		pcall(vim.keymap.del, "n", "<leader>du")
+		
+		-- Session management
 		pcall(vim.keymap.del, "n", "<leader>dr")
 		pcall(vim.keymap.del, "n", "<leader>dt")
 		pcall(vim.keymap.del, "n", "<leader>dp")
+		
+		-- Advanced debugging
+		pcall(vim.keymap.del, "n", "<leader>dS")
+		pcall(vim.keymap.del, "n", "<leader>dU")
+		pcall(vim.keymap.del, "n", "<leader>dD")
+		
+		-- Evaluation & inspection
 		pcall(vim.keymap.del, "n", "<leader>de")
 		pcall(vim.keymap.del, "v", "<leader>de")
+		pcall(vim.keymap.del, "n", "<leader>dh")
+		pcall(vim.keymap.del, "n", "<leader>ds")
+		pcall(vim.keymap.del, "n", "<leader>df")
+		
+		-- REPL
+		pcall(vim.keymap.del, "n", "<leader>dR")
+		pcall(vim.keymap.del, "n", "<leader>dk")
 	end
 
 	-- Event listeners with keymap management
