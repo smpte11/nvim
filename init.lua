@@ -195,6 +195,10 @@ now(function()
 end)
 
 now(function()
+	require("mini.splitjoin").setup()
+end)
+
+now(function()
 	require("mini.basics").setup(
 		-- No need to copy this inside `setup()`. Will be used automatically.
 		{
@@ -499,7 +503,7 @@ later(function()
 end)
 
 later(function()
-	require("mini.jump").setup()
+	require("mini.jump").setup({})
 end)
 
 later(function()
