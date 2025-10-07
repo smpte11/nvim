@@ -1,5 +1,411 @@
 local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
+-- =====================================================
+-- LANGUAGE CONFIGURATIONS
+-- =====================================================
+-- Each language defines all its requirements in one place:
+-- - LSP server configuration
+-- - DAP adapter and configurations  
+-- - Required tools (formatters, linters, etc.)
+-- - Treesitter parsers
+
+local languages = {
+	-- =================== SYSTEM LANGUAGES ===================
+	bash = {
+		lsp = { server = "bashls", config = {} },
+		dap = {
+			adapter_name = "bash-debug-adapter",
+			adapter = {
+				type = "executable",
+				command = vim.fn.stdpath("data") .. "/mason/packages/bash-debug-adapter/bash-debug-adapter",
+				name = "bashdb",
+			},
+			configurations = {
+				{
+					type = "bashdb",
+					request = "launch",
+					name = "Launch Bash script",
+					showDebugOutput = true,
+					pathBashdb = vim.fn.stdpath("data") .. "/mason/packages/bash-debug-adapter/extension/bashdb_dir/bashdb",
+					pathBashdbLib = vim.fn.stdpath("data") .. "/mason/packages/bash-debug-adapter/extension/bashdb_dir",
+					trace = true,
+					file = "${file}",
+					program = "${file}",
+					cwd = "${workspaceFolder}",
+					pathCat = "cat",
+					pathBash = "/bin/bash",
+					pathMkfifo = "mkfifo",
+					pathPkill = "pkill",
+					args = {},
+					env = {},
+					terminalKind = "integrated",
+				},
+			},
+		},
+		tools = { "shfmt", "shellcheck" },
+		parsers = { "bash" },
+	},
+
+	lua = {
+		lsp = {
+			server = "lua_ls",
+			config = {
+				settings = {
+					Lua = {
+						completion = { callSnippet = "Replace" },
+						diagnostics = { disable = { "missing-fields" } },
+					},
+				},
+			},
+		},
+		dap = {
+			adapter_name = "local-lua-debugger-vscode",
+			adapter = {
+				type = "executable",
+				command = "local-lua-debugger-vscode",
+				enrich_config = function(config, on_config)
+					if not config["extensionPath"] then
+						local c = vim.deepcopy(config)
+						c.extensionPath = vim.fn.stdpath("data") .. "/mason/packages/local-lua-debugger-vscode/"
+						on_config(c)
+					else
+						on_config(config)
+					end
+				end,
+			},
+			configurations = {
+				{
+					type = "local-lua",
+					request = "launch",
+					name = "Debug current file (lua)",
+					program = { lua = "lua", file = "${file}" },
+					cwd = "${workspaceFolder}",
+					args = {},
+				},
+				{
+					type = "local-lua",
+					request = "launch",
+					name = "Debug current file (luajit)",
+					program = { lua = "luajit", file = "${file}" },
+					cwd = "${workspaceFolder}",
+					args = {},
+				},
+				{
+					type = "local-lua",
+					request = "launch",
+					name = "Debug with arguments",
+					program = { lua = "lua", file = "${file}" },
+					args = function()
+						local args_string = vim.fn.input("Arguments: ")
+						return vim.split(args_string, " +")
+					end,
+					cwd = "${workspaceFolder}",
+				},
+			},
+		},
+		tools = { "stylua" },
+		parsers = { "lua", "luadoc" },
+	},
+
+	-- =================== WEB LANGUAGES ===================
+	javascript = {
+		-- Note: Uses typescript-tools.nvim for LSP, this provides DAP support
+		dap = {
+			adapter_name = "js-debug-adapter",
+			adapter = {
+				type = "server",
+				host = "localhost",
+				port = "${port}",
+				executable = { command = "js-debug-adapter", args = { "${port}" } },
+			},
+			configurations = {
+				{
+					type = "pwa-node",
+					request = "launch",
+					name = "Launch current file (Node.js)",
+					program = "${file}",
+					cwd = "${workspaceFolder}",
+				},
+				{
+					type = "pwa-node",
+					request = "launch",
+					name = "Launch npm script",
+					runtimeExecutable = "npm",
+					runtimeArgs = function()
+						local script = vim.fn.input("Script name: ")
+						return { "run", script }
+					end,
+					cwd = "${workspaceFolder}",
+				},
+				{
+					type = "pwa-node",
+					request = "attach",
+					name = "Attach to process",
+					processId = function()
+						return require("dap.utils").pick_process()
+					end,
+					cwd = "${workspaceFolder}",
+				},
+			},
+		},
+		parsers = { "javascript" },
+	},
+
+	typescript = {
+		-- Note: Uses typescript-tools.nvim for LSP, this provides DAP support
+		dap = {
+			-- Shares adapter with JavaScript
+			configurations = {
+				{
+					type = "pwa-node",
+					request = "launch",
+					name = "Launch current file (ts-node)",
+					runtimeExecutable = "npx",
+					runtimeArgs = { "ts-node", "${file}" },
+					cwd = "${workspaceFolder}",
+					sourceMaps = true,
+					protocol = "inspector",
+					console = "integratedTerminal",
+				},
+				{
+					type = "pwa-node",
+					request = "launch",
+					name = "Launch with tsx",
+					runtimeExecutable = "npx",
+					runtimeArgs = { "tsx", "${file}" },
+					cwd = "${workspaceFolder}",
+					sourceMaps = true,
+					protocol = "inspector",
+					console = "integratedTerminal",
+				},
+			},
+		},
+		parsers = { "typescript" },
+	},
+
+	-- =================== SYSTEMS LANGUAGES ===================
+	python = {
+		lsp = { server = "pyright", config = {} },
+		dap = {
+			adapter_name = "debugpy",
+			adapter = { type = "executable", command = "debugpy-adapter" },
+			configurations = {
+				{
+					type = "python",
+					request = "launch",
+					name = "Launch file",
+					program = "${file}",
+					pythonPath = function()
+						local cwd = vim.fn.getcwd()
+						if vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
+							return cwd .. "/venv/bin/python"
+						elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
+							return cwd .. "/.venv/bin/python"
+						else
+							return "/usr/bin/python"
+						end
+					end,
+				},
+				{
+					type = "python",
+					request = "launch",
+					name = "Launch with arguments",
+					program = "${file}",
+					args = function()
+						local args_string = vim.fn.input("Arguments: ")
+						return vim.split(args_string, " +")
+					end,
+					pythonPath = function()
+						local cwd = vim.fn.getcwd()
+						if vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
+							return cwd .. "/venv/bin/python"
+						elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
+							return cwd .. "/.venv/bin/python"
+						else
+							return "/usr/bin/python"
+						end
+					end,
+				},
+			},
+		},
+		parsers = { "python" },
+	},
+
+	-- =================== BEAM LANGUAGES ===================
+	elixir = {
+		-- Note: Uses ELP for LSP, this provides DAP support via elixir-ls
+		dap = {
+			adapter_name = "elixir-ls",
+			adapter = {
+				type = "executable",
+				command = vim.fn.stdpath("data") .. "/mason/packages/elixir-ls/debug_adapter.sh",
+				args = {},
+			},
+			configurations = {
+				{
+					type = "mix_task",
+					name = "mix test",
+					task = "test",
+					taskArgs = { "--trace" },
+					request = "launch",
+					startApps = true,
+					projectDir = "${workspaceFolder}",
+					requireFiles = { "test/**/test_helper.exs", "test/**/*_test.exs" },
+				},
+				{
+					type = "mix_task",
+					name = "mix test (current file)",
+					task = "test",
+					taskArgs = { "${file}", "--trace" },
+					request = "launch",
+					startApps = true,
+					projectDir = "${workspaceFolder}",
+					requireFiles = { "test/**/test_helper.exs" },
+				},
+				{
+					type = "mix_task",
+					name = "mix run",
+					task = "run",
+					taskArgs = { "--no-halt" },
+					request = "launch",
+					startApps = true,
+					projectDir = "${workspaceFolder}",
+				},
+				{
+					type = "mix_task",
+					name = "mix phx.server",
+					task = "phx.server",
+					request = "launch",
+					startApps = true,
+					projectDir = "${workspaceFolder}",
+				},
+				{
+					type = "mix_task",
+					name = "mix run (with args)",
+					task = "run",
+					taskArgs = function()
+						local args_string = vim.fn.input("Arguments: ")
+						return vim.split(args_string, " +")
+					end,
+					request = "launch",
+					startApps = true,
+					projectDir = "${workspaceFolder}",
+				},
+			},
+		},
+		parsers = { "elixir", "eex", "heex" },
+	},
+
+	erlang = {
+		-- Note: Uses ELP for LSP, this provides DAP support via els_dap
+		dap = {
+			adapter_name = "erlang-debugger",
+			adapter = {
+				type = "executable",
+				command = vim.fn.stdpath("data") .. "/mason/packages/erlang-debugger/els_dap",
+				args = {},
+			},
+			configurations = {
+				{
+					type = "erlang",
+					name = "Launch Erlang Project",
+					request = "launch",
+					cwd = "${workspaceFolder}",
+					timeout = 300,
+				},
+				{
+					type = "erlang",
+					name = "Attach to Existing Node",
+					request = "attach",
+					projectnode = function()
+						return vim.fn.input("Node name (without @hostname): ")
+					end,
+					cookie = function()
+						return vim.fn.input("Cookie (or press Enter for default): ")
+					end,
+					timeout = 300,
+					cwd = "${workspaceFolder}",
+				},
+				{
+					type = "erlang",
+					name = "Debug Rebar3 Project",
+					request = "launch",
+					projectnode = "debug_session",
+					cookie = "debug_cookie",
+					timeout = 300,
+					cwd = "${workspaceFolder}",
+					preLaunchTask = {
+						type = "shell",
+						command = "rebar3 shell --name debug_session@localhost --setcookie debug_cookie",
+						group = "build",
+					},
+				},
+				{
+					type = "erlang",
+					name = "Debug EUnit Tests",
+					request = "launch",
+					projectnode = "eunit_debug",
+					cookie = "eunit_cookie",
+					timeout = 300,
+					cwd = "${workspaceFolder}",
+					preLaunchTask = {
+						type = "shell",
+						command = "rebar3 shell --name eunit_debug@localhost --setcookie eunit_cookie",
+						group = "test",
+					},
+				},
+			},
+		},
+		parsers = { "erlang" },
+	},
+
+	-- =================== MARKUP/CONFIG LANGUAGES ===================
+	toml = {
+		lsp = { server = "taplo", config = {} },
+		tools = { "taplo" },
+		parsers = { "toml" },
+	},
+
+	-- Generic parsers for languages without full LSP/DAP support
+	generic = {
+		parsers = {
+			"c", "diff", "html", "markdown", "markdown_inline", "query", 
+			"vim", "vimdoc", "terraform", "hcl", "go", "gomod", "gowork", 
+			"gosum", "gotmpl", "helm",
+		},
+	},
+}
+
+-- Helper functions to collect installations from language definitions
+local function collect_installations()
+	local parsers = {}
+	local lsp_servers = {}
+	local dap_adapters = {}
+	local tools = {}
+
+	for _, lang_config in pairs(languages) do
+		if lang_config.parsers then
+			vim.list_extend(parsers, lang_config.parsers)
+		end
+		if lang_config.lsp and lang_config.lsp.server then
+			table.insert(lsp_servers, lang_config.lsp.server)
+		end
+		if lang_config.dap and lang_config.dap.adapter_name then
+			table.insert(dap_adapters, lang_config.dap.adapter_name)
+		end
+		if lang_config.tools then
+			vim.list_extend(tools, lang_config.tools)
+		end
+	end
+
+	return {
+		parsers = parsers,
+		lsp_servers = lsp_servers,
+		dap_adapters = dap_adapters,
+		tools = tools,
+	}
+end
+
 now(function()
 	-- This is a good place to add any global options you want to set for
 	-- all of the plugins in this file. For example, you could set
@@ -56,33 +462,10 @@ now(function()
 			end,
 		},
 	})
-	-- possible to immediately execute code which depends on the added plugin
+	-- Setup Treesitter with parsers from language definitions
+	local installations = collect_installations()
 	require("nvim-treesitter.configs").setup({
-		ensure_installed = {
-			"bash",
-			"c",
-			"diff",
-			"eex",
-			"elixir",
-			"erlang",
-			"heex",
-			"html",
-			"lua",
-			"luadoc",
-			"markdown",
-			"markdown_inline",
-			"query",
-			"vim",
-			"vimdoc",
-			"terraform",
-			"hcl",
-			"go",
-			"gomod",
-			"gowork",
-			"gosum",
-			"gotmpl",
-			"helm",
-		},
+		ensure_installed = installations.parsers,
 		auto_install = true,
 		highlight = { enable = true },
 	})
@@ -349,106 +732,50 @@ add({
 	--  - capabilities (table): override fields in capabilities. can be used to disable certain lsp features.
 	--  - settings (table): override the default settings passed when initializing the server.
 	--        for example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
-	local servers = {
-		-- clangd = {},
-		-- rust_analyzer = {},
-		-- ... etc. see `:help lspconfig-all` for a list of all the pre-configured lsps
-		--
-		-- some languages (like typescript) have entire language plugins that can be useful:
-		--    https://github.com/pmizio/typescript-tools.nvim
-		--
-		-- but for many setups, the lsp (`ts_ls`) will work just fine
-		terraformls = {},
-		ts_ls = {},
-		basedpyright = {
+	-- Build server configurations from language definitions
+	local installations = collect_installations()
+	local servers = {}
+	
+	-- Add servers from language definitions
+	for _, lang_config in pairs(languages) do
+		if lang_config.lsp then
+			servers[lang_config.lsp.server] = lang_config.lsp.config
+		end
+	end
+	
+	-- Add additional servers not in language definitions
+	servers.terraformls = {}
+	servers.ts_ls = {} -- Fallback, but typescript-tools.nvim is preferred
+	servers.pyright = {} -- Use pyright from language def, but keep this as alternative
+	servers.ruff = {}
+	servers.nushell = {}
+	servers.dockerls = {}
+	servers.html = {}
+	servers.jsonls = {}
+	servers.yamlls = {}
+	servers.marksman = {}
+	-- ELP for Erlang/Elixir (configured via language definitions but added here for completeness)
+	servers.elp = {
+		cmd = { "elp", "server" },
+		filetypes = { "erlang", "elixir" },
+		root_dir = function(fname)
+			return require("lspconfig.util").find_git_ancestor(fname)
+				or require("lspconfig.util").root_pattern("rebar.config", "mix.exs", "OTP_VERSION")(fname)
+		end,
 			settings = {
-				basedpyright = {
-					analysis = {
-						autosearchpaths = true,
-						diagnosticmode = "openfilesonly",
-						uselibrarycodefortypes = true,
-					},
-				},
-			},
-		},
-		ruff = {},
-		nushell = {},
-		dockerls = {},
-		-- Erlang Language Platform (ELP) - WhatsApp's advanced Erlang/Elixir LSP
-		-- Provides superior semantic analysis, go-to-definition, find references, call hierarchy
-		-- Designed to be scalable and fully incremental, inspired by rust-analyzer
-		elp = {
-			cmd = { "elp", "server" },
-			filetypes = { "erlang", "elixir" },
-			root_dir = function(fname)
-				-- Look for rebar.config, mix.exs, or .git directory
-				return require("lspconfig.util").find_git_ancestor(fname)
-					or require("lspconfig.util").root_pattern("rebar.config", "mix.exs", "OTP_VERSION")(fname)
-			end,
-			settings = {
-				elp = {
-					-- Enable incremental compilation for better performance
-					incremental = true,
-					-- Enable all diagnostics
-					diagnostics = {
-						enabled = true,
-						-- Show warnings and errors
-						disabled = {},
-					},
-					-- Enable code lens for additional information
-					codeLens = {
-						enabled = true,
-					},
-				},
-			},
-		},
-		bashls = {},
-		html = {},
-		jsonls = {},
-		yamlls = {},
-		marksman = {},
-		lua_ls = {
-			-- cmd = { ... },
-			-- filetypes = { ... },
-			-- capabilities = {},
-			settings = {
-				lua = {
-					completion = {
-						callsnippet = "replace",
-					},
-					-- you can toggle below to ignore lua_ls's noisy `missing-fields` warnings
-					diagnostics = { disable = { "missing-fields" } },
-				},
+			elp = {
+				incremental = true,
+				diagnostics = { enabled = true, disabled = {} },
+				codeLens = { enabled = true },
 			},
 		},
 	}
 
-	-- ensure the servers and tools above are installed
-	--
-	-- to check the current status of installed tools and/or manually install
-	-- other tools, you can run
-	--    :mason
-	--
-	-- you can press `g?` for help in this menu.
-	--
-	-- `mason` had to be setup earlier: to configure its options see the
-	-- `dependencies` table for `nvim-lspconfig` above.
-	--
-	-- you can add other tools here that you want mason to install
-	-- for you, so that they are available from within neovim.
-	local ensure_installed = vim.tbl_keys(servers or {})
-	vim.list_extend(ensure_installed, {
-		"stylua", -- used to format lua code
-		"shfmt",
-		"shellcheck",
-		"taplo",
-		-- ELP (Erlang Language Platform) for Erlang/Elixir
-		-- Note: May need manual installation if not available in Mason registry
-		-- Installation: cargo install --git https://github.com/whatsapp/erlang-language-platform --bin elp
-		-- Go tools are handled by ray-x/go.nvim
-		-- "tflint",
-	})
+	-- Collect all tools to install: LSP servers + additional tools
+	local ensure_installed = vim.tbl_keys(servers)
+	vim.list_extend(ensure_installed, installations.tools)
 
+	-- Remove problematic tools
 	local i = 1
 	while i <= #ensure_installed do
 		if ensure_installed[i] == "nushell" then
@@ -463,6 +790,11 @@ add({
 	require("mason-lspconfig").setup({
 		handlers = {
 			function(server_name)
+				-- Skip metals - it's handled by nvim-metals plugin
+				if server_name == "metals" then
+					return
+				end
+				
 				local server = servers[server_name] or {}
 				-- this handles overriding only values explicitly passed
 				-- by the server configuration above. useful when disabling
@@ -496,47 +828,6 @@ now(function()
 	})
 end)
 
-later(function()
-	add({
-		source = "nvim-treesitter/nvim-treesitter",
-		-- use 'master' while monitoring updates in 'main'
-		checkout = "master",
-		-- perform action after every checkout
-		hooks = {
-			post_checkout = function()
-				vim.cmd("TSUpdate")
-			end,
-		},
-	})
-	-- possible to immediately execute code which depends on the added plugin
-	require("nvim-treesitter.configs").setup({
-		ensure_installed = {
-			"bash",
-			"c",
-			"diff",
-			"eex",
-			"elixir",
-			"erlang",
-			"heex",
-			"html",
-			"lua",
-			"luadoc",
-			"markdown",
-			"markdown_inline",
-			"query",
-			"vim",
-			"vimdoc",
-			"terraform",
-			"hcl",
-			"go",
-			"gomod",
-			"gowork",
-			"gosum",
-		},
-		auto_install = true,
-		highlight = { enable = true },
-	})
-end)
 
 
 later(function()
@@ -791,33 +1082,12 @@ later(function()
 	local dap = require("dap")
 	local dapui = require("dapui")
 
+	-- Setup Mason DAP with collected adapters from language definitions
+	local installations = collect_installations()
 	require("mason-nvim-dap").setup({
-		-- Makes a best effort to setup the various debuggers with
-		-- reasonable debug configurations
 		automatic_installation = true,
-
-		-- You can provide additional configuration to the handlers,
-		-- see mason-nvim-dap README for more information
 		handlers = {},
-
-		-- Core language debuggers
-		-- Note: Go uses nvim-dap-go, Scala uses nvim-metals built-in DAP
-		-- TypeScript uses typescript-tools.nvim for LSP but needs separate DAP setup
-		-- Elixir uses ELP for LSP and elixir-ls for DAP
-		ensure_installed = {
-			-- Python
-			"debugpy",
-			-- JavaScript/TypeScript/Node.js (complements typescript-tools.nvim)
-			"js-debug-adapter",
-			-- Lua
-			"local-lua-debugger-vscode",
-			-- Bash
-			"bash-debug-adapter",
-			-- Elixir (DAP support - LSP handled by ELP)
-			"elixir-ls",
-			-- Erlang DAP support via Erlang LS (els_dap)
-			"erlang-debugger",
-		},
+		ensure_installed = installations.dap_adapters,
 	})
 
 	-- =====================================================
