@@ -111,24 +111,6 @@ end, { desc = '[/] Fuzzily search in current buffer' })
 
 keymap('n', '<leader><leader>', Utils.create_command_palette, { desc = 'Command Palette' })
 
--- ╔═══════════════════════╗
--- ║	     Git           ║
--- ╚═══════════════════════╝
-
-keymap("n", "<leader>gg", function() require('neogit').open() end, { desc = "[Git] Status" })
-keymap("n", "<leader>gb", function () MiniExtra.pickers.git_branches() end, { desc = "[Git] [B]ranches" })
-keymap("n", "<leader>gc", function () MiniExtra.pickers.git_commits() end, { desc = "[Git] [C]ommits" })
-keymap("n", "<leader>gh", function () MiniExtra.pickers.git_hunks() end, { desc = "[Git] [H]unks" })
-keymap("n", "<leader>gB", "<cmd>GitBlameToggle<cr>", { desc = "[Git] [B]lame Toggle" })
-
--- Octo / GitHub
-keymap("n", "<leader>goo", "<cmd>Octo actions<cr>", { desc = "[Git] Octo Actions" })
-keymap("n", "<leader>gop", "<cmd>Octo pr list<cr>", { desc = "[Git] Octo PR List" })
-keymap("n", "<leader>goi", "<cmd>Octo issue list<cr>", { desc = "[Git] Octo Issue List" })
-keymap("n", "<leader>goc", "<cmd>Octo issue create<cr>", { desc = "[Git] Octo Create Issue" })
-keymap("n", "<leader>gor", "<cmd>Octo review list<cr>", { desc = "[Git] Octo Review List" })
-keymap("n", "<leader>goR", "<cmd>Octo review start<cr>", { desc = "[Git] Octo Start Review" })
-keymap("n", "<leader>gos", "<cmd>Octo review submit<cr>", { desc = "[Git] Octo Submit Review" })
 
 -- ╔═══════════════════════╗
 -- ║	      UI           ║
@@ -233,14 +215,6 @@ keymap("n", "<leader>iu", insert_uuid, { desc = 'Insert uuid' })
 keymap("n", "YY", "<cmd>%y<cr>", { desc = 'Yank Buffer' })
 keymap("n", "<Esc>", "<cmd>noh<cr>", { desc = 'Clear Search' })
 
--- ╔═══════════════════════╗
--- ║          AI           ║
--- ╚═══════════════════════╝
-
--- AI operations (only verified commands from documentation)
-keymap({"n", "v"}, "<leader>aa", "<cmd>CodeCompanionActions<cr>", { desc = 'CodeCompanion [A]ctions'})
-keymap({"n", "v" }, "<leader>ac", "<cmd>CodeCompanionChat<cr>", { desc = 'CodeCompanion [C]hat'})
-keymap({"n", "v"}, "<leader>ai", "<cmd>CodeCompanion<cr>", { desc = 'CodeCompanion [I]nline Assistant'})
 
 -- ╔═══════════════════════╗
 -- ║         Visit         ║
@@ -256,18 +230,6 @@ end
 map_vis('va', 'add_label()', '[A]dd Label')
 map_vis('vr', 'remove_label()', '[R]emove Label')
 
--- ╔═══════════════════════╗
--- ║          DAP          ║
--- ╚═══════════════════════╝
-
--- Global breakpoint keymaps (always available for setting up debug sessions)
-keymap("n", "<leader>db", function() require("dap").toggle_breakpoint() end, { desc = "[D]ebug Toggle [B]reakpoint" })
-keymap("n", "<leader>dB", function()
-	require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: "))
-end, { desc = "[D]ebug Set Conditional [B]reakpoint" })
-keymap("n", "<leader>dC", function() require("dap").clear_breakpoints() end, { desc = "[D]ebug [C]lear All Breakpoints" })
-
--- Dynamic debug keymaps are managed in plugin/programming.lua with DAP setup
 
 -- ╔═══════════════════════╗
 -- ║        COMBOS         ║
@@ -470,9 +432,5 @@ map_combo(escape_modes, 'kj', '<BS><BS><Esc>')
 -- ╔═══════════════════════╗
 -- ║         Tmux          ║
 -- ╚═══════════════════════╝
-keymap("n", "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>", { desc = "Navigate left" })
-keymap("n", "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>", { desc = "Navigate down" })
-keymap("n", "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>", { desc = "Navigate up" })
-keymap("n", "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>", { desc = "Navigate right" })
-keymap("n", "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>", { desc = "Navigate previous" })
+-- Tmux navigation keymaps are set up in plugin/tmux.lua after vim-tmux-navigator is loaded
 -- stylua: ignore end

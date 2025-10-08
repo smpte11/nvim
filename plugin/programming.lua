@@ -222,6 +222,14 @@ add({
 			},
 			menu = {
 				border = Utils.ui.menu_border,
+				auto_show = function(ctx)
+					-- Don't auto-show if we're in a snippet
+					if require('blink.cmp').snippet.active() then
+						return false
+					end
+					return true
+				end,
+				auto_show_delay_ms = function(ctx, items) return vim.bo.filetype == 'markdown' and 1000 or 0 end,
 				draw = {
 					columns = {
 						{ "kind_icon", "label", "label_description", gap = 1 },
@@ -1283,6 +1291,8 @@ later(function()
 	vim.keymap.set("n", "<leader>dB", function() 
 		require("dap").set_breakpoint(vim.fn.input('Breakpoint condition: '))
 	end, { desc = "[D]ebug Conditional [B]reakpoint" })
+	vim.keymap.set("n", "<leader>dC", function() require("dap").clear_breakpoints() end, 
+		{ desc = "[D]ebug [C]lear All Breakpoints" })
 	vim.keymap.set("n", "<leader>dl", function() 
 		require("dap").set_breakpoint(nil, nil, vim.fn.input('Log point message: '))
 	end, { desc = "[D]ebug [L]og Point" })
@@ -1432,6 +1442,13 @@ later(function()
 			diffview = true,
 		},
 	})
+	
+	-- Set up git keymaps after loading
+	local keymap = vim.keymap.set
+	keymap("n", "<leader>gg", function() require('neogit').open() end, { desc = "[Git] Status" })
+	keymap("n", "<leader>gb", function() require('mini.extra').pickers.git_branches() end, { desc = "[Git] [B]ranches" })
+	keymap("n", "<leader>gc", function() require('mini.extra').pickers.git_commits() end, { desc = "[Git] [C]ommits" })
+	keymap("n", "<leader>gh", function() require('mini.extra').pickers.git_hunks() end, { desc = "[Git] [H]unks" })
 
 	-- Highlights are managed in lua/colors.lua
 end)
@@ -1447,4 +1464,7 @@ later(function()
 		date_format = "%c",
 		virtual_text_column = 2,
 	})
+	
+	-- Set up GitBlame keymap after loading
+	vim.keymap.set("n", "<leader>gB", "<cmd>GitBlameToggle<cr>", { desc = "[Git] [B]lame Toggle" })
 end)

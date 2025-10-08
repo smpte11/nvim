@@ -52,4 +52,13 @@ later(function()
 			},
 		},
 	})
+
+	-- Set up AI keymaps after CodeCompanion is loaded
+	local keymap = vim.keymap.set
+	local opts = { noremap = true, silent = false }
+
+	-- AI operations (only verified commands from documentation)
+	keymap({"n", "v"}, "<leader>aa", "<cmd>CodeCompanionActions<cr>", vim.tbl_extend("force", opts, { desc = 'CodeCompanion [A]ctions'}))
+	keymap({"n", "v" }, "<leader>ac", "<cmd>CodeCompanionChat<cr>", vim.tbl_extend("force", opts, { desc = 'CodeCompanion [C]hat'}))
+	keymap({"n", "v"}, "<leader>ai", "<cmd>CodeCompanion<cr>", vim.tbl_extend("force", opts, { desc = 'CodeCompanion [I]nline Assistant'}))
 end)

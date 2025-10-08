@@ -4,4 +4,12 @@ later(function()
 	add({
 		source = "christoomey/vim-tmux-navigator",
 	})
+	
+	-- Set up Tmux navigation keymaps after vim-tmux-navigator is loaded
+	local keymap = vim.keymap.set
+	keymap("n", "<c-h>", "<cmd><C-U>TmuxNavigateLeft<cr>", { desc = "Navigate left" })
+	keymap("n", "<c-j>", "<cmd><C-U>TmuxNavigateDown<cr>", { desc = "Navigate down" })
+	keymap("n", "<c-k>", "<cmd><C-U>TmuxNavigateUp<cr>", { desc = "Navigate up" })
+	keymap("n", "<c-l>", "<cmd><C-U>TmuxNavigateRight<cr>", { desc = "Navigate right" })
+	keymap("n", "<c-\\>", "<cmd><C-U>TmuxNavigatePrevious<cr>", { desc = "Navigate previous" })
 end)
