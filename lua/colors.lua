@@ -42,7 +42,7 @@ M.palettes = {
 }
 
 -- Current active palette
-M.current_palette = "kanagawa" -- Default to your original
+M.current_palette = "minischeme_dark" -- Default to minischeme dark
 
 local function get_active_palette()
 	return M.palettes[M.current_palette] or kanagawa_palette
