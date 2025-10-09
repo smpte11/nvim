@@ -139,23 +139,23 @@ add({
 })
 	require("blink.cmp").setup({
 		snippets = { preset = "mini_snippets" },
-		sources = {
-			cmdline = {
-				keymap = {
-					-- recommended, as the default keymap will only show and select the next item
-					["<Tab>"] = { "show", "accept" },
-				},
-				completion = {
-					menu = {
-						border = Utils.ui.menu_border,
-						auto_show = function(ctx)
-							return vim.fn.getcmdtype() == ":"
-							-- enable for inputs as well, with:
-							-- or vim.fn.getcmdtype() == '@'
-						end,
-					},
+		cmdline = {
+			keymap = {
+				-- recommended, as the default keymap will only show and select the next item
+				["<Tab>"] = { "show", "accept" },
+			},
+			completion = {
+				menu = {
+					border = Utils.ui.menu_border,
+					auto_show = function(ctx)
+						return vim.fn.getcmdtype() == ":"
+						-- enable for inputs as well, with:
+						-- or vim.fn.getcmdtype() == '@'
+					end,
 				},
 			},
+		},
+		sources = {
 			default = { "lsp", "lazydev", "path", "snippets", "buffer", "copilot" },
 			providers = {
 				lazydev = {
@@ -222,13 +222,7 @@ add({
 			},
 			menu = {
 				border = Utils.ui.menu_border,
-				auto_show = function(ctx)
-					-- Don't auto-show if we're in a snippet
-					if require('blink.cmp').snippet.active() then
-						return false
-					end
-					return true
-				end,
+				auto_show = true,
 				auto_show_delay_ms = function(ctx, items) return vim.bo.filetype == 'markdown' and 1000 or 0 end,
 				draw = {
 					columns = {
@@ -476,7 +470,7 @@ add({
 				-- by the server configuration above. useful when disabling
 				-- certain features of an lsp (for example, turning off formatting for ts_ls)
 				server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-				
+
 				require("lspconfig")[server_name].setup(server)
 			end,
 		},
@@ -569,7 +563,6 @@ later(function()
 	require("go").setup({
 		goimports = 'gopls', -- use gopls for import management
 		gofmt = 'gopls', -- use gopls for formatting
-		max_line_len = 120,
 		tag_transform = false,
 		test_dir = '',
 		comment_placeholder = '   ',
@@ -630,23 +623,23 @@ later(function()
 		-- Set up nvim-dap integration with metals
 		-- This enables Scala debugging through nvim-metals
 		require("metals").setup_dap()
-			
+
 			-- Set buffer-local keymap for metals commands picker
 			if _G.MiniPick and MiniPick.registry.metals then
-				vim.keymap.set("n", "<leader>lm", function() 
-					MiniPick.registry.metals() 
-				end, { 
-					buffer = true, 
+				vim.keymap.set("n", "<leader>lm", function()
+					MiniPick.registry.metals()
+				end, {
+					buffer = true,
 					desc = "[L]sp [M]etals Commands",
-					silent = true 
+					silent = true
 				})
 			end
-		
+
 		-- Additional Scala-specific debug keymaps
 		vim.keymap.set("n", "<leader>dt", function()
 			require("metals").run_test()
 		end, { buffer = true, desc = "[D]ebug Run [T]est" })
-		
+
 		vim.keymap.set("n", "<leader>dT", function()
 			require("metals").test_target()
 		end, { buffer = true, desc = "[D]ebug [T]est Target" })
@@ -666,12 +659,12 @@ later(function()
 	if _G.MiniPick then
 		MiniPick.registry.metals = function(local_opts)
 			local_opts = local_opts or {}
-			
+
 			-- Check if we're in a Scala-related file
 			local filetype = vim.bo.filetype
 			local scala_filetypes = { "scala", "sbt", "java", "sc" }
 			local is_scala_file = vim.tbl_contains(scala_filetypes, filetype)
-			
+
 			if not is_scala_file then
 				vim.notify("Metals commands are only available in Scala files (.scala, .sbt, .java, .sc)", vim.log.levels.WARN)
 				return
@@ -692,7 +685,7 @@ later(function()
 				vim.notify("Metals LSP client is not active in current buffer", vim.log.levels.WARN)
 				return
 			end
-			
+
 			-- Static fallback commands to avoid dynamic loading issues
 			local metals_commands = {
 				{ name = "Build Import", command = "metals.build-import", desc = "Import build" },
@@ -765,10 +758,10 @@ end)
 -- Comprehensive Debug Adapter Protocol (DAP) Setup
 -- =====================================================
 -- Supports: Python, JavaScript/TypeScript, Lua, Bash, Elixir, Erlang + Scala (via nvim-metals)
--- Features: 
+-- Features:
 -- - Auto-installation of debug adapters via Mason
 -- - Comprehensive debug configurations for each language
--- - Dynamic keymaps during debug sessions  
+-- - Dynamic keymaps during debug sessions
 -- - Virtual text showing variable values
 -- - Enhanced UI with nvim-dap-ui
 -- - Breakpoint management with custom icons
@@ -1131,7 +1124,7 @@ later(function()
 			timeout = 300,
 		},
 		{
-			type = "erlang", 
+			type = "erlang",
 			name = "Attach to Existing Node",
 			request = "attach",
 			projectnode = function()
@@ -1148,7 +1141,7 @@ later(function()
 			name = "Debug Rebar3 Project",
 			request = "launch",
 			projectnode = "debug_session",
-			cookie = "debug_cookie", 
+			cookie = "debug_cookie",
 			timeout = 300,
 			cwd = "${workspaceFolder}",
 			-- This will launch a node that can be attached to
@@ -1168,7 +1161,7 @@ later(function()
 			cwd = "${workspaceFolder}",
 			-- Setup for debugging EUnit tests
 			preLaunchTask = {
-				type = "shell", 
+				type = "shell",
 				command = "rebar3",
 				args = {"shell", "--name", "eunit_debug@localhost", "--setcookie", "eunit_cookie"},
 			},
@@ -1275,7 +1268,7 @@ later(function()
 	vim.api.nvim_set_hl(0, 'DapBreakpointRejected', { fg = '#888888' })
 	vim.api.nvim_set_hl(0, 'DapLogPoint', { fg = '#61afef' })
 	vim.api.nvim_set_hl(0, 'DapStopped', { fg = '#ffcc00' })
-	
+
 	local breakpoint_icons = vim.g.have_nerd_font
 	    and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
 	  or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
@@ -1286,69 +1279,69 @@ later(function()
 	end
 
 	-- Static breakpoint keymaps (always available)
-	vim.keymap.set("n", "<leader>db", function() require("dap").toggle_breakpoint() end, 
+	vim.keymap.set("n", "<leader>db", function() require("dap").toggle_breakpoint() end,
 		{ desc = "[D]ebug Toggle [B]reakpoint" })
-	vim.keymap.set("n", "<leader>dB", function() 
+	vim.keymap.set("n", "<leader>dB", function()
 		require("dap").set_breakpoint(vim.fn.input('Breakpoint condition: '))
 	end, { desc = "[D]ebug Conditional [B]reakpoint" })
-	vim.keymap.set("n", "<leader>dC", function() require("dap").clear_breakpoints() end, 
+	vim.keymap.set("n", "<leader>dC", function() require("dap").clear_breakpoints() end,
 		{ desc = "[D]ebug [C]lear All Breakpoints" })
-	vim.keymap.set("n", "<leader>dl", function() 
+	vim.keymap.set("n", "<leader>dl", function()
 		require("dap").set_breakpoint(nil, nil, vim.fn.input('Log point message: '))
 	end, { desc = "[D]ebug [L]og Point" })
 
 	-- Dynamic debug keymap management
 	local function setup_debug_keymaps()
 		-- Core debugging flow
-		vim.keymap.set("n", "<leader>dc", function() require("dap").continue() end, 
+		vim.keymap.set("n", "<leader>dc", function() require("dap").continue() end,
 			{ desc = "[D]ebug [C]ontinue/Start" })
-		vim.keymap.set("n", "<leader>di", function() require("dap").step_into() end, 
+		vim.keymap.set("n", "<leader>di", function() require("dap").step_into() end,
 			{ desc = "[D]ebug Step [I]nto" })
-		vim.keymap.set("n", "<leader>do", function() require("dap").step_over() end, 
+		vim.keymap.set("n", "<leader>do", function() require("dap").step_over() end,
 			{ desc = "[D]ebug Step [O]ver" })
-		vim.keymap.set("n", "<leader>dO", function() require("dap").step_out() end, 
+		vim.keymap.set("n", "<leader>dO", function() require("dap").step_out() end,
 			{ desc = "[D]ebug Step [O]ut" })
-		vim.keymap.set("n", "<leader>du", function() require("dapui").toggle() end, 
+		vim.keymap.set("n", "<leader>du", function() require("dapui").toggle() end,
 			{ desc = "[D]ebug [U]I Toggle" })
-		
+
 		-- Session management
-		vim.keymap.set("n", "<leader>dr", function() require("dap").restart() end, 
+		vim.keymap.set("n", "<leader>dr", function() require("dap").restart() end,
 			{ desc = "[D]ebug [R]estart" })
-		vim.keymap.set("n", "<leader>dt", function() require("dap").terminate() end, 
+		vim.keymap.set("n", "<leader>dt", function() require("dap").terminate() end,
 			{ desc = "[D]ebug [T]erminate" })
-		vim.keymap.set("n", "<leader>dp", function() require("dap").pause() end, 
+		vim.keymap.set("n", "<leader>dp", function() require("dap").pause() end,
 			{ desc = "[D]ebug [P]ause" })
-		
+
 		-- Advanced debugging
-		vim.keymap.set("n", "<leader>dS", function() require("dap").run_to_cursor() end, 
+		vim.keymap.set("n", "<leader>dS", function() require("dap").run_to_cursor() end,
 			{ desc = "[D]ebug Run to Cursor [S]top" })
-		vim.keymap.set("n", "<leader>dU", function() require("dap").up() end, 
+		vim.keymap.set("n", "<leader>dU", function() require("dap").up() end,
 			{ desc = "[D]ebug Stack [U]p" })
-		vim.keymap.set("n", "<leader>dD", function() require("dap").down() end, 
+		vim.keymap.set("n", "<leader>dD", function() require("dap").down() end,
 			{ desc = "[D]ebug Stack [D]own" })
-		
-		-- Evaluation & inspection  
-		vim.keymap.set("n", "<leader>de", function() require("dapui").eval() end, 
+
+		-- Evaluation & inspection
+		vim.keymap.set("n", "<leader>de", function() require("dapui").eval() end,
 			{ desc = "[D]ebug [E]valuate Expression" })
-		vim.keymap.set("v", "<leader>de", function() require("dapui").eval() end, 
+		vim.keymap.set("v", "<leader>de", function() require("dapui").eval() end,
 			{ desc = "[D]ebug [E]valuate Selection" })
-		vim.keymap.set("n", "<leader>dh", function() require("dap.ui.widgets").hover() end, 
+		vim.keymap.set("n", "<leader>dh", function() require("dap.ui.widgets").hover() end,
 			{ desc = "[D]ebug [H]over Variables" })
-		vim.keymap.set("n", "<leader>ds", function() 
+		vim.keymap.set("n", "<leader>ds", function()
 			local widgets = require("dap.ui.widgets")
 			widgets.centered_float(widgets.scopes)
 		end, { desc = "[D]ebug [S]copes" })
-		vim.keymap.set("n", "<leader>df", function() 
+		vim.keymap.set("n", "<leader>df", function()
 			local widgets = require("dap.ui.widgets")
 			widgets.centered_float(widgets.frames)
 		end, { desc = "[D]ebug [F]rames" })
-		
+
 		-- REPL
-		vim.keymap.set("n", "<leader>dR", function() require("dap").repl.open() end, 
+		vim.keymap.set("n", "<leader>dR", function() require("dap").repl.open() end,
 			{ desc = "[D]ebug [R]EPL Open" })
-		vim.keymap.set("n", "<leader>dk", function() require("dap").repl.run_last() end, 
+		vim.keymap.set("n", "<leader>dk", function() require("dap").repl.run_last() end,
 			{ desc = "[D]ebug REPL Run Last [K]ommand" })
-		
+
 		-- Add debug session clue to mini.clue
 		table.insert(MiniClue.config.clues, { mode = "n", keys = "<leader>d", desc = "🐛 debug session" })
 	end
@@ -1361,32 +1354,32 @@ later(function()
 				break
 			end
 		end
-		
+
 		-- Remove dynamic keymaps
 		-- Core debugging flow
 		pcall(vim.keymap.del, "n", "<leader>dc")
-		pcall(vim.keymap.del, "n", "<leader>di") 
+		pcall(vim.keymap.del, "n", "<leader>di")
 		pcall(vim.keymap.del, "n", "<leader>do")
 		pcall(vim.keymap.del, "n", "<leader>dO")
 		pcall(vim.keymap.del, "n", "<leader>du")
-		
+
 		-- Session management
 		pcall(vim.keymap.del, "n", "<leader>dr")
 		pcall(vim.keymap.del, "n", "<leader>dt")
 		pcall(vim.keymap.del, "n", "<leader>dp")
-		
+
 		-- Advanced debugging
 		pcall(vim.keymap.del, "n", "<leader>dS")
 		pcall(vim.keymap.del, "n", "<leader>dU")
 		pcall(vim.keymap.del, "n", "<leader>dD")
-		
+
 		-- Evaluation & inspection
 		pcall(vim.keymap.del, "n", "<leader>de")
 		pcall(vim.keymap.del, "v", "<leader>de")
 		pcall(vim.keymap.del, "n", "<leader>dh")
 		pcall(vim.keymap.del, "n", "<leader>ds")
 		pcall(vim.keymap.del, "n", "<leader>df")
-		
+
 		-- REPL
 		pcall(vim.keymap.del, "n", "<leader>dR")
 		pcall(vim.keymap.del, "n", "<leader>dk")
@@ -1442,7 +1435,7 @@ later(function()
 			diffview = true,
 		},
 	})
-	
+
 	-- Set up git keymaps after loading
 	local keymap = vim.keymap.set
 	keymap("n", "<leader>gg", function() require('neogit').open() end, { desc = "[Git] Status" })
@@ -1457,14 +1450,14 @@ later(function()
 	add({
 		source = "f-person/git-blame.nvim",
 	})
-	
+
 	require("gitblame").setup({
 		enabled = false, -- Don't enable by default
 		message_template = " <author> • <date> • <summary>",
 		date_format = "%c",
 		virtual_text_column = 2,
 	})
-	
+
 	-- Set up GitBlame keymap after loading
 	vim.keymap.set("n", "<leader>gB", "<cmd>GitBlameToggle<cr>", { desc = "[Git] [B]lame Toggle" })
 end)
