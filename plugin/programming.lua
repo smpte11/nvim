@@ -140,17 +140,12 @@ add({
 	require("blink.cmp").setup({
 		snippets = { preset = "mini_snippets" },
 		cmdline = {
-			keymap = {
-				-- recommended, as the default keymap will only show and select the next item
-				["<Tab>"] = { "show", "accept" },
-			},
+			enabled = true,
+			keymap = { preset = 'cmdline' },
 			completion = {
 				menu = {
-					border = Utils.ui.menu_border,
 					auto_show = function(ctx)
 						return vim.fn.getcmdtype() == ":"
-						-- enable for inputs as well, with:
-						-- or vim.fn.getcmdtype() == '@'
 					end,
 				},
 			},
