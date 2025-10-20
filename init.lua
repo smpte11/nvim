@@ -104,8 +104,8 @@ now(function()
 	-- Keep signcolumn on by default
 	vim.opt.signcolumn = "yes"
 
-	-- Decrease update time
-	vim.opt.updatetime = 250
+	-- Decrease update time (affects completion popup speed)
+	vim.opt.updatetime = 100
 
 	-- Decrease mapped sequence wait time
 	vim.opt.timeoutlen = 300

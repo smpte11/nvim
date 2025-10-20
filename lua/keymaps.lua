@@ -384,22 +384,21 @@ local map_multistep = minikeymap.map_multistep
 -- │ Select mode is activated when snippet has ${1:placeholder}      │
 -- │ Perfect for: Tab-ing through function parameters, etc.          │
 -- └─────────────────────────────────────────────────────────────────┘
--- Priority order: snippets first, then completion, then other behaviors
+-- Priority order: completion, snippets, indent, then smart jumps
 local tab_steps = {
 	'blink_next',              -- Navigate blink.cmp menu if visible
 	'minisnippets_next',       -- Jump to next snippet tabstop if in snippet
-	'minisnippets_expand',       -- Jump to next snippet tabstop if in snippet
+	'increase_indent',         -- Increase indent (prioritized over smart jumps)
 	'jump_after_tsnode',       -- Jump after current tree-sitter node
 	'jump_after_close',        -- Jump after closing brackets/quotes  
-	'increase_indent',         -- Increase indent if cursor is on indentation
 }
 
 local shift_tab_steps = {
 	'blink_prev',              -- Navigate blink.cmp menu backwards if visible
 	'minisnippets_prev',       -- Jump to previous snippet tabstop if in snippet
+	'decrease_indent',         -- Decrease indent (prioritized over smart jumps)
 	'jump_before_tsnode',      -- Jump before current tree-sitter node
 	'jump_before_open',        -- Jump before opening brackets/quotes
-	'decrease_indent',         -- Decrease indent if cursor is on indentation
 }
 
 -- Apply the multi-step mappings for both insert and select modes
