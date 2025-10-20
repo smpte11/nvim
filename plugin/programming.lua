@@ -583,7 +583,7 @@ later(function()
 		-- Formatter
 		trouble = true, -- trouble integration
 		test_efm = false, -- errorformat
-		luasnip = true, -- enable luasnip integration
+		luasnip = false, -- disable luasnip integration (not installed)
 		-- Build system
 		build_tags = '', -- build tags
 		textobjects = true, -- enable text objects

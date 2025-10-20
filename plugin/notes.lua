@@ -29,6 +29,14 @@ later(function()
             work_journal = "work",                              -- Matches your existing structure
             archive = "archive",                                -- For completed projects
         },
+-- Visualization settings
+    visualization = {
+        enabled = true,
+        display = {
+            icon_style = "nerd_font",  -- Change to "unicode" or "none" as needed
+            show_debug = false
+        }
+    },
 
         -- 📊 Note Tracking Configuration (Matches Your File Patterns!)
         tracking = {
