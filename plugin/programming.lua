@@ -1438,6 +1438,13 @@ later(function()
 	keymap("n", "<leader>gc", function() require('mini.extra').pickers.git_commits() end, { desc = "[Git] [C]ommits" })
 	keymap("n", "<leader>gh", function() require('mini.extra').pickers.git_hunks() end, { desc = "[Git] [H]unks" })
 
+	-- Diffview keymaps
+	keymap("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", { desc = "[Git] [D]iffview Open" })
+	keymap("n", "<leader>gD", "<cmd>DiffviewClose<cr>", { desc = "[Git] [D]iffview Close" })
+	keymap("n", "<leader>gf", "<cmd>DiffviewFileHistory %<cr>", { desc = "[Git] [F]ile History" })
+	keymap("n", "<leader>gF", "<cmd>DiffviewFileHistory<cr>", { desc = "[Git] [F]ile History (All)" })
+	keymap("n", "<leader>gm", "<cmd>DiffviewOpen origin/HEAD...HEAD<cr>", { desc = "[Git] [M]erge Base Diff" })
+
 	-- Highlights are managed in lua/colors.lua
 end)
 

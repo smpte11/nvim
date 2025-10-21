@@ -21,6 +21,11 @@ test-migrations: setup-deps
     echo "🔄 Running database migration tests..."
     nvim --headless -u scripts/minimal_init.lua -c "lua require('mini.test').setup(); MiniTest.run_file('tests/test_notes_migrations.lua')" -c "qa!"
 
+# Test diffview keymaps integration
+test-diffview:
+    echo "🔧 Testing diffview keymaps integration..."
+    nvim --headless -c "luafile tests/test_diffview_keymaps.lua" -c "qa"
+
 # Run all tests
 test-all: setup-deps
     echo "🚀 Running all notes module tests..."

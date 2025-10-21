@@ -157,8 +157,22 @@ Context-aware keys with cascading behavior:
 | `<leader>gb` | Git Branches | Browse and switch branches |
 | `<leader>gc` | Git Commits | Browse commit history |
 | `<leader>gh` | Git Hunks | View and navigate changes |
+| `<leader>gd` | Diffview Open | Open diffview to compare working directory |
+| `<leader>gD` | Diffview Close | Close the current diffview |
+| `<leader>gf` | File History | Show git history for current file |
+| `<leader>gF` | File History (All) | Show git history for entire repository |
+| `<leader>gm` | Merge Base Diff | Compare current branch with origin/HEAD |
 | `<leader>gB` | Git Blame | Toggle blame annotations |
 | `<leader>go*` | Octo Actions | GitHub integration (PR, issues, reviews) |
+
+**Diffview Buffer Mappings** (active in diffview):
+- `q` - Close diffview panel
+- `<tab>` / `<s-tab>` - Navigate between changed files
+- `[c` / `]c` - Jump between hunks (vim diff-mode)
+- `-` or `s` - Stage/unstage selected entry
+- `gf` - Open file in previous tabpage
+
+**Neogit Integration**: When in Neogit status buffer, `<leader>gd` opens diffview for quick diff access.
 
 ### UI & Visual
 

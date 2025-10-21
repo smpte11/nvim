@@ -135,6 +135,23 @@ end)
 - **Testing Framework**: mini.test with justfile automation and mock infrastructure
 - **Notes System**: ZK integration with SQLite-backed task tracking (potential plugin extraction)
 
+## Documentation Policy
+
+**CRITICAL**: This repository maintains exactly **TWO** primary documentation files:
+
+1. **`README.md`** - User-facing documentation, features, keymaps, architecture overview
+2. **`TESTING.md`** - Testing infrastructure, conventions, and procedures
+
+**All other documentation must be consolidated into these files.** Do not create standalone `.md` files like `INTEGRATION.md`, `SUMMARY.md`, `FEATURE.md`, etc.
+
+When adding new features:
+- Add keymap documentation to the appropriate section in `README.md`
+- Add testing documentation to `TESTING.md` if introducing new test patterns
+- Use code comments for implementation details
+- Use docstrings for function documentation
+
+This policy prevents documentation sprawl and ensures users have a single source of truth.
+
 ## Working with This Codebase
 
 When adding new plugins, follow the two-stage loading pattern - UI and critical functionality in `now()`, language servers and optional features in `later()`. All plugin configuration should happen inline within the loading functions, not in separate config files.
@@ -142,3 +159,5 @@ When adding new plugins, follow the two-stage loading pattern - UI and critical 
 For language support, add Treesitter parsers to `programming.lua` and configure LSP servers in the same file. Custom filetypes should be registered in the `vim.filetype.add()` call with appropriate patterns.
 
 Testing is essential - always run `just test` when modifying core functionality. The notes system has comprehensive test coverage that should be maintained if making changes before potential extraction.
+
+**Documentation**: Always update `README.md` with user-facing changes (keymaps, features) and `TESTING.md` with testing changes. Never create standalone documentation files.
