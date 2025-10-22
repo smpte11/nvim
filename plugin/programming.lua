@@ -39,9 +39,20 @@ now(function()
 			gotmpl = "gotmpl",
 		},
 		pattern = {
+			-- Helm templates (these ARE Go templates)
 			[".*/templates/.*%.tpl"] = "helm",
 			[".*/templates/.*%.ya?ml"] = "helm",
 			["helmfile.*%.ya?ml"] = "helm",
+			
+			-- Chezmoi templates with embedded languages (NOT Go templates - use base language)
+			-- These patterns detect chezmoi templates and set their filetype to the base language
+			-- The dual LSP autocmd below will handle attaching additional language servers if needed
+			[".*/%.local/share/chezmoi/.*%.sh%.tmpl$"] = "sh",
+			[".*/%.local/share/chezmoi/.*%.bash%.tmpl$"] = "bash",
+			[".*/%.local/share/chezmoi/.*%.ya?ml%.tmpl$"] = "yaml",
+			[".*/%.local/share/chezmoi/.*%.toml%.tmpl$"] = "toml",
+			[".*/%.local/share/chezmoi/.*%.json%.tmpl$"] = "json",
+			[".*/%.local/share/chezmoi/.*%.nu%.tmpl$"] = "nu",
 		},
 	})
 
@@ -593,6 +604,20 @@ later(function()
 			currentpos = '󰁕',
 		},
 	})
+	
+	-- ══════════════════════════════════════════════════════════════════════════════
+	-- NOTE: Chezmoi template handling
+	-- ══════════════════════════════════════════════════════════════════════════════
+	-- Chezmoi templates like `.sh.tmpl`, `.yaml.tmpl` are detected as their base
+	-- filetype (sh, yaml, etc.) via the vim.filetype.add() patterns above.
+	-- This means they get the correct LSP automatically (bashls for .sh.tmpl, etc.)
+	-- 
+	-- The Go template syntax highlighting is provided by treesitter injections in
+	-- queries/gotmpl/injections.scm, which work even when filetype is set to the
+	-- base language.
+	--
+	-- For actual Go template files (like Helm charts), they are detected as `gotmpl`
+	-- or `helm` filetype and get gopls LSP from go.nvim.
 end)
 
 later(function()
