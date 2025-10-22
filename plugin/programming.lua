@@ -1,4 +1,4 @@
-local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
+-- Uses global: add, now, later (from 00-bootstrap.lua)
 
 now(function()
 	-- This is a good place to add any global options you want to set for

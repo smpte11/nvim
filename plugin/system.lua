@@ -1,4 +1,4 @@
-local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
+-- Uses global: add, later (from 00-bootstrap.lua)
 
 -- chezmoi
 later(function()

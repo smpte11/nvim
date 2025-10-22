@@ -1,7 +1,6 @@
 -- ⚡ COMPREHENSIVE NOTES PLUGIN ⚡
 -- Complete notes system with proper MiniDeps initialization
-
-local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
+-- Uses global: add, now, later (from 00-bootstrap.lua)
 
 -- Load critical dependencies immediately
 now(function()

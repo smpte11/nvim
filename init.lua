@@ -7,5 +7,9 @@ require("utils")
 -- Load core configuration (options, keymaps, autocmds, commands)
 require("config.init")
 
--- Load all plugin configurations
-require("plugins.init")
+-- All plugin files in /plugin/ are auto-loaded by Neovim alphabetically.
+-- Files are prefixed with numbers to control load order:
+--   00-bootstrap.lua - Bootstrap mini.deps (loads first)
+--   01-core.lua      - Mini.nvim core UI
+--   02-editor.lua    - Editor enhancements
+--   (other files load alphabetically after these)

@@ -3,9 +3,9 @@
 -- │                                                                             │
 -- │ All mini.nvim plugins configured here. These are the foundation of the     │
 -- │ configuration and most load with now() for immediate availability.         │
+-- │                                                                             │
+-- │ Uses global: add, now, later (from 00-bootstrap.lua)                       │
 -- └─────────────────────────────────────────────────────────────────────────────┘
-
-local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- MINI.EXTRA - Additional pickers and utilities

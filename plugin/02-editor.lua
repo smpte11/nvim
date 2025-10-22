@@ -7,9 +7,9 @@
 -- │                                                                             │
 -- │ Includes: Text objects, operators, auto-pairs, commenting, jumping,        │
 -- │           animations, alignment, and more mini.nvim editing features.      │
+-- │                                                                             │
+-- │ Uses global: add, now, later (from 00-bootstrap.lua)                       │
 -- └─────────────────────────────────────────────────────────────────────────────┘
-
-local add, now, later = MiniDeps.add, MiniDeps.now, MiniDeps.later
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- MINI.AI - Enhanced text objects

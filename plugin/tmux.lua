@@ -1,4 +1,4 @@
-local add, later = MiniDeps.add, MiniDeps.later
+-- Uses global: add, later (from 00-bootstrap.lua)
 
 later(function()
 	add({
