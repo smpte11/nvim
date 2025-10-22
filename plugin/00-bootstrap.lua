@@ -16,3 +16,11 @@ require("config.bootstrap")
 _G.add = MiniDeps.add
 _G.now = MiniDeps.now
 _G.later = MiniDeps.later
+
+-- Set up spec function with explicit dependencies
+local spec_module = require("config.spec")
+_G.spec = spec_module.setup({
+	add = _G.add,
+	now = _G.now,
+	later = _G.later,
+})
