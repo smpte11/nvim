@@ -4,13 +4,12 @@
 -- │ Scala development with nvim-metals LSP, DAP debugging, and custom          │
 -- │ command picker for Mini.pick integration.                                  │
 -- │                                                                             │
--- │ Uses global: add, later (from 00-bootstrap.lua)                            │
+-- │ Uses global: spec (from 00-bootstrap.lua)                                  │
 -- └─────────────────────────────────────────────────────────────────────────────┘
 
-later(function()
-	add({
-		source = "scalameta/nvim-metals",
-	})
+spec({
+	source = "scalameta/nvim-metals",
+	config = function()
 
 	local metals_config = require("metals").bare_config()
 
@@ -134,5 +133,5 @@ later(function()
 			MiniPick.start({ source = source }, local_opts)
 		end
 	end
-end)
-
+	end,
+})

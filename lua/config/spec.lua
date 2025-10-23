@@ -17,7 +17,8 @@ function M.setup(deps)
 
 	--- Plugin specification function
 	--- @param opts table Plugin specification options
-	---   - source: string - Plugin source (required, passed to add())
+	---   - source: string - Plugin source (required unless setup_only=true)
+	---   - setup_only: boolean - If true, skip add() and only run config (for already-loaded plugins)
 	---   - immediate: boolean - If true, use now(), else use later() (default: false)
 	---   - enabled: boolean|function - Condition to enable plugin (default: true)
 	---   - config: function - Configuration function to run after plugin loads
@@ -33,6 +34,7 @@ function M.setup(deps)
 		end
 
 		-- Extract spec-specific options
+		local setup_only = opts.setup_only or false
 		local immediate = opts.immediate or false
 		local config = opts.config
 		local keys = opts.keys
@@ -40,7 +42,7 @@ function M.setup(deps)
 		-- Build add() options (pass through everything else)
 		local add_opts = {}
 		for k, v in pairs(opts) do
-			if k ~= "immediate" and k ~= "config" and k ~= "keys" and k ~= "enabled" then
+			if k ~= "setup_only" and k ~= "immediate" and k ~= "config" and k ~= "keys" and k ~= "enabled" then
 				add_opts[k] = v
 			end
 		end
@@ -49,7 +51,10 @@ function M.setup(deps)
 		local loader = immediate and now or later
 
 		loader(function()
-			add(add_opts)
+			-- Only call add() if not setup_only
+			if not setup_only then
+				add(add_opts)
+			end
 
 			-- Run config
 			if config then

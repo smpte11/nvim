@@ -8,7 +8,11 @@
 -- │ Includes: Text objects, operators, auto-pairs, commenting, jumping,        │
 -- │           animations, alignment, and more mini.nvim editing features.      │
 -- │                                                                             │
--- │ Uses global: add, now, later (from 00-bootstrap.lua)                       │
+-- │ Note: Uses later() directly since these are all mini.nvim modules that     │
+-- │       don't require add() - mini.nvim is already loaded in 01-core.lua.    │
+-- │       Could use spec({ setup_only = true, ... }) but later() is cleaner.   │
+-- │                                                                             │
+-- │ Uses global: later (from 00-bootstrap.lua)                                 │
 -- └─────────────────────────────────────────────────────────────────────────────┘
 
 -- ═══════════════════════════════════════════════════════════════════════════════

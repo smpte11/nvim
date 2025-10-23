@@ -1,53 +1,65 @@
-now(function()
-	-- Use other plugins with `add()`. It ensures plugin is available in current
-	-- session (installs if absent)
-	add({
-		source = "neovim/nvim-lspconfig",
-		-- Supply dependencies near target plugin
-		depends = {
-			"mason-org/mason.nvim",
-			"mason-org/mason-lspconfig.nvim",
-			"WhoIsSethDaniel/mason-tool-installer.nvim",
-		},
-	})
-	require("mason").setup({
-		ui = {
-			border = Utils.ui.border,
-		},
-	})
-
-	add({
-		source = "folke/lazydev.nvim",
-	})
-	require("lazydev").setup({
-		library = {
-			-- Load luvit types when the `vim.uv` word is found
-			{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
-		},
-	})
-
-local function build_blink(params)
-  vim.notify('Building blink.cmp', vim.log.levels.INFO)
-  local obj = vim.system({ 'cargo', 'build', '--release' }, { cwd = params.path }):wait()
-  if obj.code == 0 then
-    vim.notify('Building blink.cmp done', vim.log.levels.INFO)
-  else
-    vim.notify('Building blink.cmp failed', vim.log.levels.ERROR)
-  end
-end
-
-add({
-  source = 'Saghen/blink.cmp',
-		depends = {
-			"giuxtaposition/blink-cmp-copilot",
-			"Kaiser-Yang/blink-cmp-git",
-		},
-  hooks = {
-    post_install = build_blink,
-    post_checkout = build_blink,
-  },
+-- LSP configuration with Mason
+spec({
+	source = "neovim/nvim-lspconfig",
+	immediate = true,
+	depends = {
+		"mason-org/mason.nvim",
+		"mason-org/mason-lspconfig.nvim",
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+	},
+	config = function()
+		require("mason").setup({
+			ui = {
+				border = Utils.ui.border,
+			},
+		})
+	end,
 })
-	require("blink.cmp").setup({
+
+-- Lua development configuration
+spec({
+	source = "folke/lazydev.nvim",
+	immediate = true,
+	config = function()
+		require("lazydev").setup({
+			library = {
+				-- Load luvit types when the `vim.uv` word is found
+				{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+			},
+		})
+	end,
+})
+
+-- Blink.cmp completion engine
+spec({
+	source = 'Saghen/blink.cmp',
+	immediate = true,
+	depends = {
+		"giuxtaposition/blink-cmp-copilot",
+		"Kaiser-Yang/blink-cmp-git",
+	},
+	hooks = {
+		post_install = function(params)
+			vim.notify('Building blink.cmp', vim.log.levels.INFO)
+			local obj = vim.system({ 'cargo', 'build', '--release' }, { cwd = params.path }):wait()
+			if obj.code == 0 then
+				vim.notify('Building blink.cmp done', vim.log.levels.INFO)
+			else
+				vim.notify('Building blink.cmp failed', vim.log.levels.ERROR)
+			end
+		end,
+		post_checkout = function(params)
+			vim.notify('Building blink.cmp', vim.log.levels.INFO)
+			local obj = vim.system({ 'cargo', 'build', '--release' }, { cwd = params.path }):wait()
+			if obj.code == 0 then
+				vim.notify('Building blink.cmp done', vim.log.levels.INFO)
+			else
+				vim.notify('Building blink.cmp failed', vim.log.levels.ERROR)
+			end
+		end,
+	},
+	config = function()
+		require("blink.cmp").setup({
 		snippets = { preset = "mini_snippets" },
 		cmdline = {
 			enabled = true,
@@ -380,6 +392,6 @@ add({
 			end,
 		},
 	})
-
-end)
+	end,
+})
 
