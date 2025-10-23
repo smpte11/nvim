@@ -274,23 +274,23 @@ now(function()
 
 		clues = {
 			-- Leader key descriptions
-			{ mode = "n", keys = "<leader>a", desc = " ai" },
-			{ mode = "n", keys = "<leader>b", desc = " buffer" },
-			{ mode = "n", keys = "<leader>d", desc = " debug" },
-			{ mode = "n", keys = "<leader>s", desc = " search" },
+			{ mode = "n", keys = "<leader>a", desc = "󰚩 ai" },
+			{ mode = "n", keys = "<leader>b", desc = "󰓩 buffer" },
+			{ mode = "n", keys = "<leader>d", desc = "󰃤 debug" },
+			{ mode = "n", keys = "<leader>s", desc = "󰱼 search" },
 			{ mode = "n", keys = "<leader>g", desc = "󰊢 git" },
 			{ mode = "n", keys = "<leader>go", desc = " octo" },
-			{ mode = "n", keys = "<leader>i", desc = " insert" },
+			{ mode = "n", keys = "<leader>i", desc = "󰼛 insert" },
 			{ mode = "n", keys = "<leader>l", desc = "󰘦 lsp" },
-			{ mode = "n", keys = "<leader>m", desc = " mini" },
-			{ mode = "n", keys = "<leader>n", desc = " notes" },
-			{ mode = "n", keys = "<leader>q", desc = " nvim" },
+			{ mode = "n", keys = "<leader>m", desc = "󰵮 mini" },
+			{ mode = "n", keys = "<leader>n", desc = "󰠮 notes" },
+			{ mode = "n", keys = "<leader>q", desc = "󰒲 nvim" },
 			{ mode = "n", keys = "<leader>S", desc = "󰆓 session" },
 			{ mode = "n", keys = "<leader>u", desc = "󰔃 ui" },
 			{ mode = "n", keys = "<leader>up", desc = "󰯓 pipeline" },
 			{ mode = "n", keys = "<leader>uz", desc = "󰢄 zen" },
-			{ mode = "n", keys = "<leader>v", desc = " visit" },
-			{ mode = "n", keys = "<leader>w", desc = " window" },
+			{ mode = "n", keys = "<leader>v", desc = "󰈙 visit" },
+			{ mode = "n", keys = "<leader>w", desc = "󱂬 window" },
 			{ mode = "n", keys = "<leader>f", desc = "󱧷 file" },
 			
 			-- Generated clues
