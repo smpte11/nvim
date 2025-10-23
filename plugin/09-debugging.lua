@@ -404,40 +404,10 @@ spec({
             terminalKind = 'integrated'
         }}
 
-        -- Advanced configuration for better debugging experience
-        -- Enable virtual text for debugging (shows variable values inline)
-        add({
-            source = "theHamsta/nvim-dap-virtual-text"
-        })
-        require("nvim-dap-virtual-text").setup({
-            enabled = true,
-            enabled_commands = true,
-            highlight_changed_variables = true,
-            highlight_new_as_changed = false,
-            show_stop_reason = true,
-            commented = false,
-            only_first_definition = true,
-            all_references = false,
-            clear_on_continue = false,
-            display_callback = function(variable, buf, stackframe, node, options)
-                if options.virt_text_pos == 'inline' then
-                    return ' = ' .. variable.value
-                else
-                    return variable.name .. ' = ' .. variable.value
-                end
-            end,
-            virt_text_pos = vim.fn.has 'nvim-0.10' == 1 and 'inline' or 'eol',
-            all_frames = false,
-            virt_lines = false,
-            virt_text_win_col = nil
-        })
-
-        -- Dap UI setup
-        -- For more information, see |:help nvim-dap-ui|
+        -- =====================================================
+        -- DAP UI Configuration
+        -- =====================================================
         dapui.setup({
-            -- Set icons to characters that are more likely to work in every terminal.
-            --    Feel free to remove or use ones that you like more! :)
-            --    Don't feel like these are good choices.
             icons = {
                 expanded = "▾",
                 collapsed = "▸",
@@ -457,18 +427,6 @@ spec({
                 }
             }
         })
-
-        -- Change breakpoint icons
-        -- vim.api.nvim_set_hl(0, 'DapBreak', { fg = '#e51400' })
-        -- vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
-        -- local breakpoint_icons = vim.g.have_nerd_font
-        --     and { Breakpoint = '', BreakpointCondition = '', BreakpointRejected = '', LogPoint = '', Stopped = '' }
-        --   or { Breakpoint = '●', BreakpointCondition = '⊜', BreakpointRejected = '⊘', LogPoint = '◆', Stopped = '⭔' }
-        -- for type, icon in pairs(breakpoint_icons) do
-        --   local tp = 'Dap' .. type
-        --   local hl = (type == 'Stopped') and 'DapStop' or 'DapBreak'
-        --   vim.fn.sign_define(tp, { text = icon, texthl = hl, numhl = hl })
-        -- end
 
         -- Configure breakpoint icons and highlights
         vim.api.nvim_set_hl(0, 'DapBreakpoint', {
@@ -510,29 +468,36 @@ spec({
             })
         end
 
-        -- Static breakpoint keymaps (always available)
+        -- =====================================================
+        -- Static Breakpoint Keymaps (always available)
+        -- =====================================================
         vim.keymap.set("n", "<leader>db", function()
             require("dap").toggle_breakpoint()
         end, {
             desc = "[D]ebug Toggle [B]reakpoint"
         })
+
         vim.keymap.set("n", "<leader>dB", function()
             require("dap").set_breakpoint(vim.fn.input('Breakpoint condition: '))
         end, {
             desc = "[D]ebug Conditional [B]reakpoint"
         })
+
         vim.keymap.set("n", "<leader>dC", function()
             require("dap").clear_breakpoints()
         end, {
             desc = "[D]ebug [C]lear All Breakpoints"
         })
+
         vim.keymap.set("n", "<leader>dl", function()
             require("dap").set_breakpoint(nil, nil, vim.fn.input('Log point message: '))
         end, {
             desc = "[D]ebug [L]og Point"
         })
 
-        -- Dynamic debug keymap management
+        -- =====================================================
+        -- Dynamic Debug Keymap Management
+        -- =====================================================
         local function setup_debug_keymaps()
             -- Core debugging flow
             vim.keymap.set("n", "<leader>dc", function()
@@ -540,21 +505,25 @@ spec({
             end, {
                 desc = "[D]ebug [C]ontinue/Start"
             })
+
             vim.keymap.set("n", "<leader>di", function()
                 require("dap").step_into()
             end, {
                 desc = "[D]ebug Step [I]nto"
             })
+
             vim.keymap.set("n", "<leader>do", function()
                 require("dap").step_over()
             end, {
                 desc = "[D]ebug Step [O]ver"
             })
+
             vim.keymap.set("n", "<leader>dO", function()
                 require("dap").step_out()
             end, {
                 desc = "[D]ebug Step [O]ut"
             })
+
             vim.keymap.set("n", "<leader>du", function()
                 require("dapui").toggle()
             end, {
@@ -567,11 +536,13 @@ spec({
             end, {
                 desc = "[D]ebug [R]estart"
             })
+
             vim.keymap.set("n", "<leader>dt", function()
                 require("dap").terminate()
             end, {
                 desc = "[D]ebug [T]erminate"
             })
+
             vim.keymap.set("n", "<leader>dp", function()
                 require("dap").pause()
             end, {
@@ -584,11 +555,13 @@ spec({
             end, {
                 desc = "[D]ebug Run to Cursor [S]top"
             })
+
             vim.keymap.set("n", "<leader>dU", function()
                 require("dap").up()
             end, {
                 desc = "[D]ebug Stack [U]p"
             })
+
             vim.keymap.set("n", "<leader>dD", function()
                 require("dap").down()
             end, {
@@ -601,22 +574,26 @@ spec({
             end, {
                 desc = "[D]ebug [E]valuate Expression"
             })
+
             vim.keymap.set("v", "<leader>de", function()
                 require("dapui").eval()
             end, {
                 desc = "[D]ebug [E]valuate Selection"
             })
+
             vim.keymap.set("n", "<leader>dh", function()
                 require("dap.ui.widgets").hover()
             end, {
                 desc = "[D]ebug [H]over Variables"
             })
+
             vim.keymap.set("n", "<leader>ds", function()
                 local widgets = require("dap.ui.widgets")
                 widgets.centered_float(widgets.scopes)
             end, {
                 desc = "[D]ebug [S]copes"
             })
+
             vim.keymap.set("n", "<leader>df", function()
                 local widgets = require("dap.ui.widgets")
                 widgets.centered_float(widgets.frames)
@@ -630,6 +607,7 @@ spec({
             end, {
                 desc = "[D]ebug [R]EPL Open"
             })
+
             vim.keymap.set("n", "<leader>dk", function()
                 require("dap").repl.run_last()
             end, {
@@ -654,47 +632,71 @@ spec({
             end
 
             -- Remove dynamic keymaps
-            -- Core debugging flow
             pcall(vim.keymap.del, "n", "<leader>dc")
             pcall(vim.keymap.del, "n", "<leader>di")
             pcall(vim.keymap.del, "n", "<leader>do")
             pcall(vim.keymap.del, "n", "<leader>dO")
             pcall(vim.keymap.del, "n", "<leader>du")
-
-            -- Session management
             pcall(vim.keymap.del, "n", "<leader>dr")
             pcall(vim.keymap.del, "n", "<leader>dt")
             pcall(vim.keymap.del, "n", "<leader>dp")
-
-            -- Advanced debugging
             pcall(vim.keymap.del, "n", "<leader>dS")
             pcall(vim.keymap.del, "n", "<leader>dU")
             pcall(vim.keymap.del, "n", "<leader>dD")
-
-            -- Evaluation & inspection
             pcall(vim.keymap.del, "n", "<leader>de")
             pcall(vim.keymap.del, "v", "<leader>de")
             pcall(vim.keymap.del, "n", "<leader>dh")
             pcall(vim.keymap.del, "n", "<leader>ds")
             pcall(vim.keymap.del, "n", "<leader>df")
-
-            -- REPL
             pcall(vim.keymap.del, "n", "<leader>dR")
             pcall(vim.keymap.del, "n", "<leader>dk")
         end
 
-        -- Event listeners with keymap management
+        -- =====================================================
+        -- Event Listeners - Auto-open/close UI and manage keymaps
+        -- =====================================================
         dap.listeners.after.event_initialized["dapui_config"] = function()
             dapui.open()
             setup_debug_keymaps()
         end
+
         dap.listeners.before.event_terminated["dapui_config"] = function()
             dapui.close()
             teardown_debug_keymaps()
         end
+
         dap.listeners.before.event_exited["dapui_config"] = function()
             dapui.close()
             teardown_debug_keymaps()
         end
+    end
+})
+
+-- DAP virtual text - shows variable values inline
+spec({
+    source = "theHamsta/nvim-dap-virtual-text",
+    config = function()
+        require("nvim-dap-virtual-text").setup({
+            enabled = true,
+            enabled_commands = true,
+            highlight_changed_variables = true,
+            highlight_new_as_changed = false,
+            show_stop_reason = true,
+            commented = false,
+            only_first_definition = true,
+            all_references = false,
+            clear_on_continue = false,
+            display_callback = function(variable, buf, stackframe, node, options)
+                if options.virt_text_pos == 'inline' then
+                    return ' = ' .. variable.value
+                else
+                    return variable.name .. ' = ' .. variable.value
+                end
+            end,
+            virt_text_pos = vim.fn.has 'nvim-0.10' == 1 and 'inline' or 'eol',
+            all_frames = false,
+            virt_lines = false,
+            virt_text_win_col = nil
+        })
     end
 })

@@ -177,11 +177,14 @@ spec({
 	})
 
 	-- Highlights are managed in lua/colors.lua
+	end,
+})
 
-	add({
-		source = "stevearc/conform.nvim",
-	})
-	require("conform").setup({
+-- Code formatting with conform.nvim
+spec({
+	source = "stevearc/conform.nvim",
+	config = function()
+		require("conform").setup({
 		notify_on_error = false,
 		format_on_save = function(bufnr)
 			if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
@@ -216,9 +219,11 @@ spec({
 			-- You can use 'stop_after_first' to run the first available formatter from the list
 			-- javascript = { "prettierd", "prettier", stop_after_first = true },
 		},
-	})
+		})
+	end,
+})
 
-	-- Brief aside: **What is LSP?**
+-- Brief aside: **What is LSP?**
 	--
 	-- LSP is an initialism you've probably heard, but might not understand what it is.
 	--
@@ -392,6 +397,4 @@ spec({
 			end,
 		},
 	})
-	end,
-})
 
