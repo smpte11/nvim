@@ -42,24 +42,24 @@ end, {
 
 -- User commands for color palette management
 vim.api.nvim_create_user_command("ColorPalettes", function()
-    require("colors").pick_palette()
+    require("config.colors").pick_palette()
 end, { desc = "Open color palette picker" })
 
 vim.api.nvim_create_user_command("ColorPalette", function(opts)
     local palette_name = opts.args
     if palette_name == "" then
-        require("colors").pick_palette()
+        require("config.colors").pick_palette()
     else
-        require("colors").switch_palette(palette_name)
+        require("config.colors").switch_palette(palette_name)
     end
 end, {
     desc = "Switch color palette or open picker",
     nargs = '?',
     complete = function()
-        return require("colors").list_palettes()
+        return require("config.colors").list_palettes()
     end
 })
 
 vim.api.nvim_create_user_command("ColorToggle", function()
-    require("colors").toggle_favorite_palettes()
+    require("config.colors").toggle_favorite_palettes()
 end, { desc = "Toggle between favorite color palettes" })

@@ -28,7 +28,7 @@ spec({
 	setup_only = true,
 	immediate = true,
 	config = function()
-		require("colors").setup()
+		require("config.colors").setup()
 	end,
 })
 

@@ -154,6 +154,6 @@ vim.api.nvim_create_autocmd("ColorScheme", {
     group = vim.api.nvim_create_augroup("custom-highlights", { clear = true }),
     callback = function()
         -- Always reapply custom highlights after any colorscheme change
-        require("colors").apply_highlights()
+        require("config.colors").apply_highlights()
     end,
 })

@@ -2,7 +2,7 @@
 vim.loader.enable()
 
 -- Load utilities first (provides Utils global namespace)
-require("utils")
+require("config.utils")
 
 -- Load core configuration (options, keymaps, autocmds, commands)
 require("config.init")

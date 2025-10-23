@@ -215,7 +215,7 @@ M.create_command_palette = function()
 		{ name = "AI: Inline Assistant", category = "default", icon = "󰙎", action = function() vim.cmd('CodeCompanion') end },
 		
 		-- Color Palette operations (hierarchical - opens subpicker)
-		{ name = "🎨 Colors", category = "default", icon = "🎨", action = function() require("colors").pick_palette() end },
+		{ name = "🎨 Colors", category = "default", icon = "🎨", action = function() require("config.colors").pick_palette() end },
 		
 		-- Visits
 		{ name = "Visit: Paths", category = "directory", action = function() MiniExtra.pickers.visit_paths() end },

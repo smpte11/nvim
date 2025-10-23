@@ -10,10 +10,10 @@
 -- └─────────────────────────────────────────────────────────────────────────────┘
 
 -- Load global utilities first (provides Utils namespace)
-require("utils")
+require("config.utils")
 
 -- Load core configuration
 require("config.options")  -- vim.opt, vim.g settings
-require("keymaps")         -- Global keymaps
-require("autocmd")         -- Autocommands
-require("cmd")             -- User commands
+require("config.keymaps")  -- Global keymaps
+require("config.autocmd")  -- Autocommands
+require("config.cmd")      -- User commands
