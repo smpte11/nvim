@@ -35,33 +35,16 @@ spec({
             }
         })
     end,
-    keys = {{
-        "<leader>uzt",
-        "<cmd>NoNeckPain<cr>",
-        desc = "Toggle"
-    }, {
-        "<leader>uzl",
-        "<cmd>NoNeckPainToggleLeftSide<cr>",
-        desc = "Toggle Left Side"
-    }, {
-        "<leader>uzr",
-        "<cmd>NoNeckPainToggleRightSide<cr>",
-        desc = "Toggle Right Side"
-    }, {
-        "<leader>uz=",
-        _G.__zen_width_increase,
-        expr = true,
-        desc = "Increase Width (dot-repeatable)"
-    }, {
-        "<leader>uz-",
-        _G.__zen_width_decrease,
-        expr = true,
-        desc = "Decrease Width (dot-repeatable)"
-    }, {
-        "<leader>uzs",
-        "<cmd>NoNeckPainScratchPad<cr>",
-        desc = "Toggle ScratchPad"
-    }}
+    -- stylua: ignore start
+    keys = {
+        { "<leader>uzt", "<cmd>NoNeckPain<cr>", desc = "Toggle" },
+        { "<leader>uzl", "<cmd>NoNeckPainToggleLeftSide<cr>", desc = "Toggle Left Side" },
+        { "<leader>uzr", "<cmd>NoNeckPainToggleRightSide<cr>", desc = "Toggle Right Side" },
+        { "<leader>uz=", _G.__zen_width_increase, expr = true, desc = "Increase Width (dot-repeatable)" },
+        { "<leader>uz-", _G.__zen_width_decrease, expr = true, desc = "Decrease Width (dot-repeatable)" },
+        { "<leader>uzs", "<cmd>NoNeckPainScratchPad<cr>", desc = "Toggle ScratchPad" },
+    }
+    -- stylua: ignore end
 })
 
 spec({

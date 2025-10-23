@@ -12,6 +12,7 @@ spec({
 			picker = "mini_picker",
 		})
 	end,
+	-- stylua: ignore start
 	keys = {
 		{ "<leader>goo", "<cmd>Octo actions<cr>", desc = "[Git] Octo Actions" },
 		{ "<leader>gop", "<cmd>Octo pr list<cr>", desc = "[Git] Octo PR List" },
@@ -21,4 +22,5 @@ spec({
 		{ "<leader>goR", "<cmd>Octo review start<cr>", desc = "[Git] Octo Start Review" },
 		{ "<leader>gos", "<cmd>Octo review submit<cr>", desc = "[Git] Octo Submit Review" },
 	},
+	-- stylua: ignore end
 })

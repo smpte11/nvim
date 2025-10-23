@@ -54,9 +54,11 @@ spec({
 			},
 		})
 	end,
+	-- stylua: ignore start
 	keys = {
 		{ "<leader>aa", "<cmd>CodeCompanionActions<cr>", desc = "CodeCompanion [A]ctions", mode = { "n", "v" }, noremap = true, silent = false },
 		{ "<leader>ac", "<cmd>CodeCompanionChat<cr>", desc = "CodeCompanion [C]hat", mode = { "n", "v" }, noremap = true, silent = false },
 		{ "<leader>ai", "<cmd>CodeCompanion<cr>", desc = "CodeCompanion [I]nline Assistant", mode = { "n", "v" }, noremap = true, silent = false },
 	},
+	-- stylua: ignore end
 })
