@@ -1,5 +1,8 @@
 -- Uses global: spec (from 00-bootstrap.lua)
+-- NOTE: Commented out in favor of snacks.nvim gh module
+-- Uncomment if you prefer octo.nvim over snacks gh
 
+--[[ 
 spec({
 	source = "smpte11/octo.nvim",
 	depends = {
@@ -24,3 +27,4 @@ spec({
 	},
 	-- stylua: ignore end
 })
+--]]

@@ -16,6 +16,7 @@
 spec({
     setup_only = true,
     config = function()
+		local gen_spec = require("mini.ai").gen_spec
         local gen_ai_spec = MiniExtra.gen_ai_spec
         require("mini.ai").setup({
             custom_textobjects = {
@@ -24,7 +25,7 @@ spec({
                 I = gen_ai_spec.indent(),
                 L = gen_ai_spec.line(),
                 N = gen_ai_spec.number(),
-				F = gen_ai_spec.treesitter({ a = '@function.outer', i = '@function.inner' }),
+				F = gen_spec.treesitter({ a = '@function.outer', i = '@function.inner' }),
             },
 search_method = "cover",
         })

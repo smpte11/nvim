@@ -98,6 +98,55 @@ spec({
 })
 
 -- ═══════════════════════════════════════════════════════════════════════════════
+-- SNACKS.NVIM - GitHub integration & LSP file rename
+-- ═══════════════════════════════════════════════════════════════════════════════
+spec({
+	source = "folke/snacks.nvim",
+	immediate = true,
+	config = function()
+		require("snacks").setup({
+			-- Enable gh (GitHub integration) and rename (LSP file rename) modules
+			gh = { enabled = true },
+			rename = { enabled = true },
+			picker = { 
+				enabled = true,
+				-- Match mini.pick layout (centered, 75% dimensions)
+				layout = {
+					preset = function()
+						return vim.o.columns >= 120 and "default" or "vertical"
+					end,
+				},
+			},
+			scratch = { enabled = true }, -- Required for gh editing
+			-- Configure styles to match your UI
+			styles = {
+				-- Scratch buffers (used for editing GitHub comments/descriptions)
+				scratch = {
+					border = Utils.ui.border,
+					width = 100,
+					height = 30,
+				},
+				-- Picker windows
+				picker = {
+					border = Utils.ui.border,
+				},
+			},
+		})
+	end,
+	-- stylua: ignore start
+	keys = {
+		-- GitHub integration
+		{ "<leader>gi", function() Snacks.picker.gh_issue() end, desc = "GitHub Issues (open)" },
+		{ "<leader>gI", function() Snacks.picker.gh_issue({ state = "all" }) end, desc = "GitHub Issues (all)" },
+		{ "<leader>gp", function() Snacks.picker.gh_pr() end, desc = "GitHub Pull Requests (open)" },
+		{ "<leader>gP", function() Snacks.picker.gh_pr({ state = "all" }) end, desc = "GitHub Pull Requests (all)" },
+		-- File rename (alternative to LSP rename)
+		{ "<leader>cR", function() Snacks.rename.rename_file() end, desc = "Rename File" },
+	},
+	-- stylua: ignore end
+})
+
+-- ═══════════════════════════════════════════════════════════════════════════════
 -- MINI.NOTIFY - Notification manager
 -- ═══════════════════════════════════════════════════════════════════════════════
 spec({
@@ -264,6 +313,14 @@ spec({
 				width_focus = 30,
 				width_preview = 50,
 			},
+		})
+		
+		-- Integrate with snacks.nvim rename for LSP file renaming
+		vim.api.nvim_create_autocmd("User", {
+			pattern = "MiniFilesActionRename",
+			callback = function(event)
+				Snacks.rename.on_rename_file(event.data.from, event.data.to)
+			end,
 		})
 	end,
 })
