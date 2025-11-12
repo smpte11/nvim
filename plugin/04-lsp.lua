@@ -131,6 +131,7 @@ spec({
 						enabled = true,
 						default_brackets = { "(", ")" },
 						override_brackets_for_filetypes = {},
+						blocked_filetypes = { "erlang" },
 						-- Disable semantic token resolution for Java/Scala to prevent unwanted parentheses on modules
 						semantic_token_resolution = {
 							enabled = true,
