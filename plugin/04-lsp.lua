@@ -105,7 +105,8 @@ spec({
 						module = "blink-cmp-git",
 						name = "Git",
 						enabled = function()
-							return vim.tbl_contains({ "octo", "gitcommit", "markdown" }, vim.bo.filetype)
+							-- NOTE: Removed "octo" since we're using snacks.nvim gh
+							return vim.tbl_contains({ "gitcommit", "markdown" }, vim.bo.filetype)
 						end,
 					},
 				},

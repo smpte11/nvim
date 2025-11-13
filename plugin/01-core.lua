@@ -50,50 +50,50 @@ spec({
 	setup_only = true,
 	immediate = true,
 	config = function()
-	-- Centered on screen
-	local win_config = function()
-		local height = math.floor(0.75 * vim.o.lines)
-		local width = math.floor(0.75 * vim.o.columns)
-		return {
-			anchor = "NW",
-			height = height,
-			width = width,
-			row = math.floor(0.5 * (vim.o.lines - height)),
-			col = math.floor(0.5 * (vim.o.columns - width)),
-			border = Utils.ui.border,
-		}
-	end
-	
-	require("mini.pick").setup({
-		window = { config = win_config },
-	})
-
-	-- Use mini.pick for vim.ui.select
-	vim.ui.select = MiniPick.ui_select
-
-	-- Custom directory picker
-	MiniPick.registry.directories = function(path)
-		local dirs = {}
-		local handle = vim.loop.fs_scandir(path or vim.fn.getcwd())
-		if handle then
-			while true do
-				local name, type = vim.loop.fs_scandir_next(handle)
-				if not name then
-					break
-				end
-				if type == "directory" and not name:match("^%.") then
-					table.insert(dirs, name)
-				end
-			end
+		-- Centered on screen
+		local win_config = function()
+			local height = math.floor(0.75 * vim.o.lines)
+			local width = math.floor(0.75 * vim.o.columns)
+			return {
+				anchor = "NW",
+				height = height,
+				width = width,
+				row = math.floor(0.5 * (vim.o.lines - height)),
+				col = math.floor(0.5 * (vim.o.columns - width)),
+				border = Utils.ui.border,
+			}
 		end
 
-		return MiniPick.start({
-			source = {
-				name = "Select destination directory",
-				items = dirs,
-			},
+		require("mini.pick").setup({
+			window = { config = win_config },
 		})
-	end
+
+		-- Use mini.pick for vim.ui.select
+		vim.ui.select = MiniPick.ui_select
+
+		-- Custom directory picker
+		MiniPick.registry.directories = function(path)
+			local dirs = {}
+			local handle = vim.loop.fs_scandir(path or vim.fn.getcwd())
+			if handle then
+				while true do
+					local name, type = vim.loop.fs_scandir_next(handle)
+					if not name then
+						break
+					end
+					if type == "directory" and not name:match("^%.") then
+						table.insert(dirs, name)
+					end
+				end
+			end
+
+			return MiniPick.start({
+				source = {
+					name = "Select destination directory",
+					items = dirs,
+				},
+			})
+		end
 	end,
 })
 
@@ -108,7 +108,7 @@ spec({
 			-- Enable gh (GitHub integration) and rename (LSP file rename) modules
 			gh = { enabled = true },
 			rename = { enabled = true },
-			picker = { 
+			picker = {
 				enabled = true,
 				-- Match mini.pick layout (centered, 75% dimensions)
 				layout = {
@@ -180,11 +180,11 @@ spec({
 		hipatterns.setup({
 			highlighters = {
 				-- Highlight standalone 'FIXME', 'HACK', 'TODO', 'NOTE'
-				fixme = { pattern = '%f[%w]()FIXME()%f[%W]', group = 'MiniHipatternsFixme' },
-				hack  = { pattern = '%f[%w]()HACK()%f[%W]',  group = 'MiniHipatternsHack' },
-				todo  = { pattern = '%f[%w]()TODO()%f[%W]',  group = 'MiniHipatternsTodo' },
-				note  = { pattern = '%f[%w]()NOTE()%f[%W]',  group = 'MiniHipatternsNote' },
-				
+				fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
+				hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
+				todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsTodo" },
+				note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
+
 				-- Highlight hex color strings (`#rrggbb`) using that color
 				hex_color = hipatterns.gen_highlighter.hex_color(),
 			},
@@ -204,7 +204,7 @@ spec({
 				extra_ui = true, -- Extra UI features ('winblend', 'cmdheight=0', ...)
 			},
 			mappings = {
-				windows = true,      -- Window navigation with <C-hjkl>, resize with <C-arrow>
+				windows = true, -- Window navigation with <C-hjkl>, resize with <C-arrow>
 				move_with_alt = true, -- Move cursor in Insert, Command, and Terminal mode with <M-hjkl>
 			},
 			silent = true,
@@ -285,15 +285,15 @@ spec({
 	config = function()
 		-- Disable 's' key first (we use it for surround)
 		vim.keymap.set({ "n", "x" }, "s", "<Nop>")
-		
+
 		require("mini.surround").setup({
 			mappings = {
-				add = "sa",            -- Add surrounding in Normal and Visual modes
-				delete = "sd",         -- Delete surrounding
-				find = "sf",           -- Find surrounding (to the right)
-				find_left = "sF",      -- Find surrounding (to the left)
-				highlight = "sh",      -- Highlight surrounding
-				replace = "sr",        -- Replace surrounding
+				add = "sa", -- Add surrounding in Normal and Visual modes
+				delete = "sd", -- Delete surrounding
+				find = "sf", -- Find surrounding (to the right)
+				find_left = "sF", -- Find surrounding (to the left)
+				highlight = "sh", -- Highlight surrounding
+				replace = "sr", -- Replace surrounding
 				update_n_lines = "sn", -- Update `n_lines`
 			},
 		})
@@ -314,7 +314,7 @@ spec({
 				width_preview = 50,
 			},
 		})
-		
+
 		-- Integrate with snacks.nvim rename for LSP file renaming
 		vim.api.nvim_create_autocmd("User", {
 			pattern = "MiniFilesActionRename",
@@ -370,83 +370,84 @@ spec({
 	immediate = true,
 	config = function()
 		require("mini.clue").setup({
-		triggers = {
-			-- Leader triggers
-			{ mode = "n", keys = "<leader>" },
-			{ mode = "x", keys = "<leader>" },
-			{ mode = "n", keys = "<localleader>" },
-			{ mode = "x", keys = "<localleader>" },
-			{ mode = "n", keys = "\\" },
-			
-			-- Built-in completion
-			{ mode = "i", keys = "<c-x>" },
-			
-			-- `g` key
-			{ mode = "n", keys = "g" },
-			{ mode = "x", keys = "g" },
-			
-			-- Marks
-			{ mode = "n", keys = "'" },
-			{ mode = "n", keys = "`" },
-			{ mode = "x", keys = "'" },
-			{ mode = "x", keys = "`" },
-			
-			-- Registers
-			{ mode = "n", keys = '"' },
-			{ mode = "x", keys = '"' },
-			{ mode = "i", keys = "<c-r>" },
-			{ mode = "c", keys = "<c-r>" },
-			
-			-- Window commands
-			{ mode = "n", keys = "<c-w>" },
-			
-			-- `z` key
-			{ mode = "n", keys = "z" },
-			{ mode = "x", keys = "z" },
-			
-			-- `s` key (surround)
-			{ mode = "n", keys = "s" },
-			{ mode = "x", keys = "s" },
-		},
+			triggers = {
+				-- Leader triggers
+				{ mode = "n", keys = "<leader>" },
+				{ mode = "x", keys = "<leader>" },
+				{ mode = "n", keys = "<localleader>" },
+				{ mode = "x", keys = "<localleader>" },
+				{ mode = "n", keys = "\\" },
 
-		clues = {
-			-- Leader key descriptions
-			{ mode = "n", keys = "<leader>a", desc = "󰚩 ai" },
-			{ mode = "n", keys = "<leader>b", desc = "󰓩 buffer" },
-			{ mode = "n", keys = "<leader>d", desc = "󰃤 debug" },
-			{ mode = "n", keys = "<leader>s", desc = "󰱼 search" },
-			{ mode = "n", keys = "<leader>g", desc = "󰊢 git" },
-			{ mode = "n", keys = "<leader>go", desc = " octo" },
-			{ mode = "n", keys = "<leader>i", desc = "󰼛 insert" },
-			{ mode = "n", keys = "<leader>l", desc = "󰘦 lsp" },
-			{ mode = "n", keys = "<leader>m", desc = "󰵮 mini" },
-			{ mode = "n", keys = "<leader>n", desc = "󰠮 notes" },
-			{ mode = "n", keys = "<leader>q", desc = "󰒲 nvim" },
-			{ mode = "n", keys = "<leader>S", desc = "󰆓 session" },
-			{ mode = "n", keys = "<leader>u", desc = "󰔃 ui" },
-			{ mode = "n", keys = "<leader>up", desc = "󰯓 pipeline" },
-			{ mode = "n", keys = "<leader>uz", desc = "󰢄 zen" },
-			{ mode = "n", keys = "<leader>v", desc = "󰈙 visit" },
-			{ mode = "n", keys = "<leader>w", desc = "󱂬 window" },
-			{ mode = "n", keys = "<leader>f", desc = "󱧷 file" },
-			
-			-- Generated clues
-			require("mini.clue").gen_clues.g(),
-			require("mini.clue").gen_clues.builtin_completion(),
-			require("mini.clue").gen_clues.marks(),
-			require("mini.clue").gen_clues.registers(),
-			require("mini.clue").gen_clues.windows({
-				submode_move = true,
-				submode_navigate = true,
-				submode_resize = true,
-			}),
-			require("mini.clue").gen_clues.z(),
-		},
-		
-		window = {
-			delay = 0,
-			config = { width = "auto", border = Utils.ui.border },
-		},
-	})
+				-- Built-in completion
+				{ mode = "i", keys = "<c-x>" },
+
+				-- `g` key
+				{ mode = "n", keys = "g" },
+				{ mode = "x", keys = "g" },
+
+				-- Marks
+				{ mode = "n", keys = "'" },
+				{ mode = "n", keys = "`" },
+				{ mode = "x", keys = "'" },
+				{ mode = "x", keys = "`" },
+
+				-- Registers
+				{ mode = "n", keys = '"' },
+				{ mode = "x", keys = '"' },
+				{ mode = "i", keys = "<c-r>" },
+				{ mode = "c", keys = "<c-r>" },
+
+				-- Window commands
+				{ mode = "n", keys = "<c-w>" },
+
+				-- `z` key
+				{ mode = "n", keys = "z" },
+				{ mode = "x", keys = "z" },
+
+				-- `s` key (surround)
+				{ mode = "n", keys = "s" },
+				{ mode = "x", keys = "s" },
+			},
+
+			clues = {
+				-- Leader key descriptions
+				{ mode = "n", keys = "<leader>a", desc = "󰚩 ai" },
+				{ mode = "n", keys = "<leader>b", desc = "󰓩 buffer" },
+				{ mode = "n", keys = "<leader>d", desc = "󰃤 debug" },
+				{ mode = "n", keys = "<leader>s", desc = "󰱼 search" },
+				{ mode = "n", keys = "<leader>g", desc = "󰊢 git" },
+				-- NOTE: Commented out - using snacks.nvim gh instead
+				-- { mode = "n", keys = "<leader>go", desc = " octo" },
+				{ mode = "n", keys = "<leader>i", desc = "󰼛 insert" },
+				{ mode = "n", keys = "<leader>l", desc = "󰘦 lsp" },
+				{ mode = "n", keys = "<leader>m", desc = "󰵮 mini" },
+				{ mode = "n", keys = "<leader>n", desc = "󰠮 notes" },
+				{ mode = "n", keys = "<leader>q", desc = "󰒲 nvim" },
+				{ mode = "n", keys = "<leader>S", desc = "󰆓 session" },
+				{ mode = "n", keys = "<leader>u", desc = "󰔃 ui" },
+				{ mode = "n", keys = "<leader>up", desc = "󰯓 pipeline" },
+				{ mode = "n", keys = "<leader>uz", desc = "󰢄 zen" },
+				{ mode = "n", keys = "<leader>v", desc = "󰈙 visit" },
+				{ mode = "n", keys = "<leader>w", desc = "󱂬 window" },
+				{ mode = "n", keys = "<leader>f", desc = "󱧷 file" },
+
+				-- Generated clues
+				require("mini.clue").gen_clues.g(),
+				require("mini.clue").gen_clues.builtin_completion(),
+				require("mini.clue").gen_clues.marks(),
+				require("mini.clue").gen_clues.registers(),
+				require("mini.clue").gen_clues.windows({
+					submode_move = true,
+					submode_navigate = true,
+					submode_resize = true,
+				}),
+				require("mini.clue").gen_clues.z(),
+			},
+
+			window = {
+				delay = 0,
+				config = { width = "auto", border = Utils.ui.border },
+			},
+		})
 	end,
 })

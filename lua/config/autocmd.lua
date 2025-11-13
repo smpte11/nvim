@@ -107,6 +107,8 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
+-- NOTE: Commented out - using snacks.nvim gh instead of octo.nvim
+--[[ 
 -- Autocommands for Octo buffers
 local octo_clues_augroup = vim.api.nvim_create_augroup("octo_clues", { clear = true })
 
@@ -130,8 +132,8 @@ vim.api.nvim_create_autocmd("FileType", {
             table.insert(MiniClue.config.clues, clue)
         end
 
-        -- Autocommand to remove clues when leaving the buffer
-        vim.api.nvim_create_autocmd("BufLeave", {
+        -- Auto remove clues when octo buffer is closed
+        vim.api.nvim_create_autocmd("BufWinLeave", {
             buffer = 0,
             group = octo_clues_augroup,
             callback = function()
@@ -148,6 +150,7 @@ vim.api.nvim_create_autocmd("FileType", {
         })
     end,
 })
+--]]
 
 -- Reapply custom highlights when colorscheme changes (simplified approach)
 vim.api.nvim_create_autocmd("ColorScheme", {
