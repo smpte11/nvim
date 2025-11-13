@@ -147,7 +147,7 @@ vim.api.nvim_create_autocmd("FileType", {
 			end
 			
 			if not has_erlang_clue then
-				table.insert(clues, { mode = "n", keys = "<leader>e", desc = "+erlang" })
+				table.insert(clues, { mode = "n", keys = "<leader>e", desc = " erlang" })
 				MiniClue.config.clues = clues
 			end
 		end

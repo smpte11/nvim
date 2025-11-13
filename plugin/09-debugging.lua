@@ -614,19 +614,20 @@ spec({
                 desc = "[D]ebug REPL Run Last [K]ommand"
             })
 
-            -- Add debug session clue to mini.clue
-            table.insert(MiniClue.config.clues, {
-                mode = "n",
-                keys = "<leader>d",
-                desc = "🐛 debug session"
-            })
+            -- Update debug clue in mini.clue (change description during active session)
+            for i, entry in ipairs(MiniClue.config.clues) do
+                if entry.mode == "n" and entry.keys == "<leader>d" then
+                    MiniClue.config.clues[i].desc = "󰃤 debug session"
+                    break
+                end
+            end
         end
 
         local function teardown_debug_keymaps()
-            -- Remove debug session clue from mini.clue
+            -- Restore debug clue in mini.clue (back to default description)
             for i, entry in ipairs(MiniClue.config.clues) do
-                if entry.mode == "n" and entry.keys == "<leader>d" and entry.desc == "🐛 debug session" then
-                    table.remove(MiniClue.config.clues, i)
+                if entry.mode == "n" and entry.keys == "<leader>d" and entry.desc == "󰃤 debug session" then
+                    MiniClue.config.clues[i].desc = "󰃤 debug"
                     break
                 end
             end

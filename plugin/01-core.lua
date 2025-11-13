@@ -410,7 +410,7 @@ spec({
 			},
 
 			clues = {
-				-- Leader key descriptions
+				-- Leader key descriptions (Normal mode)
 				{ mode = "n", keys = "<leader>a", desc = "󰚩 ai" },
 				{ mode = "n", keys = "<leader>b", desc = "󰓩 buffer" },
 				{ mode = "n", keys = "<leader>d", desc = "󰃤 debug" },
@@ -430,6 +430,10 @@ spec({
 				{ mode = "n", keys = "<leader>v", desc = "󰈙 visit" },
 				{ mode = "n", keys = "<leader>w", desc = "󱂬 window" },
 				{ mode = "n", keys = "<leader>f", desc = "󱧷 file" },
+
+				-- Leader key descriptions (Visual/Select modes)
+				{ mode = "x", keys = "<leader>a", desc = "󰚩 ai" },
+				{ mode = "x", keys = "<leader>l", desc = "󰘦 lsp" },
 
 				-- Generated clues
 				require("mini.clue").gen_clues.g(),
