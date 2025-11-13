@@ -113,6 +113,49 @@ keymap('n', '<leader><leader>', Utils.create_command_palette, { desc = 'Command 
 
 
 -- ╔═══════════════════════╗
+-- ║	   Editor          ║
+-- ╚═══════════════════════╝
+-- Format toggle with status indicator
+local function get_format_status()
+	if vim.b.disable_autoformat then
+		return "disabled (buffer)"
+	elseif vim.g.disable_autoformat then
+		return "disabled (global)"
+	else
+		return "enabled"
+	end
+end
+
+local function format_status_icon()
+	if vim.g.disable_autoformat or vim.b.disable_autoformat then
+		return "󰉿"  -- Disabled
+	else
+		return "󰸞"  -- Enabled
+	end
+end
+
+keymap("n", "<leader>ef", function()
+	local status = get_format_status()
+	local icon = format_status_icon()
+	vim.notify(string.format("%s Format is currently %s", icon, status), vim.log.levels.INFO)
+end, { desc = "[E]ditor [F]ormat Status" })
+
+keymap("n", "<leader>eF", function()
+	vim.cmd("FormatEnable")
+	vim.notify("󰸞 Format enabled", vim.log.levels.INFO)
+end, { desc = "[E]ditor [F]ormat Enable" })
+
+keymap("n", "<leader>ed", function()
+	vim.cmd("FormatDisable")
+	vim.notify("󰉿 Format disabled (global)", vim.log.levels.INFO)
+end, { desc = "[E]ditor [D]isable Format (global)" })
+
+keymap("n", "<leader>eD", function()
+	vim.cmd("FormatDisable!")
+	vim.notify("󰉿 Format disabled (buffer only)", vim.log.levels.INFO)
+end, { desc = "[E]ditor [D]isable Format (buffer)" })
+
+-- ╔═══════════════════════╗
 -- ║	      UI           ║
 -- ╚═══════════════════════╝
 keymap("n", "<leader>ui", "<cmd>PasteImage<cr>", { desc = "[U]I Paste [I]mage" })

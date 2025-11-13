@@ -63,15 +63,7 @@ spec({
 		require("blink.cmp").setup({
 			snippets = { preset = "mini_snippets" },
 			cmdline = {
-				enabled = true,
-				keymap = { preset = "cmdline" },
-				completion = {
-					menu = {
-						auto_show = function(ctx)
-							return vim.fn.getcmdtype() == ":"
-						end,
-					},
-				},
+				enabled = false,
 			},
 			sources = {
 				default = { "lsp", "lazydev", "path", "snippets", "buffer", "copilot" },

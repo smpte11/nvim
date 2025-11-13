@@ -135,13 +135,13 @@ spec({
 	end,
 	-- stylua: ignore start
 	keys = {
-		-- GitHub integration
-		{ "<leader>gi", function() Snacks.picker.gh_issue() end, desc = "GitHub Issues (open)" },
-		{ "<leader>gI", function() Snacks.picker.gh_issue({ state = "all" }) end, desc = "GitHub Issues (all)" },
-		{ "<leader>gp", function() Snacks.picker.gh_pr() end, desc = "GitHub Pull Requests (open)" },
-		{ "<leader>gP", function() Snacks.picker.gh_pr({ state = "all" }) end, desc = "GitHub Pull Requests (all)" },
-		-- File rename (alternative to LSP rename)
-		{ "<leader>cR", function() Snacks.rename.rename_file() end, desc = "Rename File" },
+		-- GitHub integration (grouped under <leader>gh)
+		{ "<leader>ghi", function() Snacks.picker.gh_issue() end, desc = "[GitHub] [I]ssues (open)" },
+		{ "<leader>ghI", function() Snacks.picker.gh_issue({ state = "all" }) end, desc = "[GitHub] [I]ssues (all)" },
+		{ "<leader>ghp", function() Snacks.picker.gh_pr() end, desc = "[GitHub] [P]ull Requests (open)" },
+		{ "<leader>ghP", function() Snacks.picker.gh_pr({ state = "all" }) end, desc = "[GitHub] [P]ull Requests (all)" },
+		-- File rename (moved from <leader>cR to fit with file operations)
+		{ "<leader>fR", function() Snacks.rename.rename_file() end, desc = "Rename File" },
 	},
 	-- stylua: ignore end
 })
@@ -414,10 +414,10 @@ spec({
 				{ mode = "n", keys = "<leader>a", desc = "󰚩 ai" },
 				{ mode = "n", keys = "<leader>b", desc = "󰓩 buffer" },
 				{ mode = "n", keys = "<leader>d", desc = "󰃤 debug" },
+				{ mode = "n", keys = "<leader>e", desc = "󰌌 editor" },
 				{ mode = "n", keys = "<leader>s", desc = "󰱼 search" },
 				{ mode = "n", keys = "<leader>g", desc = "󰊢 git" },
-				-- NOTE: Commented out - using snacks.nvim gh instead
-				-- { mode = "n", keys = "<leader>go", desc = " octo" },
+				{ mode = "n", keys = "<leader>gh", desc = " github" },
 				{ mode = "n", keys = "<leader>i", desc = "󰼛 insert" },
 				{ mode = "n", keys = "<leader>l", desc = "󰘦 lsp" },
 				{ mode = "n", keys = "<leader>m", desc = "󰵮 mini" },
