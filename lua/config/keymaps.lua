@@ -118,13 +118,13 @@ keymap('n', '<leader><leader>', Utils.create_command_palette, { desc = 'Command 
 keymap("n", "<leader>ui", "<cmd>PasteImage<cr>", { desc = "[U]I Paste [I]mage" })
 
 -- Color Palette Switching - Essential only
-keymap("n", "<leader>uc", function() require("colors").pick_palette() end, { desc = "[U]I [C]olor Palette Picker" })
-keymap("n", "<leader>ut", function() require("colors").toggle_favorite_palettes() end, { desc = "[U]I [T]oggle Favorite Palettes" })
+keymap("n", "<leader>uc", function() require("config.colors").pick_palette() end, { desc = "[U]I [C]olor Palette Picker" })
+keymap("n", "<leader>ut", function() require("config.colors").toggle_favorite_palettes() end, { desc = "[U]I [T]oggle Favorite Palettes" })
 
 -- Alternative quick access keymaps
 keymap("n", "<leader>uC", "<cmd>ColorToggle<cr>", { desc = "[U]I [C]olor Toggle" })
-keymap("n", "<F10>", function() require("colors").toggle_favorite_palettes() end, { desc = "Quick Color Toggle" })
-keymap("n", "<F11>", function() require("colors").pick_palette() end, { desc = "Quick Color Picker" })
+keymap("n", "<F10>", function() require("config.colors").toggle_favorite_palettes() end, { desc = "Quick Color Toggle" })
+keymap("n", "<F11>", function() require("config.colors").pick_palette() end, { desc = "Quick Color Picker" })
 
 -- ╔═══════════════════════╗
 -- ║	     File          ║

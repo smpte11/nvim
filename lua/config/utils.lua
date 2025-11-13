@@ -215,7 +215,7 @@ M.create_command_palette = function()
 		{ name = "AI: Inline Assistant", category = "default", icon = "󰙎", action = function() vim.cmd('CodeCompanion') end },
 		
 		-- Color Palette operations (hierarchical - opens subpicker)
-		{ name = "🎨 Colors", category = "default", icon = "🎨", action = function() require("colors").pick_palette() end },
+		{ name = "🎨 Colors", category = "default", icon = "🎨", action = function() require("config.colors").pick_palette() end },
 		
 		-- Visits
 		{ name = "Visit: Paths", category = "directory", action = function() MiniExtra.pickers.visit_paths() end },
@@ -299,5 +299,35 @@ M.create_command_palette = function()
 		}
 	})
 end
+
+-- Treesitter parser utilities
+M.treesitter = {
+	--- Ensure treesitter parsers are installed without calling setup() again
+	--- @param parsers string|table Parser name or list of parser names
+	ensure_installed = function(parsers)
+		-- Normalize to table
+		if type(parsers) == "string" then
+			parsers = { parsers }
+		end
+		
+		-- Schedule to avoid blocking
+		vim.schedule(function()
+			-- Use nvim-treesitter's API to check installed parsers
+			local has_ts, ts_parsers = pcall(require, "nvim-treesitter.parsers")
+			if not has_ts then
+				vim.notify("nvim-treesitter not available yet", vim.log.levels.WARN)
+				return
+			end
+			
+			for _, parser in ipairs(parsers) do
+				-- Check if parser is installed using treesitter's API
+				if not ts_parsers.has_parser(parser) then
+					vim.notify("Installing treesitter parser: " .. parser, vim.log.levels.INFO)
+					vim.cmd("TSInstall " .. parser)
+				end
+			end
+		end)
+	end,
+}
 
 _G.Utils = M
