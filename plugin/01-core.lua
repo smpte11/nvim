@@ -110,11 +110,56 @@ spec({
 			rename = { enabled = true },
 			picker = {
 				enabled = true,
-				-- Match mini.pick layout (centered, 75% dimensions)
-				layout = {
-					preset = function()
-						return vim.o.columns >= 120 and "default" or "vertical"
-					end,
+				-- Configure window borders to match mini.clue
+				win = {
+					input = {
+						border = Utils.ui.border,
+					},
+					list = {
+						border = Utils.ui.border,
+					},
+					preview = {
+						border = Utils.ui.border,
+					},
+				},
+				-- Override source configs to use double borders
+				sources = {
+					gh_issue = {
+						layout = {
+							layout = {
+								box = "horizontal",
+								width = 0.8,
+								min_width = 120,
+								height = 0.8,
+								{
+									box = "vertical",
+									border = Utils.ui.border,
+									title = "{title} {live} {flags}",
+									{ win = "input", height = 1, border = "bottom" },
+									{ win = "list", border = "none" },
+								},
+								{ win = "preview", title = "{preview}", border = Utils.ui.border, width = 0.5 },
+							},
+						},
+					},
+					gh_pr = {
+						layout = {
+							layout = {
+								box = "horizontal",
+								width = 0.8,
+								min_width = 120,
+								height = 0.8,
+								{
+									box = "vertical",
+									border = Utils.ui.border,
+									title = "{title} {live} {flags}",
+									{ win = "input", height = 1, border = "bottom" },
+									{ win = "list", border = "none" },
+								},
+								{ win = "preview", title = "{preview}", border = Utils.ui.border, width = 0.5 },
+							},
+						},
+					},
 				},
 			},
 			scratch = { enabled = true }, -- Required for gh editing
@@ -125,10 +170,6 @@ spec({
 					border = Utils.ui.border,
 					width = 100,
 					height = 30,
-				},
-				-- Picker windows
-				picker = {
-					border = Utils.ui.border,
 				},
 			},
 		})

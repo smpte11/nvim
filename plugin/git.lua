@@ -44,7 +44,7 @@ spec({
 		{ "<leader>gg", function() require("neogit").open() end, desc = "[Git] Status" },
 		{ "<leader>gb", function() require("mini.extra").pickers.git_branches() end, desc = "[Git] [B]ranches" },
 		{ "<leader>gc", function() require("mini.extra").pickers.git_commits() end, desc = "[Git] [C]ommits" },
-		{ "<leader>gh", function() require("mini.extra").pickers.git_hunks() end, desc = "[Git] [H]unks" },
+		{ "<leader>gH", function() require("mini.extra").pickers.git_hunks() end, desc = "[Git] [H]unks" },
 	},
 	-- stylua: ignore end
 })

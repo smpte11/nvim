@@ -52,6 +52,17 @@ This is a **Mini.nvim-centric Neovim configuration** designed for productivity a
 - Custom keymaps, autocmds, and commands in separate `/lua/` modules
 - Global utilities accessible via `Utils` namespace
 
+### Keymap Management and Collision Prevention
+**CRITICAL**: Always check for keymap collisions before adding new keybindings:
+- **Mini.clue submenu prefixes** define hierarchical key groups (e.g., `<leader>g` for git, `<leader>gH` for GitHub)
+- **Direct mappings** should not conflict with submenu prefixes or other direct mappings
+- **Collision detection process**:
+  1. Search for existing keymaps: `grep_search` for the proposed keymap
+  2. Check `plugin/01-core.lua` for mini.clue submenu definitions (search for `desc = "`)
+  3. Verify no overlap between direct mappings and submenu prefixes
+- **Common submenu prefixes**: `<leader>g` (git), `<leader>gh` (GitHub), `<leader>l` (LSP), `<leader>d` (debug), `<leader>a` (AI), etc.
+- **Resolution strategy**: Use uppercase letters to differentiate (e.g., `<leader>gH` for git Hunks, `<leader>gh` for github submenu)
+
 ### Language Support Patterns
 - **Treesitter**: Comprehensive language support including custom `gotmpl` filetype
 - **LSP Integration**: Language servers configured per language in `programming.lua`

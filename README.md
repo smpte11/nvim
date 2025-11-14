@@ -156,7 +156,11 @@ Context-aware keys with cascading behavior:
 | `<leader>gg` | Git Status | Open Neogit interface |
 | `<leader>gb` | Git Branches | Browse and switch branches |
 | `<leader>gc` | Git Commits | Browse commit history |
-| `<leader>gh` | Git Hunks | View and navigate changes |
+| `<leader>gH` | Git Hunks | View and navigate changes |
+| `<leader>ghi` | GitHub Issues | Browse open GitHub issues |
+| `<leader>ghI` | GitHub Issues (All) | Browse all GitHub issues |
+| `<leader>ghp` | GitHub PRs | Browse open pull requests |
+| `<leader>ghP` | GitHub PRs (All) | Browse all pull requests |
 | `<leader>gd` | Diffview Open | Open diffview to compare working directory |
 | `<leader>gD` | Diffview Close | Close the current diffview |
 | `<leader>gf` | File History | Show git history for current file |
