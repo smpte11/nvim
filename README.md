@@ -155,28 +155,60 @@ Context-aware keys with cascading behavior:
 |--------|---------|-------------|
 | `<leader>gg` | Git Status | Open Neogit interface |
 | `<leader>gb` | Git Branches | Browse and switch branches |
-| `<leader>gc` | Git Commits | Browse commit history |
 | `<leader>gH` | Git Hunks | View and navigate changes |
+| `<leader>gB` | Git Blame | Toggle blame annotations |
+
+**Commit/Diff Submenu** (`<leader>gc*`):
+
+| Keymap | Action | Description |
+|--------|---------|-------------|
+| `<leader>gcc` | Git Commits | Browse commit history |
+| `<leader>gcd` | Diffview Open | Open diffview to compare working directory |
+| `<leader>gcD` | Diffview Close | Close the current diffview |
+| `<leader>gcf` | File History | Show git history for current file |
+| `<leader>gcF` | File History (All) | Show git history for entire repository |
+| `<leader>gcm` | Merge Base Diff | Compare current branch with origin/HEAD |
+
+**DiffView Panel Controls** (active in DiffView, `<leader>gcp*`):
+
+| Keymap | Action | Description |
+|--------|---------|-------------|
+| `<leader>gcpe` | Panel Focus | Bring focus to the file panel |
+| `<leader>gcpt` | Panel Toggle | Toggle the file panel visibility |
+
+**DiffView Conflict Resolution** (active during merge conflicts, `<leader>gc[otba]*`):
+
+| Keymap | Action | Description |
+|--------|---------|-------------|
+| `<leader>gco` | Choose Ours | Accept OURS version of conflict (hunk) |
+| `<leader>gct` | Choose Theirs | Accept THEIRS version of conflict (hunk) |
+| `<leader>gcb` | Choose Base | Accept BASE version of conflict (hunk) |
+| `<leader>gca` | Choose All | Accept all versions of conflict (hunk) |
+| `<leader>gcO` | Choose Ours (file) | Accept OURS version for entire file |
+| `<leader>gcT` | Choose Theirs (file) | Accept THEIRS version for entire file |
+| `<leader>gcB` | Choose Base (file) | Accept BASE version for entire file |
+| `<leader>gcA` | Choose All (file) | Accept all versions for entire file |
+
+**GitHub Submenu** (`<leader>gh*`):
+
+| Keymap | Action | Description |
+|--------|---------|-------------|
 | `<leader>ghi` | GitHub Issues | Browse open GitHub issues |
 | `<leader>ghI` | GitHub Issues (All) | Browse all GitHub issues |
 | `<leader>ghp` | GitHub PRs | Browse open pull requests |
 | `<leader>ghP` | GitHub PRs (All) | Browse all pull requests |
-| `<leader>gd` | Diffview Open | Open diffview to compare working directory |
-| `<leader>gD` | Diffview Close | Close the current diffview |
-| `<leader>gf` | File History | Show git history for current file |
-| `<leader>gF` | File History (All) | Show git history for entire repository |
-| `<leader>gm` | Merge Base Diff | Compare current branch with origin/HEAD |
-| `<leader>gB` | Git Blame | Toggle blame annotations |
-| `<leader>go*` | Octo Actions | GitHub integration (PR, issues, reviews) |
 
-**Diffview Buffer Mappings** (active in diffview):
+**Diffview Buffer Mappings** (non-leader keys, active in diffview):
 - `q` - Close diffview panel
 - `<tab>` / `<s-tab>` - Navigate between changed files
 - `[c` / `]c` - Jump between hunks (vim diff-mode)
+- `[x` / `]x` - Jump between conflict markers
 - `-` or `s` - Stage/unstage selected entry
 - `gf` - Open file in previous tabpage
+- `g<C-x>` - Cycle through available layouts
+- `X` - Restore entry to left side state
 
-**Neogit Integration**: When in Neogit status buffer, `<leader>gd` opens diffview for quick diff access.
+**Neogit Integration**: When in Neogit status buffer, `<leader>gcd` opens diffview for quick diff access.
 
 ### UI & Visual
 

@@ -173,8 +173,15 @@ keymap("n", "<F11>", function() require("config.colors").pick_palette() end, { d
 -- ║	     File          ║
 -- ╚═══════════════════════╝
 keymap('n', '<leader>fp', function() MiniExtra.pickers.explorer() end, { desc = "[F]ile [P]icker" })
-keymap('n', '<leader>ff', function() MiniFiles.open(vim.api.nvim_buf_get_name(0), true) end, { desc = "[F]ile Explorer" })
-keymap('n', '<leader>fF', function() MiniFiles.open(vim.uv.cwd(), true) end, { desc = "[F]ile Explorer (cwd)" })
+keymap('n', '<leader>ff', function()
+	local path = vim.api.nvim_buf_get_name(0)
+	-- If buffer has no valid path or is a special buffer, use cwd instead
+	if path == "" or path:match("^%w+:") then
+		path = vim.uv.cwd()
+	end
+	require('mini.files').open(path, true)
+end, { desc = "[F]ile Explorer" })
+keymap('n', '<leader>fF', function() require('mini.files').open(vim.uv.cwd(), true) end, { desc = "[F]ile Explorer (cwd)" })
 keymap('n', '<leader>fy', copy_file_path, { desc = "[F]ile [Y]ank Path" })
 
 -- ╔═══════════════════════╗
@@ -358,7 +365,7 @@ map_combo('i', '""', function()
 		local col = vim.api.nvim_win_get_cursor(0)[2]
 		local char_before = col > 0 and line:sub(col, col) or ' '
 		local char_after = col < #line and line:sub(col + 1, col + 1) or ' '
-		
+
 		if char_before:match('%w') and char_after:match('%w') then
 			-- Inside word - wrap word in quotes
 			return '<BS><BS><Esc>viw<Esc>`<i"<Esc>`>la"<Esc>i'
@@ -433,7 +440,7 @@ local tab_steps = {
 	'minisnippets_next',       -- Jump to next snippet tabstop if in snippet
 	'increase_indent',         -- Increase indent (prioritized over smart jumps)
 	'jump_after_tsnode',       -- Jump after current tree-sitter node
-	'jump_after_close',        -- Jump after closing brackets/quotes  
+	'jump_after_close',        -- Jump after closing brackets/quotes
 }
 
 local shift_tab_steps = {
