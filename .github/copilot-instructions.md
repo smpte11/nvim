@@ -80,6 +80,40 @@ just test-init
 just test-migrations
 ```
 
+### Commit Message Conventions
+**CRITICAL**: All commit messages MUST follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+**Common types**:
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation changes
+- `style`: Code style changes (formatting, missing semicolons, etc.)
+- `refactor`: Code refactoring without changing functionality
+- `perf`: Performance improvements
+- `test`: Adding or updating tests
+- `chore`: Maintenance tasks, dependency updates
+- `ci`: CI/CD configuration changes
+
+**Examples**:
+- `feat(notes): add SQLite-backed task tracking`
+- `fix(lsp): resolve gopls configuration issues`
+- `docs: update keymap documentation in README`
+- `refactor(plugin): extract AI configuration to separate file`
+- `test(notes): add migration test coverage`
+- `chore(deps): update mini.nvim to latest version`
+
+**Breaking changes**: Add `!` after type/scope or include `BREAKING CHANGE:` in footer:
+- `feat(api)!: change session save format`
+- `refactor!: restructure plugin loading order`
+
 ### AI Integration Workflow
 - **GitHub Copilot**: Primary completion engine with panel disabled
 - **CodeCompanion**: Chat interface with dual adapter support (Copilot + local LM Studio)

@@ -197,6 +197,10 @@ Context-aware keys with cascading behavior:
 | `<leader>ghI` | GitHub Issues (All) | Browse all GitHub issues |
 | `<leader>ghp` | GitHub PRs | Browse open pull requests |
 | `<leader>ghP` | GitHub PRs (All) | Browse all pull requests |
+| `<leader>gha` | GitHub Actions | Open Octo actions menu |
+| `<leader>ghc` | Create Issue | Create new GitHub issue |
+| `<leader>ghr` | Start Review | Start PR review |
+| `<leader>ghs` | Submit Review | Submit PR review |
 
 **Diffview Buffer Mappings** (non-leader keys, active in diffview):
 - `q` - Close diffview panel
@@ -256,4 +260,5 @@ Key plugins:
 - **mini.keymap** - Advanced keymap features (combos, multi-step)
 - **nvim-dap** + **nvim-dap-ui** - Debugging interface
 - **neogit** + **diffview** - Git integration
+- **octo.nvim** + **fzf-lua** - GitHub integration with fuzzy picker
 - **codecompanion** - AI assistance
