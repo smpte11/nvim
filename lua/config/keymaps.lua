@@ -5,37 +5,37 @@ local keymap = vim.keymap.set
 local opts = { noremap = true, silent = false }
 
 local insert_password = function()
-	local command = "openssl rand -base64 18"
-	for _, line in ipairs(vim.fn.systemlist(command)) do
-		vim.api.nvim_put({ line }, "", true, true)
-	end
+    local command = "openssl rand -base64 18"
+    for _, line in ipairs(vim.fn.systemlist(command)) do
+        vim.api.nvim_put({ line }, "", true, true)
+    end
 end
 
 local insert_uuid = function()
-	local uuid = Utils.generate_uuid()
-	vim.api.nvim_put({ uuid }, "", true, true)
+    local uuid = Utils.generate_uuid()
+    vim.api.nvim_put({ uuid }, "", true, true)
 end
 
 local split_sensibly = function()
-	if vim.api.nvim_win_get_width(0) > math.floor(vim.api.nvim_win_get_height(0) * 2.3) then
-		vim.cmd("vs")
-	else
-		vim.cmd("split")
-	end
+    if vim.api.nvim_win_get_width(0) > math.floor(vim.api.nvim_win_get_height(0) * 2.3) then
+        vim.cmd("vs")
+    else
+        vim.cmd("split")
+    end
 end
 
 local copy_file_path = function()
-	local path = vim.fn.expand('%:.')
-	if path ~= '' then
-		-- Include project name for full context
-		local cwd = vim.fn.getcwd()
-		local project_name = cwd:match("([^/]+)$")
-		path = project_name .. '/' .. path
-		vim.fn.setreg('+', path)
-		vim.notify('Copied path: ' .. path, vim.log.levels.INFO)
-	else
-		vim.notify('No file path to copy', vim.log.levels.WARN)
-	end
+    local path = vim.fn.expand('%:.')
+    if path ~= '' then
+        -- Include project name for full context
+        local cwd = vim.fn.getcwd()
+        local project_name = cwd:match("([^/]+)$")
+        path = project_name .. '/' .. path
+        vim.fn.setreg('+', path)
+        vim.notify('Copied path: ' .. path, vim.log.levels.INFO)
+    else
+        vim.notify('No file path to copy', vim.log.levels.WARN)
+    end
 end
 
 -- stylua: ignore start
@@ -45,7 +45,8 @@ end
 keymap("n", "<leader>mu", function() require("mini.deps").update() end, { desc = "[M]ini [U]pdate Plugins" })
 keymap("n", "<leader>ms", function() require("mini.deps").snap_save() end, { desc = "[M]ini [S]ave Snapshot" })
 keymap("n", "<leader>ml", function() require("mini.deps").snap_load() end, { desc = "[M]ini [L]oad Snapshot" })
-keymap("n", "<leader>mn", function() require("mini.notify").show_history() end, { desc = "[M]ini [N]otification History" })
+keymap("n", "<leader>mn", function() require("mini.notify").show_history() end,
+    { desc = "[M]ini [N]otification History" })
 
 -- Quit
 keymap("n", "<leader>qq", "<cmd>qa<cr>", { desc = "Quit All" })
@@ -59,7 +60,7 @@ keymap("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer", silent = true
 keymap("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer", silent = true })
 keymap("n", "<leader>bb", "<cmd>e #<cr>", { desc = "Switch to Other Buffer", silent = true })
 keymap("n", "<leader>bD", "<cmd>:bd<cr>", { desc = "Delete Buffer and Window", silent = true })
-keymap("n", "<leader>bd", function () MiniBufremove.delete() end, { desc = "Delete Buffer", silent = true })
+keymap("n", "<leader>bd", function() MiniBufremove.delete() end, { desc = "Delete Buffer", silent = true })
 
 -- Windows
 keymap("n", "<leader>ws", split_sensibly, { desc = "[S]plit [S]ensibly", remap = true })
@@ -79,28 +80,30 @@ keymap('n', '<leader>s"', function() MiniExtra.pickers.registers() end, { desc =
 keymap('n', '<leader>st', function() MiniExtra.pickers.treesitter() end, { desc = '[S]earch [T]reesitter' })
 keymap('n', '<leader>ss', function() MiniExtra.pickers.spellsuggest() end, { desc = '[S]pelling [S]uggestions' })
 keymap('n', '<leader>sR', function() MiniPick.builtin.resume() end, { desc = '[S]earch [R]esume' })
-keymap('n', '<leader>s.', function() MiniExtra.pickers.oldfiles() end, { desc = '[S]earch Recent Files ("." for repeat)' })
+keymap('n', '<leader>s.', function() MiniExtra.pickers.oldfiles() end,
+    { desc = '[S]earch Recent Files ("." for repeat)' })
 keymap('n', '<leader>sc', function() MiniExtra.pickers.commands() end, { desc = '[S]earch commands' })
 keymap('n', '<leader>sg', function() MiniPick.builtin.grep_live() end, { desc = '[S]earch by [G]rep' })
-keymap('n', '<leader>sw', function() MiniPick.builtin.grep({ pattern = vim.fn.expand('<cword>') }) end, { desc = '[S]earch current [W]ord' })
+keymap('n', '<leader>sw', function() MiniPick.builtin.grep({ pattern = vim.fn.expand('<cword>') }) end,
+    { desc = '[S]earch current [W]ord' })
 
 -- Fuzzily search in current buffer (mini.pick equivalent of telescope current_buffer_fuzzy_find)
 keymap('n', '<leader>/', function()
-	MiniExtra.pickers.buf_lines({}, {
-		window = {
-			config = function()
-				local height = math.floor(0.4 * vim.o.lines)
-				local width = math.floor(0.8 * vim.o.columns)
-				return {
-					anchor = "NW",
-					height = height,
-					width = width,
-					row = 1,
-					col = math.floor(0.5 * (vim.o.columns - width)),
-				}
-			end
-		}
-	})
+    MiniExtra.pickers.buf_lines({}, {
+        window = {
+            config = function()
+                local height = math.floor(0.4 * vim.o.lines)
+                local width = math.floor(0.8 * vim.o.columns)
+                return {
+                    anchor = "NW",
+                    height = height,
+                    width = width,
+                    row = 1,
+                    col = math.floor(0.5 * (vim.o.columns - width)),
+                }
+            end
+        }
+    })
 end, { desc = '[/] Fuzzily search in current buffer' })
 
 -- keymap('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
@@ -117,42 +120,42 @@ keymap('n', '<leader><leader>', Utils.create_command_palette, { desc = 'Command 
 -- ╚═══════════════════════╝
 -- Format toggle with status indicator
 local function get_format_status()
-	if vim.b.disable_autoformat then
-		return "disabled (buffer)"
-	elseif vim.g.disable_autoformat then
-		return "disabled (global)"
-	else
-		return "enabled"
-	end
+    if vim.b.disable_autoformat then
+        return "disabled (buffer)"
+    elseif vim.g.disable_autoformat then
+        return "disabled (global)"
+    else
+        return "enabled"
+    end
 end
 
 local function format_status_icon()
-	if vim.g.disable_autoformat or vim.b.disable_autoformat then
-		return "󰉿"  -- Disabled
-	else
-		return "󰸞"  -- Enabled
-	end
+    if vim.g.disable_autoformat or vim.b.disable_autoformat then
+        return "󰉿" -- Disabled
+    else
+        return "󰸞" -- Enabled
+    end
 end
 
 keymap("n", "<leader>ef", function()
-	local status = get_format_status()
-	local icon = format_status_icon()
-	vim.notify(string.format("%s Format is currently %s", icon, status), vim.log.levels.INFO)
+    local status = get_format_status()
+    local icon = format_status_icon()
+    vim.notify(string.format("%s Format is currently %s", icon, status), vim.log.levels.INFO)
 end, { desc = "[E]ditor [F]ormat Status" })
 
 keymap("n", "<leader>eF", function()
-	vim.cmd("FormatEnable")
-	vim.notify("󰸞 Format enabled", vim.log.levels.INFO)
+    vim.cmd("FormatEnable")
+    vim.notify("󰸞 Format enabled", vim.log.levels.INFO)
 end, { desc = "[E]ditor [F]ormat Enable" })
 
 keymap("n", "<leader>ed", function()
-	vim.cmd("FormatDisable")
-	vim.notify("󰉿 Format disabled (global)", vim.log.levels.INFO)
+    vim.cmd("FormatDisable")
+    vim.notify("󰉿 Format disabled (global)", vim.log.levels.INFO)
 end, { desc = "[E]ditor [D]isable Format (global)" })
 
 keymap("n", "<leader>eD", function()
-	vim.cmd("FormatDisable!")
-	vim.notify("󰉿 Format disabled (buffer only)", vim.log.levels.INFO)
+    vim.cmd("FormatDisable!")
+    vim.notify("󰉿 Format disabled (buffer only)", vim.log.levels.INFO)
 end, { desc = "[E]ditor [D]isable Format (buffer)" })
 
 -- ╔═══════════════════════╗
@@ -161,8 +164,10 @@ end, { desc = "[E]ditor [D]isable Format (buffer)" })
 keymap("n", "<leader>ui", "<cmd>PasteImage<cr>", { desc = "[U]I Paste [I]mage" })
 
 -- Color Palette Switching - Essential only
-keymap("n", "<leader>uc", function() require("config.colors").pick_palette() end, { desc = "[U]I [C]olor Palette Picker" })
-keymap("n", "<leader>ut", function() require("config.colors").toggle_favorite_palettes() end, { desc = "[U]I [T]oggle Favorite Palettes" })
+keymap("n", "<leader>uc", function() require("config.colors").pick_palette() end,
+    { desc = "[U]I [C]olor Palette Picker" })
+keymap("n", "<leader>ut", function() require("config.colors").toggle_favorite_palettes() end,
+    { desc = "[U]I [T]oggle Favorite Palettes" })
 
 -- Alternative quick access keymaps
 keymap("n", "<leader>uC", "<cmd>ColorToggle<cr>", { desc = "[U]I [C]olor Toggle" })
@@ -174,14 +179,15 @@ keymap("n", "<F11>", function() require("config.colors").pick_palette() end, { d
 -- ╚═══════════════════════╝
 keymap('n', '<leader>fp', function() MiniExtra.pickers.explorer() end, { desc = "[F]ile [P]icker" })
 keymap('n', '<leader>ff', function()
-	local path = vim.api.nvim_buf_get_name(0)
-	-- If buffer has no valid path or is a special buffer, use cwd instead
-	if path == "" or path:match("^%w+:") then
-		path = vim.uv.cwd()
-	end
-	require('mini.files').open(path, true)
+    local path = vim.api.nvim_buf_get_name(0)
+    -- If buffer has no valid path or is a special buffer, use cwd instead
+    if path == "" or path:match("^%w+:") then
+        path = vim.uv.cwd()
+    end
+    require('mini.files').open(path, true)
 end, { desc = "[F]ile Explorer" })
-keymap('n', '<leader>fF', function() require('mini.files').open(vim.uv.cwd(), true) end, { desc = "[F]ile Explorer (cwd)" })
+keymap('n', '<leader>fF', function() require('mini.files').open(vim.uv.cwd(), true) end,
+    { desc = "[F]ile Explorer (cwd)" })
 keymap('n', '<leader>fy', copy_file_path, { desc = "[F]ile [Y]ank Path" })
 
 -- ╔═══════════════════════╗
@@ -202,7 +208,7 @@ keymap('n', '<leader>fy', copy_file_path, { desc = "[F]ile [Y]ank Path" })
 -- jump to the implementation of the word under your cursor.
 --  useful when your language has ways of declaring types without an actual implementation.
 -- keymap("n", "gi", function() MiniExtra.pickers.lsp({ scope = "implementation" }) end,
-    -- { desc = "[G]oto [I]mplementation" })
+-- { desc = "[G]oto [I]mplementation" })
 
 -- jump to the type of the word under your cursor.
 --  useful when you're not sure what type a variable is and you want to see
@@ -210,17 +216,17 @@ keymap('n', '<leader>fy', copy_file_path, { desc = "[F]ile [Y]ank Path" })
 
 -- todo: look into keymapping this the same as lazyvim
 -- keymap("n", "<leader>lD", function() MiniExtra.pickers.lsp({ scope = "type_definition" }) end,
-    -- { desc = "[L]sp Type [D]efinition" })
+-- { desc = "[L]sp Type [D]efinition" })
 
 -- Fuzzy find all the symbols in your current document.
 --  Symbols are things like variables, functions, types, etc.
 -- keymap("n", "<leader>ls", function() MiniExtra.pickers.lsp({ scope = "document_symbol" }) end,
-    -- { desc = "[L]sp Document [S]ymbols" })
+-- { desc = "[L]sp Document [S]ymbols" })
 
 -- Fuzzy find all the symbols in your current workspace.
 --  Similar to document symbols, except searches over your entire project.
 -- keymap("n", "<leader>lW", function() MiniExtra.pickers.lsp({ scope = "workspace_symbol" }) end,
-    -- { desc = "[L]sp workspace [S]ymbols" })
+-- { desc = "[L]sp workspace [S]ymbols" })
 
 -- Rename the variable under your cursor.
 --  Most Language Servers support renaming across files, etc.
@@ -314,10 +320,10 @@ map_combo({ 'n', 'x' }, 'hh', 'g^')
 -- │ Perfect for: C/C++/Java/JavaScript/Rust/Erlang                  │
 -- └─────────────────────────────────────────────────────────────────┘
 map_combo('i', ';;', function()
-	local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-	vim.api.nvim_input('<End>;<Esc>')
-	vim.api.nvim_win_set_cursor(0, {row, col})
-	vim.api.nvim_input('a')
+    local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+    vim.api.nvim_input('<End>;<Esc>')
+    vim.api.nvim_win_set_cursor(0, { row, col })
+    vim.api.nvim_input('a')
 end)
 
 -- ┌─────────────────────────────────────────────────────────────────┐
@@ -355,25 +361,25 @@ map_combo('i', '==', '<BS><BS> = ')
 -- │ Perfect for: String literals, wrapping existing text            │
 -- └─────────────────────────────────────────────────────────────────┘
 map_combo('i', '""', function()
-	local mode = vim.fn.mode()
-	if mode == 'v' or mode == 'V' then
-		-- Wrap selection in quotes
-		return '<Esc>`<i"<Esc>`>la"<Esc>i'
-	else
-		-- Check if we're at word boundary or inside word
-		local line = vim.api.nvim_get_current_line()
-		local col = vim.api.nvim_win_get_cursor(0)[2]
-		local char_before = col > 0 and line:sub(col, col) or ' '
-		local char_after = col < #line and line:sub(col + 1, col + 1) or ' '
+    local mode = vim.fn.mode()
+    if mode == 'v' or mode == 'V' then
+        -- Wrap selection in quotes
+        return '<Esc>`<i"<Esc>`>la"<Esc>i'
+    else
+        -- Check if we're at word boundary or inside word
+        local line = vim.api.nvim_get_current_line()
+        local col = vim.api.nvim_win_get_cursor(0)[2]
+        local char_before = col > 0 and line:sub(col, col) or ' '
+        local char_after = col < #line and line:sub(col + 1, col + 1) or ' '
 
-		if char_before:match('%w') and char_after:match('%w') then
-			-- Inside word - wrap word in quotes
-			return '<BS><BS><Esc>viw<Esc>`<i"<Esc>`>la"<Esc>i'
-		else
-			-- Create quote pair
-			return '<BS><BS>""<Left>'
-		end
-	end
+        if char_before:match('%w') and char_after:match('%w') then
+            -- Inside word - wrap word in quotes
+            return '<BS><BS><Esc>viw<Esc>`<i"<Esc>`>la"<Esc>i'
+        else
+            -- Create quote pair
+            return '<BS><BS>""<Left>'
+        end
+    end
 end)
 
 -- ┌─────────────────────────────────────────────────────────────────┐
@@ -435,20 +441,21 @@ local map_multistep = minikeymap.map_multistep
 -- │ Perfect for: Tab-ing through function parameters, etc.          │
 -- └─────────────────────────────────────────────────────────────────┘
 -- Priority order: completion, snippets, indent, then smart jumps
+-- NOTE: Using pmenu_* for mini.completion. For blink.cmp, replace with blink_* steps
 local tab_steps = {
-	'blink_next',              -- Navigate blink.cmp menu if visible
-	'minisnippets_next',       -- Jump to next snippet tabstop if in snippet
-	'increase_indent',         -- Increase indent (prioritized over smart jumps)
-	'jump_after_tsnode',       -- Jump after current tree-sitter node
-	'jump_after_close',        -- Jump after closing brackets/quotes
+    'pmenu_next',        -- Navigate mini.completion menu if visible (blink: 'blink_next')
+    'minisnippets_next', -- Jump to next snippet tabstop if in snippet
+    'increase_indent',   -- Increase indent (prioritized over smart jumps)
+    'jump_after_tsnode', -- Jump after current tree-sitter node
+    'jump_after_close',  -- Jump after closing brackets/quotes
 }
 
 local shift_tab_steps = {
-	'blink_prev',              -- Navigate blink.cmp menu backwards if visible
-	'minisnippets_prev',       -- Jump to previous snippet tabstop if in snippet
-	'decrease_indent',         -- Decrease indent (prioritized over smart jumps)
-	'jump_before_tsnode',      -- Jump before current tree-sitter node
-	'jump_before_open',        -- Jump before opening brackets/quotes
+    'pmenu_prev',         -- Navigate mini.completion menu backwards if visible (blink: 'blink_prev')
+    'minisnippets_prev',  -- Jump to previous snippet tabstop if in snippet
+    'decrease_indent',    -- Decrease indent (prioritized over smart jumps)
+    'jump_before_tsnode', -- Jump before current tree-sitter node
+    'jump_before_open',   -- Jump before opening brackets/quotes
 }
 
 -- Apply the multi-step mappings for both insert and select modes
@@ -456,7 +463,8 @@ map_multistep({ 'i', 's' }, '<Tab>', tab_steps)
 map_multistep({ 'i', 's' }, '<S-Tab>', shift_tab_steps)
 
 -- Smart Enter that accepts completion and respects pairs
-map_multistep('i', '<CR>', { 'blink_accept', 'minipairs_cr' })
+-- NOTE: Using pmenu_accept for mini.completion. For blink.cmp, use 'blink_accept'
+map_multistep('i', '<CR>', { 'pmenu_accept', 'minipairs_cr' })
 
 -- Smart Backspace that respects pairs and does hungry deletion
 map_multistep('i', '<BS>', { 'minipairs_bs', 'hungry_bs' })
