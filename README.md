@@ -2,6 +2,18 @@
 
 A modern Neovim configuration built with `mini.deps` and focused on developer productivity.
 
+## Recent Changes
+
+**Completion System Migration** (2025-01):
+- Migrated from `blink.cmp` to `mini.completion` for LSP completions
+- Enabled `copilot.lua` suggestions for AI-powered ghost text
+- Integrated `mini.keymap` multi-step mappings for smart completion navigation
+- **New workflow**: LSP completions in popup menu (navigate with `<Tab>/<S-Tab>` or `<C-n>/<C-p>`, accept with `<CR>` or `<C-y>`), Copilot as inline ghost text (accept with `<M-l>`)
+- **Why**: Full alignment with mini.nvim ecosystem philosophy, simpler configuration, clear separation between AI and LSP
+- **Trade-offs**: Lost fuzzy matching and auto-brackets, gained simplicity and consistency with mini.nvim patterns
+- **Rollback**: Old `blink.cmp` code is commented out in `plugin/04-lsp.lua`, `plugin/ai.lua`, and `lua/config/keymaps.lua` for easy reversion if needed
+- **macOS/Kitty**: Add `macos_option_as_alt yes` to `~/.config/kitty/kitty.conf` to enable Option key as Meta for Copilot keybindings
+
 ## Keybinding System
 
 This configuration uses a systematic approach to keybindings with logical categories and consistent patterns.
@@ -119,11 +131,45 @@ Context-aware keys with cascading behavior:
 
 ```lua
 -- Insert & Select modes
-"<Tab>"    -- Expand → snippets → completion → tree → brackets
+"<Tab>"    -- Navigate completion → snippets → indent → tree → brackets
 "<S-Tab>"  -- Reverse navigation through same chain
 "<CR>"     -- Accept completion → handle pairs
 "<BS>"     -- Handle pairs → hungry whitespace deletion
 ```
+
+### Completion & AI
+
+**LSP Completion** (popup menu):
+
+| Keymap | Action | Description |
+|--------|---------|-------------|
+| `<Tab>` | Next Item | Navigate to next completion (smart multi-step) |
+| `<S-Tab>` | Previous Item | Navigate to previous completion (smart multi-step) |
+| `<CR>` | Accept | Accept selected completion (smart multi-step) |
+| `<C-n>` | Next Item | Navigate to next completion (built-in) |
+| `<C-p>` | Previous Item | Navigate to previous completion (built-in) |
+| `<C-y>` | Accept | Accept selected completion (built-in) |
+| `<C-e>` | Close Menu | Close completion menu (built-in) |
+| `<C-Space>` | Force LSP | Force two-step completion (LSP → fallback) |
+| `<A-Space>` | Force Fallback | Force fallback completion |
+| `<C-f>` | Scroll Down | Scroll documentation/info window down |
+| `<C-b>` | Scroll Up | Scroll documentation/info window up |
+
+**Copilot Suggestions** (ghost text):
+
+| Keymap | Action | Description |
+|--------|---------|-------------|
+| `<M-l>` | Accept | Accept AI suggestion (Option+L) |
+| `<M-]>` | Next | Next suggestion (Option+]) |
+| `<M-[>` | Previous | Previous suggestion (Option+[) |
+| `<M-d>` | Dismiss | Dismiss suggestion (Option+D) |
+
+**Built-in Completion Sources**:
+- `<C-x><C-f>` - File path completion
+- `<C-x><C-l>` - Whole line completion
+- `<C-x><C-n>` - Keyword completion
+
+> **Architecture**: LSP completion uses `mini.completion` for popup menu, Copilot provides inline ghost text suggestions. Ghost text auto-hides when completion menu is open. Tab/Shift-Tab use `mini.keymap` multi-step logic to navigate completion when visible, otherwise handle snippets/indentation. Copilot uses Meta/Option key (`<M-*>`) for ergonomic single-key combos. See "Recent Changes" section for migration details.
 
 ### Search Operations
 

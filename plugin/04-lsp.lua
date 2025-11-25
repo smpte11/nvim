@@ -1,111 +1,16 @@
 -- LSP configuration with Mason
 spec({
     source = "neovim/nvim-lspconfig",
-    immediate = false,
+    immediate = true,
     depends = {
         "mason-org/mason.nvim",
         "mason-org/mason-lspconfig.nvim",
         "WhoIsSethDaniel/mason-tool-installer.nvim",
     },
     config = function()
-        local ok, mason = pcall(require, "mason")
-        if not ok then
-            vim.notify("Failed to load mason.nvim", vim.log.levels.ERROR)
-            return
-        end
-
-        mason.setup({
+        require("mason").setup({
             ui = {
                 border = Utils.ui.border,
-            },
-        })
-
-        -- LSP server configurations
-        local servers = {
-            terraformls = {},
-            ts_ls = {},
-            basedpyright = {
-                settings = {
-                    basedpyright = {
-                        analysis = {
-                            autosearchpaths = true,
-                            diagnosticmode = "openfilesonly",
-                            uselibrarycodefortypes = true,
-                        },
-                    },
-                },
-            },
-            ruff = {},
-            nushell = {},
-            dockerls = {},
-            elp = {
-                cmd = { "elp", "server" },
-                filetypes = { "erlang", "elixir" },
-                root_dir = function(fname)
-                    return require("lspconfig.util").find_git_ancestor(fname)
-                        or require("lspconfig.util").root_pattern("rebar.config", "mix.exs", "OTP_VERSION")(fname)
-                end,
-                settings = {
-                    elp = {
-                        incremental = true,
-                        diagnostics = {
-                            enabled = true,
-                            disabled = {},
-                        },
-                        codeLens = {
-                            enabled = true,
-                        },
-                    },
-                },
-            },
-            bashls = {},
-            html = {},
-            jsonls = {},
-            yamlls = {},
-            marksman = {},
-            lua_ls = {
-                settings = {
-                    lua = {
-                        completion = {
-                            callsnippet = "replace",
-                        },
-                        diagnostics = { disable = { "missing-fields" } },
-                    },
-                },
-            },
-        }
-
-        -- Tools to ensure are installed
-        local ensure_installed = vim.tbl_keys(servers or {})
-        vim.list_extend(ensure_installed, {
-            "stylua",
-            "shfmt",
-            "shellcheck",
-            "taplo",
-            "erlfmt",
-        })
-
-        -- Remove nushell from ensure_installed
-        local i = 1
-        while i <= #ensure_installed do
-            if ensure_installed[i] == "nushell" then
-                table.remove(ensure_installed, i)
-            else
-                i = i + 1
-            end
-        end
-
-        -- Setup mason-tool-installer
-        require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
-
-        -- Setup mason-lspconfig with handlers
-        require("mason-lspconfig").setup({
-            handlers = {
-                function(server_name)
-                    local server = servers[server_name] or {}
-                    server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
-                    require("lspconfig")[server_name].setup(server)
-                end,
             },
         })
     end,
@@ -125,7 +30,52 @@ spec({
     end,
 })
 
--- Blink.cmp completion engine
+-- Mini.completion - LSP completion engine
+spec({
+    source = "nvim-mini/mini.completion",
+    config = function()
+        require("mini.completion").setup({
+            delay = {
+                completion = 100,
+                info = 100,
+                signature = 50,
+            },
+            lsp_completion = {
+                source_func = "completefunc",
+                auto_setup = true,
+                -- Use mini.snippets for snippet insertion (already configured)
+                snippet_insert = nil, -- Uses default which prefers mini.snippets
+            },
+            -- Fallback to built-in keyword completion when LSP unavailable
+            fallback_action = "<C-n>",
+            window = {
+                info = { height = 25, width = 80, border = Utils.ui.border },
+                signature = { height = 25, width = 80, border = Utils.ui.border },
+            },
+            mappings = {
+                force_twostep = "<C-Space>",
+                force_fallback = "<A-Space>",
+                scroll_down = "<C-f>",
+                scroll_up = "<C-b>",
+            },
+        })
+
+        -- Integration: Hide Copilot suggestions when completion menu is visible
+        local completion_group = vim.api.nvim_create_augroup("MiniCompletionIntegration", { clear = true })
+
+        -- Hide Copilot when popup menu is shown
+        vim.api.nvim_create_autocmd("CompleteDone", {
+            group = completion_group,
+            callback = function()
+                vim.b.copilot_suggestion_hidden = false
+            end,
+        })
+    end,
+})
+
+-- COMMENTED OUT: Blink.cmp completion engine (replaced by mini.completion)
+-- Uncomment to revert to blink.cmp
+--[[
 spec({
     source = "Saghen/blink.cmp",
     immediate = true,
@@ -161,7 +111,7 @@ spec({
                 enabled = false,
             },
             sources = {
-                default = { "lsp", "lazydev", "path", "snippets", "buffer", "copilot", "git" },
+                default = { "lsp", "lazydev", "path", "snippets", "buffer", "copilot" },
                 providers = {
                     lazydev = {
                         name = "LazyDev",
@@ -192,13 +142,13 @@ spec({
                         module = "blink-cmp-git",
                         name = "Git",
                         enabled = function()
-                            return vim.tbl_contains({ "gitcommit", "markdown", "octo" }, vim.bo.filetype)
+                            -- NOTE: Removed "octo" since we're using snacks.nvim gh
+                            return vim.tbl_contains({ "gitcommit", "markdown" }, vim.bo.filetype)
                         end,
                     },
                 },
                 per_filetype = {
                     codecompanion = { "codecompanion" },
-                    octo = { "lsp", "path", "snippets", "buffer", "git" },
                 },
             },
             keymap = {
@@ -271,6 +221,7 @@ spec({
         -- Highlights are managed in lua/colors.lua
     end,
 })
+--]]
 
 -- Code formatting with conform.nvim
 spec({
@@ -302,7 +253,6 @@ spec({
                 elixir = { "mix_format" },
                 exs = { "mix_format" },
                 heex = { "mix_format" },
-                erlang = { "erlfmt" },
                 yaml = { "prettierd", "prettier" },
                 markdown = { "prettier" },
                 go = { "goimports", "gofumpt" },
@@ -353,9 +303,10 @@ end
 -- lsp servers and clients are able to communicate to each other what features they support.
 --  by default, neovim doesn't support everything that is in the lsp specification.
 --  when you add nvim-cmp, luasnip, etc. neovim now has *more* capabilities.
---  so, we create new capabilities with nvim cmp, and then broadcast that to the servers.
+--  so, we create new capabilities and then broadcast that to the servers.
 local capabilities = vim.lsp.protocol.make_client_capabilities()
-capabilities = vim.tbl_deep_extend("force", capabilities, require("blink.cmp").get_lsp_capabilities())
+-- mini.completion uses default capabilities, no need to extend
+-- For blink.cmp, uncomment: capabilities = vim.tbl_deep_extend("force", capabilities, require("blink.cmp").get_lsp_capabilities())
 
 -- enable the following language servers
 --  feel free to add/remove any lsps that you want here. they will automatically be installed.
@@ -366,6 +317,127 @@ capabilities = vim.tbl_deep_extend("force", capabilities, require("blink.cmp").g
 --  - capabilities (table): override fields in capabilities. can be used to disable certain lsp features.
 --  - settings (table): override the default settings passed when initializing the server.
 --        for example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+local servers = {
+    -- clangd = {},
+    -- rust_analyzer = {},
+    -- ... etc. see `:help lspconfig-all` for a list of all the pre-configured lsps
+    --
+    -- some languages (like typescript) have entire language plugins that can be useful:
+    --    https://github.com/pmizio/typescript-tools.nvim
+    --
+    -- but for many setups, the lsp (`ts_ls`) will work just fine
+    terraformls = {},
+    ts_ls = {},
+    basedpyright = {
+        settings = {
+            basedpyright = {
+                analysis = {
+                    autosearchpaths = true,
+                    diagnosticmode = "openfilesonly",
+                    uselibrarycodefortypes = true,
+                },
+            },
+        },
+    },
+    ruff = {},
+    nushell = {},
+    dockerls = {},
+    -- Erlang Language Platform (ELP) - WhatsApp's advanced Erlang/Elixir LSP
+    -- Provides superior semantic analysis, go-to-definition, find references, call hierarchy
+    -- Designed to be scalable and fully incremental, inspired by rust-analyzer
+    elp = {
+        cmd = { "elp", "server" },
+        filetypes = { "erlang", "elixir" },
+        root_dir = function(fname)
+            -- Look for rebar.config, mix.exs, or .git directory
+            return require("lspconfig.util").find_git_ancestor(fname)
+                or require("lspconfig.util").root_pattern("rebar.config", "mix.exs", "OTP_VERSION")(fname)
+        end,
+        settings = {
+            elp = {
+                -- Enable incremental compilation for better performance
+                incremental = true,
+                -- Enable all diagnostics
+                diagnostics = {
+                    enabled = true,
+                    -- Show warnings and errors
+                    disabled = {},
+                },
+                -- Enable code lens for additional information
+                codeLens = {
+                    enabled = true,
+                },
+            },
+        },
+    },
+    bashls = {},
+    html = {},
+    jsonls = {},
+    yamlls = {},
+    marksman = {},
+    lua_ls = {
+        -- cmd = { ... },
+        -- filetypes = { ... },
+        -- capabilities = {},
+        settings = {
+            lua = {
+                completion = {
+                    callsnippet = "replace",
+                },
+                -- you can toggle below to ignore lua_ls's noisy `missing-fields` warnings
+                diagnostics = { disable = { "missing-fields" } },
+            },
+        },
+    },
+}
+
+-- ensure the servers and tools above are installed
 --
--- Note: LSP server configuration and Mason setup has been moved into the spec config function above
--- to ensure all dependencies are loaded before trying to configure them.
+-- to check the current status of installed tools and/or manually install
+-- other tools, you can run
+--    :mason
+--
+-- you can press `g?` for help in this menu.
+--
+-- `mason` had to be setup earlier: to configure its options see the
+-- `dependencies` table for `nvim-lspconfig` above.
+--
+-- you can add other tools here that you want mason to install
+-- for you, so that they are available from within neovim.
+local ensure_installed = vim.tbl_keys(servers or {})
+vim.list_extend(ensure_installed, {
+    "stylua", -- used to format lua code
+    "shfmt",
+    "shellcheck",
+    "taplo",
+    -- ELP (Erlang Language Platform) for Erlang/Elixir
+    -- Note: May need manual installation if not available in Mason registry
+    -- Installation: cargo install --git https://github.com/whatsapp/erlang-language-platform --bin elp
+    -- Go tools are handled by ray-x/go.nvim
+    -- "tflint",
+})
+
+local i = 1
+while i <= #ensure_installed do
+    if ensure_installed[i] == "nushell" then
+        table.remove(ensure_installed, i)
+    else
+        i = i + 1
+    end
+end
+
+require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
+
+require("mason-lspconfig").setup({
+    handlers = {
+        function(server_name)
+            local server = servers[server_name] or {}
+            -- this handles overriding only values explicitly passed
+            -- by the server configuration above. useful when disabling
+            -- certain features of an lsp (for example, turning off formatting for ts_ls)
+            server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
+
+            require("lspconfig")[server_name].setup(server)
+        end,
+    },
+})

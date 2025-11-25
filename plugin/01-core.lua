@@ -22,6 +22,17 @@ spec({
 })
 
 -- ═══════════════════════════════════════════════════════════════════════════════
+-- MINI.COLORS - Color manipulation utilities (needed for transparency)
+-- ═══════════════════════════════════════════════════════════════════════════════
+spec({
+    setup_only = true,
+    immediate = true,
+    config = function()
+        -- No setup needed, just ensure it's loaded before colorscheme
+    end,
+})
+
+-- ═══════════════════════════════════════════════════════════════════════════════
 -- COLORSCHEME - Using mini.base16 with custom palettes
 -- ═══════════════════════════════════════════════════════════════════════════════
 spec({
@@ -100,8 +111,6 @@ spec({
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- SNACKS.NVIM - GitHub integration & LSP file rename
 -- ═══════════════════════════════════════════════════════════════════════════════
--- NOTE: Commented out in favor of octo.nvim with fzf-lua
---[[
 spec({
     source = "folke/snacks.nvim",
     immediate = true,
@@ -124,9 +133,56 @@ spec({
                         border = Utils.ui.border,
                     },
                 },
+                -- Override source configs to use double borders
+                sources = {
+                    gh_issue = {
+                        layout = {
+                            layout = {
+                                box = "horizontal",
+                                width = 0.8,
+                                min_width = 120,
+                                height = 0.8,
+                                {
+                                    box = "vertical",
+                                    border = Utils.ui.border,
+                                    title = "{title} {live} {flags}",
+                                    { win = "input", height = 1,     border = "bottom" },
+                                    { win = "list",  border = "none" },
+                                },
+                                { win = "preview", title = "{preview}", border = Utils.ui.border, width = 0.5 },
+                            },
+                        },
+                    },
+                    gh_pr = {
+                        layout = {
+                            layout = {
+                                box = "horizontal",
+                                width = 0.8,
+                                min_width = 120,
+                                height = 0.8,
+                                {
+                                    box = "vertical",
+                                    border = Utils.ui.border,
+                                    title = "{title} {live} {flags}",
+                                    { win = "input", height = 1,     border = "bottom" },
+                                    { win = "list",  border = "none" },
+                                },
+                                { win = "preview", title = "{preview}", border = Utils.ui.border, width = 0.5 },
+                            },
+                        },
+                    },
+                },
             },
             scratch = { enabled = true }, -- Required for gh editing
             -- Configure styles to match your UI
+            styles = {
+                -- Scratch buffers (used for editing GitHub comments/descriptions)
+                scratch = {
+                    border = Utils.ui.border,
+                    width = 100,
+                    height = 30,
+                },
+            },
         })
     end,
     -- stylua: ignore start
@@ -141,7 +197,6 @@ spec({
     },
     -- stylua: ignore end
 })
---]]
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- MINI.NOTIFY - Notification manager
@@ -201,7 +256,7 @@ spec({
                 extra_ui = true, -- Extra UI features ('winblend', 'cmdheight=0', ...)
             },
             mappings = {
-                windows = true,       -- Window navigation with <C-hjkl>, resize with <C-arrow>
+                windows = true, -- Window navigation with <C-hjkl>, resize with <C-arrow>
                 move_with_alt = true, -- Move cursor in Insert, Command, and Terminal mode with <M-hjkl>
             },
             silent = true,
@@ -268,12 +323,12 @@ spec({
 
         require("mini.surround").setup({
             mappings = {
-                add = "sa",            -- Add surrounding in Normal and Visual modes
-                delete = "sd",         -- Delete surrounding
-                find = "sf",           -- Find surrounding (to the right)
-                find_left = "sF",      -- Find surrounding (to the left)
-                highlight = "sh",      -- Highlight surrounding
-                replace = "sr",        -- Replace surrounding
+                add = "sa", -- Add surrounding in Normal and Visual modes
+                delete = "sd", -- Delete surrounding
+                find = "sf", -- Find surrounding (to the right)
+                find_left = "sF", -- Find surrounding (to the left)
+                highlight = "sh", -- Highlight surrounding
+                replace = "sr", -- Replace surrounding
                 update_n_lines = "sn", -- Update `n_lines`
             },
         })
@@ -293,6 +348,14 @@ spec({
                 width_focus = 30,
                 width_preview = 50,
             },
+        })
+
+        -- Integrate with snacks.nvim rename for LSP file renaming
+        vim.api.nvim_create_autocmd("User", {
+            pattern = "MiniFilesActionRename",
+            callback = function(event)
+                Snacks.rename.on_rename_file(event.data.from, event.data.to)
+            end,
         })
     end,
 })
@@ -390,7 +453,7 @@ spec({
                 { mode = "n", keys = "<leader>s", desc = "󰱼 search" },
                 { mode = "n", keys = "<leader>g", desc = "󰊢 git" },
                 { mode = "n", keys = "<leader>gh", desc = " github" },
-                { mode = "n", keys = "<leader>gc", desc = " merge" },
+                { mode = "n", keys = "<leader>gc", desc = " conflicts" },
                 { mode = "n", keys = "<leader>i", desc = "󰼛 insert" },
                 { mode = "n", keys = "<leader>l", desc = "󰘦 lsp" },
                 { mode = "n", keys = "<leader>m", desc = "󰵮 mini" },
