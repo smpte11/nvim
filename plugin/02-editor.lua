@@ -16,7 +16,7 @@
 spec({
     setup_only = true,
     config = function()
-		local gen_spec = require("mini.ai").gen_spec
+        local gen_spec = require("mini.ai").gen_spec
         local gen_ai_spec = MiniExtra.gen_ai_spec
         require("mini.ai").setup({
             custom_textobjects = {
@@ -25,9 +25,9 @@ spec({
                 I = gen_ai_spec.indent(),
                 L = gen_ai_spec.line(),
                 N = gen_ai_spec.number(),
-				F = gen_spec.treesitter({ a = '@function.outer', i = '@function.inner' }),
+                F = gen_spec.treesitter({ a = '@function.outer', i = '@function.inner' }),
             },
-search_method = "cover",
+            search_method = "cover",
         })
     end
 })
@@ -71,11 +71,11 @@ spec({
         local gen_loader = require("mini.snippets").gen_loader
         require("mini.snippets").setup({
             snippets = { -- Load custom file with global snippets first (adjust for Windows)
-            gen_loader.from_file("~/.config/nvim/snippets/global.json"),
+                gen_loader.from_file("~/.config/nvim/snippets/global.json"),
 
-            -- Load snippets based on current language by reading files from
-            -- "snippets/" subdirectories from 'runtimepath' directories.
-            gen_loader.from_lang()}
+                -- Load snippets based on current language by reading files from
+                -- "snippets/" subdirectories from 'runtimepath' directories.
+                gen_loader.from_lang() }
         })
     end
 })
@@ -140,15 +140,7 @@ spec({
     end
 })
 
--- ═══════════════════════════════════════════════════════════════════════════════
--- MINI.HIPATTERNS - Highlight patterns
--- ═══════════════════════════════════════════════════════════════════════════════
-spec({
-    setup_only = true,
-    config = function()
-        require("mini.hipatterns").setup()
-    end
-})
+
 
 -- ═══════════════════════════════════════════════════════════════════════════════
 -- MINI.TRAILSPACE - Trailing space management
@@ -166,13 +158,46 @@ spec({
 spec({
     setup_only = true,
     config = function()
-        require("mini.diff").setup()
+        local diff = require("mini.diff")
+        diff.setup({
+            -- Visual representation of changes
+            view = {
+                style = 'sign', -- Can be 'sign' or 'number'
+                signs = { add = '▎', change = '▎', delete = '▎' },
+                priority = 199, -- Priority of signs
+            },
+
+            -- Source for diff computation
+            -- Disabled by default for cleaner CodeCompanion inline assistant experience
+            -- Can be toggled on/off with :lua MiniDiff.toggle() or <leader>gdt
+            source = diff.gen_source.none(),
+
+            -- Delay before updating diff (ms)
+            delay = {
+                text_change = 200, -- Delay after text change
+            },
+
+            -- Use default mappings:
+            -- gh - apply hunk (normal/visual)
+            -- gH - reset hunk (normal/visual)
+            -- [H / ]H - navigate to prev/next hunk
+            -- [h / ]h - navigate to first/last hunk (needs Mini.bracketed)
+            -- Note: 'gh' text object for hunk operations
+
+            -- Various options
+            options = {
+                algorithm = 'histogram', -- Diff algorithm: 'minimal', 'patience', 'histogram', 'myers'
+                indent_heuristic = true, -- Better diff for indented code
+                linematch = 60,          -- Enable line matching for better word-level diff
+            },
+        })
     end,
-    keys = {{
-        "<leader>gd",
-        "<Cmd>lua MiniDiff.toggle_overlay()<CR>",
-        desc = "Open diff view"
-    }}
+    keys = {
+        -- Overlay toggle
+        { "<leader>gdo", function() MiniDiff.toggle_overlay() end, desc = "[D]iff [O]verlay" },
+        -- Toggle diff source on/off (useful when using CodeCompanion inline assistant)
+        { "<leader>gdt", function() MiniDiff.toggle() end,         desc = "[D]iff [T]oggle source" },
+    }
 })
 
 -- ═══════════════════════════════════════════════════════════════════════════════
@@ -203,7 +228,8 @@ spec({
 
         -- Synchronize terminal emulator background with Neovim's background to remove
         -- possibly different color padding around Neovim instance
-        MiniMisc.setup_termbg_sync()
+        -- DISABLED: Prevents transparency from working with mini.colors
+        -- MiniMisc.setup_termbg_sync()
     end
 })
 

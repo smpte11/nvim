@@ -70,14 +70,6 @@ spec({
                 vim.b.copilot_suggestion_hidden = false
             end,
         })
-
-        vim.api.nvim_create_autocmd("CompleteChanged", {
-            group = completion_group,
-            callback = function()
-                local info = vim.fn.complete_info({ "mode" })
-                vim.b.copilot_suggestion_hidden = (info.mode ~= "")
-            end,
-        })
     end,
 })
 

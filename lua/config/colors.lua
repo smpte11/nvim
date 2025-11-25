@@ -179,24 +179,25 @@ M.setup = function(palette_name)
         palette = palette,
     })
 
-    -- Add transparency using mini.colors (as suggested by mini.nvim author)
-    -- This makes background transparent while keeping the same color scheme
-    local ok, mini_colors = pcall(require, 'mini.colors')
-    if ok then
-        mini_colors.get_colorscheme():add_transparency({
-            general = true,      -- Make general background transparent (Normal, etc.)
-            float = true,        -- Make floating windows transparent
-            statuscolumn = true, -- Make status column transparent
-            statusline = false,  -- Keep statusline opaque for readability
-            tabline = false,     -- Keep tabline opaque for readability
-            winbar = false,      -- Keep winbar opaque for readability
-        }):apply()
-    end
-
     -- Apply all custom highlights using the same palette
     M.apply_highlights(palette)
 
-    print("🎨 Switched to " .. palette_name .. " palette (transparent)")
+    -- Add transparency using mini.colors (as suggested by mini.nvim author)
+    -- This makes background transparent while keeping the same color scheme
+    -- MUST be done AFTER apply_highlights to avoid being overwritten
+    local ok, mini_colors = pcall(require, 'mini.colors')
+    if ok then
+        mini_colors.get_colorscheme():add_transparency({
+            general = true,       -- Make general background transparent (Normal, etc.)
+            float = false,        -- Keep floating windows opaque to prevent artifacts
+            statuscolumn = false, -- Keep status column opaque to prevent artifacts
+            statusline = false,   -- Keep statusline opaque for readability
+            tabline = false,      -- Keep tabline opaque for readability
+            winbar = false,       -- Keep winbar opaque for readability
+        }):apply()
+    end
+
+    print("🎨 Switched to " .. palette_name .. " palette")
 end
 
 --- Switch between available palettes (canonical mini.base16 approach)
