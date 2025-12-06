@@ -1,76 +1,127 @@
 -- LSP configuration with Mason
 spec({
-    source = "neovim/nvim-lspconfig",
-    immediate = true,
-    depends = {
-        "mason-org/mason.nvim",
-        "mason-org/mason-lspconfig.nvim",
-        "WhoIsSethDaniel/mason-tool-installer.nvim",
-    },
-    config = function()
-        require("mason").setup({
-            ui = {
-                border = Utils.ui.border,
-            },
-        })
-    end,
+	source = "neovim/nvim-lspconfig",
+	immediate = true,
+	depends = {
+		"mason-org/mason.nvim",
+		"mason-org/mason-lspconfig.nvim",
+		"WhoIsSethDaniel/mason-tool-installer.nvim",
+	},
+	config = function()
+		require("mason").setup({
+			ui = {
+				border = Utils.ui.border,
+			},
+		})
+	end,
 })
 
 -- Lua development configuration
 spec({
-    source = "folke/lazydev.nvim",
-    immediate = true,
-    config = function()
-        require("lazydev").setup({
-            library = {
-                -- Load luvit types when the `vim.uv` word is found
-                { path = "${3rd}/luv/library", words = { "vim%.uv" } },
-            },
-        })
-    end,
+	source = "folke/lazydev.nvim",
+	immediate = true,
+	config = function()
+		require("lazydev").setup({
+			library = {
+				-- Load luvit types when the `vim.uv` word is found
+				{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+			},
+		})
+	end,
 })
 
 -- Mini.completion - LSP completion engine
 spec({
-    source = "nvim-mini/mini.completion",
-    config = function()
-        require("mini.completion").setup({
-            delay = {
-                completion = 100,
-                info = 100,
-                signature = 50,
-            },
-            lsp_completion = {
-                source_func = "completefunc",
-                auto_setup = true,
-                -- Use mini.snippets for snippet insertion (already configured)
-                snippet_insert = nil, -- Uses default which prefers mini.snippets
-            },
-            -- Fallback to built-in keyword completion when LSP unavailable
-            fallback_action = "<C-n>",
-            window = {
-                info = { height = 25, width = 80, border = Utils.ui.border },
-                signature = { height = 25, width = 80, border = Utils.ui.border },
-            },
-            mappings = {
-                force_twostep = "<C-Space>",
-                force_fallback = "<A-Space>",
-                scroll_down = "<C-f>",
-                scroll_up = "<C-b>",
-            },
-        })
+	source = "nvim-mini/mini.completion",
+	depends = { "nvim-mini/mini.icons" },
+	config = function()
+		require("mini.completion").setup({
+			delay = {
+				completion = 100,
+				info = 100,
+				signature = 50,
+			},
+			lsp_completion = {
+				source_func = "completefunc",
+				auto_setup = true,
+				-- process_items defaults to default_process_items which adds mini.icons highlighting
+				process_items = nil,
+				-- Use mini.snippets for snippet insertion (already configured)
+				snippet_insert = nil, -- Uses default which prefers mini.snippets
+			},
+			-- Context-aware fallback: prefer path/file completion (<C-x><C-f>) when prefix looks like a path,
+			-- otherwise fall back to keyword completion (<C-n>). Executed only if LSP stage produced no items.
+			fallback_action = function()
+				local line = vim.api.nvim_get_current_line()
+				local col = vim.api.nvim_win_get_cursor(0)[2]
+				local before = line:sub(1, col)
+				-- Extract last fragment (non-whitespace, non-quote)
+				local fragment = before:match("([^%s\"']+)$") or ""
 
-        -- Integration: Hide Copilot suggestions when completion menu is visible
-        local completion_group = vim.api.nvim_create_augroup("MiniCompletionIntegration", { clear = true })
+				local path_like = false
 
-        -- Hide Copilot when popup menu is shown
-        vim.api.nvim_create_autocmd("CompleteDone", {
-            group = completion_group,
-            callback = function()
-                vim.b.copilot_suggestion_hidden = false
-            end,
-        })
-    end,
+				-- Direct path indicators
+				if
+					fragment:match("[/\\]") -- contains a path separator
+					or fragment:match("^%.%.?/") -- ../ or ../../
+					or fragment:match("^%./") -- ./ relative path
+					or fragment:match("^~/%w*") -- ~/ home path
+					or fragment:match("^/")
+				then -- absolute path
+					path_like = true
+				end
+
+				-- Inside common file-loading contexts
+				if
+					before:match("require%s*[%('\"].*$")
+					or before:match("import%s+['\"].*$")
+					or before:match("from%s+['\"].*$")
+					or before:match("source%s+['\"].*$")
+					or before:match("include%s+['\"].*$")
+				then
+					path_like = true
+				end
+
+				local termcodes = function(keys)
+					return vim.api.nvim_replace_termcodes(keys, true, false, true)
+				end
+
+				if path_like then
+					-- Trigger file completion
+					vim.api.nvim_feedkeys(termcodes("<C-x><C-f>"), "n", false)
+				else
+					-- Fall back to keyword completion
+					vim.api.nvim_feedkeys(termcodes("<C-n>"), "n", false)
+				end
+			end,
+			window = {
+				info = { height = 25, width = 80, border = Utils.ui.border },
+				signature = { height = 25, width = 80, border = Utils.ui.border },
+			},
+			mappings = {
+				force_twostep = "<C-Space>",
+				force_fallback = "<A-Space>",
+				scroll_down = "<C-f>",
+				scroll_up = "<C-b>",
+			},
+		})
+
+		-- Tweak LSP kind icons to use mini.icons (requires Neovim >= 0.11)
+		if vim.fn.has("nvim-0.11") == 1 then
+			require("mini.icons").tweak_lsp_kind()
+		end
+
+		-- Integration: Hide Copilot suggestions when completion menu is visible
+		local completion_group = vim.api.nvim_create_augroup("MiniCompletionIntegration", { clear = true })
+
+		-- Hide Copilot when popup menu is shown
+		vim.api.nvim_create_autocmd("CompleteDone", {
+			group = completion_group,
+			callback = function()
+				vim.b.copilot_suggestion_hidden = false
+			end,
+		})
+	end,
 })
 
 -- COMMENTED OUT: Blink.cmp completion engine (replaced by mini.completion)
@@ -225,45 +276,51 @@ spec({
 
 -- Code formatting with conform.nvim
 spec({
-    source = "stevearc/conform.nvim",
-    config = function()
-        require("conform").setup({
-            notify_on_error = false,
-            format_on_save = function(bufnr)
-                if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
-                    return
-                end
-                -- Disable "format_on_save lsp_fallback" for languages that don't
-                -- have a well standardized coding style. You can add additional
-                -- languages here or re-enable it for the disabled ones.
-                local disable_filetypes = { c = true, cpp = true }
-                local lsp_format_opt
-                if disable_filetypes[vim.bo[bufnr].filetype] then
-                    lsp_format_opt = "never"
-                else
-                    lsp_format_opt = "fallback"
-                end
-                return {
-                    timeout_ms = 500,
-                    lsp_format = lsp_format_opt,
-                }
-            end,
-            formatters_by_ft = {
-                lua = { "stylua" },
-                elixir = { "mix_format" },
-                exs = { "mix_format" },
-                heex = { "mix_format" },
-                yaml = { "prettierd", "prettier" },
-                markdown = { "prettier" },
-                go = { "goimports", "gofumpt" },
-                -- Conform can also run multiple formatters sequentially
-                -- python = { "isort", "black" },
-                --
-                -- You can use 'stop_after_first' to run the first available formatter from the list
-                -- javascript = { "prettierd", "prettier", stop_after_first = true },
-            },
-        })
-    end,
+	source = "stevearc/conform.nvim",
+	config = function()
+		require("conform").setup({
+			notify_on_error = false,
+			format_on_save = function(bufnr)
+				if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+					return
+				end
+				-- Disable "format_on_save lsp_fallback" for languages that don't
+				-- have a well standardized coding style. You can add additional
+				-- languages here or re-enable it for the disabled ones.
+				local disable_filetypes = { c = true, cpp = true }
+				local lsp_format_opt
+				if disable_filetypes[vim.bo[bufnr].filetype] then
+					lsp_format_opt = "never"
+				else
+					lsp_format_opt = "fallback"
+				end
+				return {
+					timeout_ms = 500,
+					lsp_format = lsp_format_opt,
+				}
+			end,
+			formatters = {
+				erlfmt = {
+					command = "/opt/homebrew/bin/erlfmt",
+				},
+			},
+			formatters_by_ft = {
+				lua = { "stylua" },
+				elixir = { "mix_format" },
+				exs = { "mix_format" },
+				heex = { "mix_format" },
+				yaml = { "prettierd", "prettier" },
+				markdown = { "prettier" },
+				go = { "goimports", "gofumpt" },
+				erlfmt = { "erlfmt" },
+				-- Conform can also run multiple formatters sequentially
+				-- python = { "isort", "black" },
+				--
+				-- You can use 'stop_after_first' to run the first available formatter from the list
+				-- javascript = { "prettierd", "prettier", stop_after_first = true },
+			},
+		})
+	end,
 })
 
 -- Brief aside: **What is LSP?**
@@ -293,11 +350,11 @@ spec({
 
 -- change diagnostic symbols in the sign column (gutter)
 if vim.g.have_nerd_font then
-    local signs = { error = "", warn = "", hint = "", info = "" }
-    for type, icon in pairs(signs) do
-        local hl = "diagnosticsign" .. type
-        vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
-    end
+	local signs = { error = "", warn = "", hint = "", info = "" }
+	for type, icon in pairs(signs) do
+		local hl = "diagnosticsign" .. type
+		vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+	end
 end
 
 -- lsp servers and clients are able to communicate to each other what features they support.
@@ -318,77 +375,77 @@ local capabilities = vim.lsp.protocol.make_client_capabilities()
 --  - settings (table): override the default settings passed when initializing the server.
 --        for example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
 local servers = {
-    -- clangd = {},
-    -- rust_analyzer = {},
-    -- ... etc. see `:help lspconfig-all` for a list of all the pre-configured lsps
-    --
-    -- some languages (like typescript) have entire language plugins that can be useful:
-    --    https://github.com/pmizio/typescript-tools.nvim
-    --
-    -- but for many setups, the lsp (`ts_ls`) will work just fine
-    terraformls = {},
-    ts_ls = {},
-    basedpyright = {
-        settings = {
-            basedpyright = {
-                analysis = {
-                    autosearchpaths = true,
-                    diagnosticmode = "openfilesonly",
-                    uselibrarycodefortypes = true,
-                },
-            },
-        },
-    },
-    ruff = {},
-    nushell = {},
-    dockerls = {},
-    -- Erlang Language Platform (ELP) - WhatsApp's advanced Erlang/Elixir LSP
-    -- Provides superior semantic analysis, go-to-definition, find references, call hierarchy
-    -- Designed to be scalable and fully incremental, inspired by rust-analyzer
-    elp = {
-        cmd = { "elp", "server" },
-        filetypes = { "erlang", "elixir" },
-        root_dir = function(fname)
-            -- Look for rebar.config, mix.exs, or .git directory
-            return require("lspconfig.util").find_git_ancestor(fname)
-                or require("lspconfig.util").root_pattern("rebar.config", "mix.exs", "OTP_VERSION")(fname)
-        end,
-        settings = {
-            elp = {
-                -- Enable incremental compilation for better performance
-                incremental = true,
-                -- Enable all diagnostics
-                diagnostics = {
-                    enabled = true,
-                    -- Show warnings and errors
-                    disabled = {},
-                },
-                -- Enable code lens for additional information
-                codeLens = {
-                    enabled = true,
-                },
-            },
-        },
-    },
-    bashls = {},
-    html = {},
-    jsonls = {},
-    yamlls = {},
-    marksman = {},
-    lua_ls = {
-        -- cmd = { ... },
-        -- filetypes = { ... },
-        -- capabilities = {},
-        settings = {
-            lua = {
-                completion = {
-                    callsnippet = "replace",
-                },
-                -- you can toggle below to ignore lua_ls's noisy `missing-fields` warnings
-                diagnostics = { disable = { "missing-fields" } },
-            },
-        },
-    },
+	-- clangd = {},
+	-- rust_analyzer = {},
+	-- ... etc. see `:help lspconfig-all` for a list of all the pre-configured lsps
+	--
+	-- some languages (like typescript) have entire language plugins that can be useful:
+	--    https://github.com/pmizio/typescript-tools.nvim
+	--
+	-- but for many setups, the lsp (`ts_ls`) will work just fine
+	terraformls = {},
+	ts_ls = {},
+	basedpyright = {
+		settings = {
+			basedpyright = {
+				analysis = {
+					autosearchpaths = true,
+					diagnosticmode = "openfilesonly",
+					uselibrarycodefortypes = true,
+				},
+			},
+		},
+	},
+	ruff = {},
+	nushell = {},
+	dockerls = {},
+	-- Erlang Language Platform (ELP) - WhatsApp's advanced Erlang/Elixir LSP
+	-- Provides superior semantic analysis, go-to-definition, find references, call hierarchy
+	-- Designed to be scalable and fully incremental, inspired by rust-analyzer
+	elp = {
+		cmd = { "elp", "server" },
+		filetypes = { "erlang", "elixir" },
+		root_dir = function(fname)
+			-- Look for rebar.config, mix.exs, or .git directory
+			return require("lspconfig.util").find_git_ancestor(fname)
+				or require("lspconfig.util").root_pattern("rebar.config", "mix.exs", "OTP_VERSION")(fname)
+		end,
+		settings = {
+			elp = {
+				-- Enable incremental compilation for better performance
+				incremental = true,
+				-- Enable all diagnostics
+				diagnostics = {
+					enabled = true,
+					-- Show warnings and errors
+					disabled = {},
+				},
+				-- Enable code lens for additional information
+				codeLens = {
+					enabled = true,
+				},
+			},
+		},
+	},
+	bashls = {},
+	html = {},
+	jsonls = {},
+	yamlls = {},
+	marksman = {},
+	lua_ls = {
+		-- cmd = { ... },
+		-- filetypes = { ... },
+		-- capabilities = {},
+		settings = {
+			lua = {
+				completion = {
+					callsnippet = "replace",
+				},
+				-- you can toggle below to ignore lua_ls's noisy `missing-fields` warnings
+				diagnostics = { disable = { "missing-fields" } },
+			},
+		},
+	},
 }
 
 -- ensure the servers and tools above are installed
@@ -406,38 +463,38 @@ local servers = {
 -- for you, so that they are available from within neovim.
 local ensure_installed = vim.tbl_keys(servers or {})
 vim.list_extend(ensure_installed, {
-    "stylua", -- used to format lua code
-    "shfmt",
-    "shellcheck",
-    "taplo",
-    -- ELP (Erlang Language Platform) for Erlang/Elixir
-    -- Note: May need manual installation if not available in Mason registry
-    -- Installation: cargo install --git https://github.com/whatsapp/erlang-language-platform --bin elp
-    -- Go tools are handled by ray-x/go.nvim
-    -- "tflint",
+	"stylua", -- used to format lua code
+	"shfmt",
+	"shellcheck",
+	"taplo",
+	-- ELP (Erlang Language Platform) for Erlang/Elixir
+	-- Note: May need manual installation if not available in Mason registry
+	-- Installation: cargo install --git https://github.com/whatsapp/erlang-language-platform --bin elp
+	-- Go tools are handled by ray-x/go.nvim
+	-- "tflint",
 })
 
 local i = 1
 while i <= #ensure_installed do
-    if ensure_installed[i] == "nushell" then
-        table.remove(ensure_installed, i)
-    else
-        i = i + 1
-    end
+	if ensure_installed[i] == "nushell" then
+		table.remove(ensure_installed, i)
+	else
+		i = i + 1
+	end
 end
 
 require("mason-tool-installer").setup({ ensure_installed = ensure_installed })
 
 require("mason-lspconfig").setup({
-    handlers = {
-        function(server_name)
-            local server = servers[server_name] or {}
-            -- this handles overriding only values explicitly passed
-            -- by the server configuration above. useful when disabling
-            -- certain features of an lsp (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
+	handlers = {
+		function(server_name)
+			local server = servers[server_name] or {}
+			-- this handles overriding only values explicitly passed
+			-- by the server configuration above. useful when disabling
+			-- certain features of an lsp (for example, turning off formatting for ts_ls)
+			server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
 
-            require("lspconfig")[server_name].setup(server)
-        end,
-    },
+			require("lspconfig")[server_name].setup(server)
+		end,
+	},
 })

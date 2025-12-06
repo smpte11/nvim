@@ -74,16 +74,28 @@ M.apply_highlights = function(palette)
     vim.api.nvim_set_hl(0, "MiniJump2dSpot", { reverse = true })
 
     -- ═══════════════════════════════════════════════════════════════════
-    -- 🔹 COMPLETION HIGHLIGHTS (BlinkCmp)
+    -- 🔹 COMPLETION HIGHLIGHTS (mini.completion)
     -- ═══════════════════════════════════════════════════════════════════
 
-    vim.api.nvim_set_hl(0, "BlinkCmpMenu", { link = "Pmenu" })
-    vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { link = "Pmenu" })
-    vim.api.nvim_set_hl(0, "BlinkCmpMenuSelection", { link = "PmenuSel" })
-    vim.api.nvim_set_hl(0, "BlinkCmpDoc", { link = "NormalFloat" })
-    vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { link = "NormalFloat" })
-    vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { link = "NormalFloat" })
-    vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { link = "NormalFloat" })
+    -- Popup menu (completion menu) - use normal background for better border visibility
+    vim.api.nvim_set_hl(0, "Pmenu", { bg = palette.base01, fg = palette.base05 })
+    vim.api.nvim_set_hl(0, "PmenuSel", { bg = palette.base02, fg = palette.base05, bold = true })
+    vim.api.nvim_set_hl(0, "PmenuSbar", { bg = palette.base02 })
+    vim.api.nvim_set_hl(0, "PmenuThumb", { bg = palette.base04 })
+    vim.api.nvim_set_hl(0, "PmenuBorder", { fg = palette.base03, bg = palette.base01 })
+
+    -- Mini.completion specific highlights
+    vim.api.nvim_set_hl(0, "MiniCompletionActiveParameter", { bg = palette.base02, bold = true })
+    vim.api.nvim_set_hl(0, "MiniCompletionDeprecated", { fg = palette.base03, strikethrough = true })
+
+    -- COMMENTED OUT: Blink.cmp highlights (replaced by mini.completion)
+    -- vim.api.nvim_set_hl(0, "BlinkCmpMenu", { link = "Pmenu" })
+    -- vim.api.nvim_set_hl(0, "BlinkCmpMenuBorder", { link = "Pmenu" })
+    -- vim.api.nvim_set_hl(0, "BlinkCmpMenuSelection", { link = "PmenuSel" })
+    -- vim.api.nvim_set_hl(0, "BlinkCmpDoc", { link = "NormalFloat" })
+    -- vim.api.nvim_set_hl(0, "BlinkCmpDocBorder", { link = "NormalFloat" })
+    -- vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelp", { link = "NormalFloat" })
+    -- vim.api.nvim_set_hl(0, "BlinkCmpSignatureHelpBorder", { link = "NormalFloat" })
 
     -- ═══════════════════════════════════════════════════════════════════
     -- 🔹 AI ASSISTANT HIGHLIGHTS (CodeCompanion)
