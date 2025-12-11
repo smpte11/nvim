@@ -4,6 +4,9 @@ vim.loader.enable()
 -- Load utilities first (provides Utils global namespace)
 require("config.utils")
 
+-- Bootstrap mini.deps (must be loaded before config.init because keymaps depend on mini.keymap)
+require("config.bootstrap")
+
 -- Load core configuration (options, keymaps, autocmds, commands)
 require("config.init")
 
