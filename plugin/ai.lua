@@ -51,6 +51,7 @@ spec({
     },
     config = function()
         require("codecompanion").setup({
+            ignore_warnings = true, -- Mute v18.0.0 breaking changes warning
             adapters = {
                 http = {
                     ollama = function()
@@ -63,7 +64,7 @@ spec({
                     end,
                 },
             },
-            strategies = {
+            interactions = { -- Renamed from strategies in v18.0.0
                 chat = {
                     adapter = "copilot",
                     keymaps = {
@@ -84,11 +85,10 @@ spec({
                 action_palette = {
                     width = 95,
                     height = 10,
-                    prompt = "Prompt ",                     -- Prompt used for interactive LLM calls
-                    provider = "mini_pick",                 -- default|telescope|mini_pick
+                    prompt = "Prompt ",      -- Prompt used for interactive LLM calls
+                    provider = "mini_pick",  -- default|telescope|mini_pick
                     opts = {
-                        show_default_actions = true,        -- Show the default actions in the action palette?
-                        show_default_prompt_library = true, -- Show the default prompt library in the action palette?
+                        show_presets = true, -- Renamed from show_default_actions in v18.0.0
                     },
                 },
             },

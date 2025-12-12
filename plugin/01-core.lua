@@ -267,7 +267,7 @@ spec({
                 extra_ui = true, -- Extra UI features ('winblend', 'cmdheight=0', ...)
             },
             mappings = {
-                windows = true, -- Window navigation with <C-hjkl>, resize with <C-arrow>
+                windows = true,       -- Window navigation with <C-hjkl>, resize with <C-arrow>
                 move_with_alt = true, -- Move cursor in Insert, Command, and Terminal mode with <M-hjkl>
             },
             silent = true,
@@ -334,12 +334,12 @@ spec({
 
         require("mini.surround").setup({
             mappings = {
-                add = "sa", -- Add surrounding in Normal and Visual modes
-                delete = "sd", -- Delete surrounding
-                find = "sf", -- Find surrounding (to the right)
-                find_left = "sF", -- Find surrounding (to the left)
-                highlight = "sh", -- Highlight surrounding
-                replace = "sr", -- Replace surrounding
+                add = "sa",            -- Add surrounding in Normal and Visual modes
+                delete = "sd",         -- Delete surrounding
+                find = "sf",           -- Find surrounding (to the right)
+                find_left = "sF",      -- Find surrounding (to the left)
+                highlight = "sh",      -- Highlight surrounding
+                replace = "sr",        -- Replace surrounding
                 update_n_lines = "sn", -- Update `n_lines`
             },
         })
@@ -384,7 +384,7 @@ spec({
             items = {
                 starter.sections.sessions(5, true),
                 {
-                    { name = "Git Status", action = "Neogit", section = "Git" },
+                    { name = "Git Status", action = function() require("neogit").open() end, section = "Git" },
                 },
                 starter.sections.builtin_actions(),
                 starter.sections.recent_files(5, false, true),
