@@ -44,8 +44,7 @@ spec({
 
 -- CodeCompanion AI assistant
 spec({
-    source = "smpte11/codecompanion.nvim",
-    checkout = "feat/add-mini-completion-provider",
+    source = "olimorris/codecompanion.nvim",
     depends = {
         "nvim-lua/plenary.nvim",
         "nvim-treesitter/nvim-treesitter",
@@ -74,7 +73,7 @@ spec({
                         },
                     },
                     opts = {
-                        completion_provider = 'mini', -- Use mini.completion provider
+                        completion_provider = 'default', -- Use mini.completion provider
                     },
                 },
                 inline = {
