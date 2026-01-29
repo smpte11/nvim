@@ -121,6 +121,19 @@ spec({
                 vim.b.copilot_suggestion_hidden = false
             end,
         })
+
+        -- Disable mini.completion in floating input windows (like snacks picker, vim.ui.input, etc.)
+        vim.api.nvim_create_autocmd("BufEnter", {
+            group = completion_group,
+            callback = function(args)
+                -- Check if current window is floating
+                local win_config = vim.api.nvim_win_get_config(0)
+                if win_config.relative ~= "" then
+                    -- It's a floating window, disable mini.completion
+                    vim.b[args.buf].minicompletion_disable = true
+                end
+            end,
+        })
     end,
 })
 

@@ -109,96 +109,6 @@ spec({
 })
 
 -- ═══════════════════════════════════════════════════════════════════════════════
--- SNACKS.NVIM - GitHub integration & LSP file rename
--- ═══════════════════════════════════════════════════════════════════════════════
-spec({
-    source = "folke/snacks.nvim",
-    immediate = true,
-    config = function()
-        require("snacks").setup({
-            -- Enable gh (GitHub integration) and rename (LSP file rename) modules
-            gh = { enabled = true },
-            rename = { enabled = true },
-            picker = {
-                enabled = true,
-                -- Configure window borders to match mini.clue
-                win = {
-                    input = {
-                        border = Utils.ui.border,
-                    },
-                    list = {
-                        border = Utils.ui.border,
-                    },
-                    preview = {
-                        border = Utils.ui.border,
-                    },
-                },
-                -- Override source configs to use double borders
-                sources = {
-                    gh_issue = {
-                        layout = {
-                            layout = {
-                                box = "horizontal",
-                                width = 0.8,
-                                min_width = 120,
-                                height = 0.8,
-                                {
-                                    box = "vertical",
-                                    border = Utils.ui.border,
-                                    title = "{title} {live} {flags}",
-                                    { win = "input", height = 1,     border = "bottom" },
-                                    { win = "list",  border = "none" },
-                                },
-                                { win = "preview", title = "{preview}", border = Utils.ui.border, width = 0.5 },
-                            },
-                        },
-                    },
-                    gh_pr = {
-                        layout = {
-                            layout = {
-                                box = "horizontal",
-                                width = 0.8,
-                                min_width = 120,
-                                height = 0.8,
-                                {
-                                    box = "vertical",
-                                    border = Utils.ui.border,
-                                    title = "{title} {live} {flags}",
-                                    { win = "input", height = 1,     border = "bottom" },
-                                    { win = "list",  border = "none" },
-                                },
-                                { win = "preview", title = "{preview}", border = Utils.ui.border, width = 0.5 },
-                            },
-                        },
-                    },
-                },
-            },
-            scratch = { enabled = true }, -- Required for gh editing
-            -- Configure styles to match your UI
-            styles = {
-                -- Scratch buffers (used for editing GitHub comments/descriptions)
-                scratch = {
-                    border = Utils.ui.border,
-                    width = 100,
-                    height = 30,
-                },
-            },
-        })
-    end,
-    -- stylua: ignore start
-    keys = {
-        -- GitHub integration (grouped under <leader>gh)
-        { "<leader>ghi", function() Snacks.picker.gh_issue() end,                  desc = "[GitHub] [I]ssues (open)" },
-        { "<leader>ghI", function() Snacks.picker.gh_issue({ state = "all" }) end, desc = "[GitHub] [I]ssues (all)" },
-        { "<leader>ghp", function() Snacks.picker.gh_pr() end,                     desc = "[GitHub] [P]ull Requests (open)" },
-        { "<leader>ghP", function() Snacks.picker.gh_pr({ state = "all" }) end,    desc = "[GitHub] [P]ull Requests (all)" },
-        -- File rename (moved from <leader>cR to fit with file operations)
-        { "<leader>fR",  function() Snacks.rename.rename_file() end,               desc = "Rename File" },
-    },
-    -- stylua: ignore end
-})
-
--- ═══════════════════════════════════════════════════════════════════════════════
 -- MINI.NOTIFY - Notification manager
 -- ═══════════════════════════════════════════════════════════════════════════════
 spec({
@@ -502,4 +412,94 @@ spec({
             },
         })
     end,
+})
+
+-- ═══════════════════════════════════════════════════════════════════════════════
+-- SNACKS.NVIM - GitHub integration & LSP file rename
+-- ═══════════════════════════════════════════════════════════════════════════════
+spec({
+    source = "folke/snacks.nvim",
+    immediate = true,
+    config = function()
+        require("snacks").setup({
+            -- Enable gh (GitHub integration) and rename (LSP file rename) modules
+            gh = { enabled = true },
+            rename = { enabled = true },
+            picker = {
+                enabled = true,
+                -- Configure window borders to match mini.clue
+                win = {
+                    input = {
+                        border = Utils.ui.border,
+                    },
+                    list = {
+                        border = Utils.ui.border,
+                    },
+                    preview = {
+                        border = Utils.ui.border,
+                    },
+                },
+                -- Override source configs to use double borders
+                sources = {
+                    gh_issue = {
+                        layout = {
+                            layout = {
+                                box = "horizontal",
+                                width = 0.8,
+                                min_width = 120,
+                                height = 0.8,
+                                {
+                                    box = "vertical",
+                                    border = Utils.ui.border,
+                                    title = "{title} {live} {flags}",
+                                    { win = "input", height = 1,     border = "bottom" },
+                                    { win = "list",  border = "none" },
+                                },
+                                { win = "preview", title = "{preview}", border = Utils.ui.border, width = 0.5 },
+                            },
+                        },
+                    },
+                    gh_pr = {
+                        layout = {
+                            layout = {
+                                box = "horizontal",
+                                width = 0.8,
+                                min_width = 120,
+                                height = 0.8,
+                                {
+                                    box = "vertical",
+                                    border = Utils.ui.border,
+                                    title = "{title} {live} {flags}",
+                                    { win = "input", height = 1,     border = "bottom" },
+                                    { win = "list",  border = "none" },
+                                },
+                                { win = "preview", title = "{preview}", border = Utils.ui.border, width = 0.5 },
+                            },
+                        },
+                    },
+                },
+            },
+            scratch = { enabled = true }, -- Required for gh editing
+            -- Configure styles to match your UI
+            styles = {
+                -- Scratch buffers (used for editing GitHub comments/descriptions)
+                scratch = {
+                    border = Utils.ui.border,
+                    width = 100,
+                    height = 30,
+                },
+            },
+        })
+    end,
+    -- stylua: ignore start
+    keys = {
+        -- GitHub integration (grouped under <leader>gh)
+        { "<leader>ghi", function() Snacks.picker.gh_issue() end,                  desc = "[GitHub] [I]ssues (open)" },
+        { "<leader>ghI", function() Snacks.picker.gh_issue({ state = "all" }) end, desc = "[GitHub] [I]ssues (all)" },
+        { "<leader>ghp", function() Snacks.picker.gh_pr() end,                     desc = "[GitHub] [P]ull Requests (open)" },
+        { "<leader>ghP", function() Snacks.picker.gh_pr({ state = "all" }) end,    desc = "[GitHub] [P]ull Requests (all)" },
+        -- File rename (moved from <leader>cR to fit with file operations)
+        { "<leader>fR",  function() Snacks.rename.rename_file() end,               desc = "Rename File" },
+    },
+    -- stylua: ignore end
 })

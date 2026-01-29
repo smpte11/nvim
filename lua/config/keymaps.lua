@@ -177,7 +177,7 @@ keymap("n", "<F11>", function() require("config.colors").pick_palette() end, { d
 -- ╔═══════════════════════╗
 -- ║	     File          ║
 -- ╚═══════════════════════╝
-keymap('n', '<leader>fp', function() MiniExtra.pickers.explorer() end, { desc = "[F]ile [P]icker" })
+
 keymap('n', '<leader>ff', function()
     local path = vim.api.nvim_buf_get_name(0)
     -- If buffer has no valid path or is a special buffer, use cwd instead
