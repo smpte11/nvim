@@ -21,12 +21,12 @@ spec({
                 hide_during_completion = true, -- Hide when completion menu is open
                 debounce = 75,
                 keymap = {
-                    accept = "<M-l>", -- Option+l to accept suggestion
-                    accept_word = false,
-                    accept_line = false,
-                    next = "<M-]>",    -- Option+] for next suggestion
-                    prev = "<M-[>",    -- Option+[ for previous suggestion
-                    dismiss = "<M-d>", -- Option+d to dismiss
+                    accept = "<C-l>", -- Ctrl+l to accept suggestion (ergonomic, home row)
+                    accept_word = "<C-j>", -- Ctrl+j to accept word
+                    accept_line = "<C-y>", -- Ctrl+y to accept line (avoids <C-k> conflict)
+                    next = "<C-]>",    -- Ctrl+] for next suggestion
+                    prev = "<C-[>",    -- Ctrl+[ for previous suggestion
+                    dismiss = "<C-h>", -- Ctrl+h to dismiss (left/backspace feel)
                 },
             },
             panel = { enabled = false },
