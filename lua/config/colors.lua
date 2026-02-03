@@ -128,6 +128,31 @@ M.apply_highlights = function(palette)
     -- vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
 
     -- ═══════════════════════════════════════════════════════════════════
+    -- 🔹 MARKDOWN HIGHLIGHTS (render-markdown.nvim)
+    -- ═══════════════════════════════════════════════════════════════════
+
+    -- Headers: Text colors (with background for fallback/text highlighting)
+    vim.api.nvim_set_hl(0, "RenderMarkdownH1", { fg = palette.base0D, bg = palette.base02, bold = true }) -- Blue
+    vim.api.nvim_set_hl(0, "RenderMarkdownH2", { fg = palette.base0E, bg = palette.base01, bold = true }) -- Purple
+    vim.api.nvim_set_hl(0, "RenderMarkdownH3", { fg = palette.base0C, bg = palette.base01 })             -- Cyan
+    vim.api.nvim_set_hl(0, "RenderMarkdownH4", { fg = palette.base09, bg = palette.base01 })             -- Orange
+    vim.api.nvim_set_hl(0, "RenderMarkdownH5", { fg = palette.base0A, bg = palette.base01 })             -- Yellow
+    vim.api.nvim_set_hl(0, "RenderMarkdownH6", { fg = palette.base08, bg = palette.base01 })             -- Red
+
+    -- Headers: Background blocks (referenced in plugin config)
+    vim.api.nvim_set_hl(0, "RenderMarkdownH1Bg", { bg = palette.base02 })
+    vim.api.nvim_set_hl(0, "RenderMarkdownH2Bg", { bg = palette.base01 })
+    vim.api.nvim_set_hl(0, "RenderMarkdownH3Bg", { bg = palette.base01 })
+    vim.api.nvim_set_hl(0, "RenderMarkdownH4Bg", { bg = palette.base01 })
+    vim.api.nvim_set_hl(0, "RenderMarkdownH5Bg", { bg = palette.base01 })
+    vim.api.nvim_set_hl(0, "RenderMarkdownH6Bg", { bg = palette.base01 })
+
+    -- Code blocks: Distinct background to separate from text
+    -- Code uses RenderMarkdownCode (block) and RenderMarkdownCodeInline (inline)
+    vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = palette.base01 })
+    vim.api.nvim_set_hl(0, "RenderMarkdownCodeInline", { fg = palette.base0C, bg = palette.base01 })
+
+    -- ═══════════════════════════════════════════════════════════════════
     -- 🔹 STATUSLINE HIGHLIGHTS (Custom enhancements)
     -- ═══════════════════════════════════════════════════════════════════
 
@@ -191,12 +216,8 @@ M.setup = function(palette_name)
         palette = palette,
     })
 
-    -- Apply all custom highlights using the same palette
-    M.apply_highlights(palette)
-
     -- Add transparency using mini.colors (as suggested by mini.nvim author)
     -- This makes background transparent while keeping the same color scheme
-    -- MUST be done AFTER apply_highlights to avoid being overwritten
     local ok, mini_colors = pcall(require, 'mini.colors')
     if ok then
         mini_colors.get_colorscheme():add_transparency({
@@ -208,6 +229,10 @@ M.setup = function(palette_name)
             winbar = false,       -- Keep winbar opaque for readability
         }):apply()
     end
+
+    -- Apply all custom highlights using the same palette
+    -- MUST be done AFTER transparency to ensure our custom backgrounds aren't stripped
+    M.apply_highlights(palette)
 
     print("🎨 Switched to " .. palette_name .. " palette")
 end
