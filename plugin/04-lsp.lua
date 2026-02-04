@@ -396,6 +396,7 @@ local servers = {
     --    https://github.com/pmizio/typescript-tools.nvim
     --
     -- but for many setups, the lsp (`ts_ls`) will work just fine
+    ocamllsp={},
     terraformls = {},
     ts_ls = {},
     basedpyright = {
