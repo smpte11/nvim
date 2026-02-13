@@ -52,7 +52,7 @@ vim.api.nvim_create_autocmd("lspattach", {
         map("n", "<leader>le", vim.diagnostic.open_float, "[L]SP [E]rror (Line Diagnostics)")
         map("n", "[d", vim.diagnostic.goto_prev, "Diagnostics: Go to Previous")
         map("n", "]d", vim.diagnostic.goto_next, "Diagnostics: Go to Next")
-        map("n", "<leader>ld", function() require("MiniExtra.pickers").diagnostic({ buffer = event.buf }) end,
+        map("n", "<leader>ld", function() require("mini.extra").pickers.diagnostic({ buffer = event.buf }) end,
             "[L]SP [D]iagnostics Picker")
         -- stylua: ignore end
 
@@ -110,15 +110,32 @@ vim.api.nvim_create_autocmd("FileType", {
 -- Autocommands for Octo buffers
 local octo_clues_augroup = vim.api.nvim_create_augroup("octo_clues", { clear = true })
 
+-- Dynamic local leader (default to comma if not set)
+local loc = vim.g.maplocalleader or ","
+
+-- Mappings based on Octo default values
 local octo_clues = {
-    { mode = "n", keys = ",a", desc = "🐙 assignee" },
-    { mode = "n", keys = ",c", desc = "🐙 comment" },
-    { mode = "n", keys = ",g", desc = "🐙 goto" },
-    { mode = "n", keys = ",i", desc = "🐙 issue" },
-    { mode = "n", keys = ",l", desc = "🐙 label" },
-    { mode = "n", keys = ",p", desc = "🐙 pr" },
-    { mode = "n", keys = ",r", desc = "🐙 reaction" },
-    { mode = "n", keys = ",v", desc = "🐙 review" },
+    -- General
+    { mode = "n", keys = loc .. "a", desc = " Assignee" },
+    { mode = "n", keys = loc .. "c", desc = " Comment/Create" },
+    { mode = "n", keys = loc .. "l", desc = " Label" },
+    { mode = "n", keys = loc .. "r", desc = " React" },
+    -- Issue/PR
+    { mode = "n", keys = loc .. "i", desc = " Issue Action" },
+    { mode = "n", keys = loc .. "p", desc = " PR Action" },
+    -- Review
+    { mode = "n", keys = loc .. "v", desc = " Review" },
+    { mode = "n", keys = loc .. "va", desc = " Add Review Comment" },
+    { mode = "n", keys = loc .. "vd", desc = " Delete Review Comment" },
+    -- Threads
+    { mode = "n", keys = loc .. "t", desc = " Thread" },
+    { mode = "n", keys = loc .. "tr", desc = " Resolve Thread" },
+    { mode = "n", keys = loc .. "tu", desc = " Unresolve Thread" },
+    -- Navigation
+    { mode = "n", keys = loc .. "g", desc = " Goto" },
+    { mode = "n", keys = loc .. "gi", desc = " Goto Issue" },
+    { mode = "n", keys = loc .. "gp", desc = " Goto PR" },
+    { mode = "n", keys = loc .. "gf", desc = " Goto File" },
 }
 
 vim.api.nvim_create_autocmd("FileType", {

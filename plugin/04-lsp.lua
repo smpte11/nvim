@@ -122,7 +122,7 @@ spec({
             end,
         })
 
-        -- Disable mini.completion in floating input windows (like snacks picker, vim.ui.input, etc.)
+        -- Disable mini.completion in floating input windows (like vim.ui.input, etc.)
         vim.api.nvim_create_autocmd("BufEnter", {
             group = completion_group,
             callback = function(args)
@@ -206,8 +206,7 @@ spec({
                         module = "blink-cmp-git",
                         name = "Git",
                         enabled = function()
-                            -- NOTE: Removed "octo" since we're using snacks.nvim gh
-                            return vim.tbl_contains({ "gitcommit", "markdown" }, vim.bo.filetype)
+                            return vim.tbl_contains({ "gitcommit", "octo", "markdown" }, vim.bo.filetype)
                         end,
                     },
                 },

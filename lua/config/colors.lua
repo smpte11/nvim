@@ -128,29 +128,34 @@ M.apply_highlights = function(palette)
     -- vim.api.nvim_set_hl(0, 'DapStop', { fg = '#ffcc00' })
 
     -- ═══════════════════════════════════════════════════════════════════
-    -- 🔹 MARKDOWN HIGHLIGHTS (render-markdown.nvim)
+    -- 🔹 MARKDOWN HIGHLIGHTS (markview.nvim)
     -- ═══════════════════════════════════════════════════════════════════
 
-    -- Headers: Text colors (with background for fallback/text highlighting)
-    vim.api.nvim_set_hl(0, "RenderMarkdownH1", { fg = palette.base0D, bg = palette.base02, bold = true }) -- Blue
-    vim.api.nvim_set_hl(0, "RenderMarkdownH2", { fg = palette.base0E, bg = palette.base01, bold = true }) -- Purple
-    vim.api.nvim_set_hl(0, "RenderMarkdownH3", { fg = palette.base0C, bg = palette.base01 })             -- Cyan
-    vim.api.nvim_set_hl(0, "RenderMarkdownH4", { fg = palette.base09, bg = palette.base01 })             -- Orange
-    vim.api.nvim_set_hl(0, "RenderMarkdownH5", { fg = palette.base0A, bg = palette.base01 })             -- Yellow
-    vim.api.nvim_set_hl(0, "RenderMarkdownH6", { fg = palette.base08, bg = palette.base01 })             -- Red
+    -- Headings
+    vim.api.nvim_set_hl(0, "MarkviewHeading1", { fg = palette.base0D, bg = palette.base02, bold = true }) -- Blue
+    vim.api.nvim_set_hl(0, "MarkviewHeading2", { fg = palette.base0E, bg = palette.base01, bold = true }) -- Purple
+    vim.api.nvim_set_hl(0, "MarkviewHeading3", { fg = palette.base0C, bold = true }) -- Cyan
+    vim.api.nvim_set_hl(0, "MarkviewHeading4", { fg = palette.base09, bold = true }) -- Orange
+    vim.api.nvim_set_hl(0, "MarkviewHeading5", { fg = palette.base0A, bold = true }) -- Yellow
+    vim.api.nvim_set_hl(0, "MarkviewHeading6", { fg = palette.base08, bold = true }) -- Red
+    
+    -- Heading Signs/Markers (link to heading color)
+    vim.api.nvim_set_hl(0, "MarkviewHeading1Sign", { link = "MarkviewHeading1" })
+    vim.api.nvim_set_hl(0, "MarkviewHeading2Sign", { link = "MarkviewHeading2" })
+    vim.api.nvim_set_hl(0, "MarkviewHeading3Sign", { link = "MarkviewHeading3" })
+    vim.api.nvim_set_hl(0, "MarkviewHeading4Sign", { link = "MarkviewHeading4" })
+    vim.api.nvim_set_hl(0, "MarkviewHeading5Sign", { link = "MarkviewHeading5" })
+    vim.api.nvim_set_hl(0, "MarkviewHeading6Sign", { link = "MarkviewHeading6" })
 
-    -- Headers: Background blocks (referenced in plugin config)
-    vim.api.nvim_set_hl(0, "RenderMarkdownH1Bg", { bg = palette.base02 })
-    vim.api.nvim_set_hl(0, "RenderMarkdownH2Bg", { bg = palette.base01 })
-    vim.api.nvim_set_hl(0, "RenderMarkdownH3Bg", { bg = palette.base01 })
-    vim.api.nvim_set_hl(0, "RenderMarkdownH4Bg", { bg = palette.base01 })
-    vim.api.nvim_set_hl(0, "RenderMarkdownH5Bg", { bg = palette.base01 })
-    vim.api.nvim_set_hl(0, "RenderMarkdownH6Bg", { bg = palette.base01 })
+    -- Code blocks
+    vim.api.nvim_set_hl(0, "MarkviewCode", { bg = palette.base01 })
+    vim.api.nvim_set_hl(0, "MarkviewCodeInfo", { bg = palette.base01, fg = palette.base04 }) -- info string (language name)
+    vim.api.nvim_set_hl(0, "MarkviewInlineCode", { fg = palette.base0C, bg = palette.base01 })
 
-    -- Code blocks: Distinct background to separate from text
-    -- Code uses RenderMarkdownCode (block) and RenderMarkdownCodeInline (inline)
-    vim.api.nvim_set_hl(0, "RenderMarkdownCode", { bg = palette.base01 })
-    vim.api.nvim_set_hl(0, "RenderMarkdownCodeInline", { fg = palette.base0C, bg = palette.base01 })
+    -- Other elements
+    vim.api.nvim_set_hl(0, "MarkviewBlockQuote", { fg = palette.base04 })
+    vim.api.nvim_set_hl(0, "MarkviewTableBorder", { fg = palette.base0E })
+    vim.api.nvim_set_hl(0, "MarkviewHyperlink", { fg = palette.base0D, underline = true })
 
     -- ═══════════════════════════════════════════════════════════════════
     -- 🔹 STATUSLINE HIGHLIGHTS (Custom enhancements)
