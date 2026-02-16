@@ -1,57 +1,63 @@
 -- Uses global: spec (from 00-bootstrap.lua)
 
 -- CodeDiff - VSCode-style side-by-side diff
--- spec({
--- 	source = "esmuellert/codediff.nvim",
--- 	depends = { "MunifTanjim/nui.nvim" },
--- 	config = function()
--- 		require("codediff").setup({
--- 			-- Use defaults, which adapt to the colorscheme's 'background' setting
--- 			-- and use standard DiffAdd/DiffDelete highlight groups.
--- 			keymaps = {
--- 				view = {
--- 					quit = "q",
--- 					toggle_explorer = "<leader>gcp", -- [C]ommit/Diff [P]anel
--- 					next_hunk = "]c",
--- 					prev_hunk = "[c",
--- 				},
--- 				conflict = {
--- 					accept_incoming = "<leader>gct", -- [T]heirs
--- 					accept_current = "<leader>gco", -- [O]urs
--- 					accept_both = "<leader>gcb", -- [B]oth
--- 					discard = "<leader>gcx", -- Discard
--- 					next_conflict = "]x",
--- 					prev_conflict = "[x",
--- 				},
--- 			},
--- 		})
--- 	end,
--- 	-- stylua: ignore start
---     keys = {
---         { "<leader>gcd", "<cmd>CodeDiff<cr>",                    desc = "[Commit/Diff] [D]iff (CodeDiff)" },
---         { "<leader>gcf", function()
---             local range = vim.fn.input("Git Range (default: current file): ")
---             if range == "" then
---                 vim.cmd("CodeDiff history %")
---             else
---                 vim.cmd("CodeDiff history " .. range .. " %")
---             end
---         end, desc = "[Commit/Diff] [F]ile History" },
---         { "<leader>gcF", function()
---             local range = vim.fn.input("Git Range (default: all): ")
---             vim.cmd("CodeDiff history " .. range)
---         end, desc = "[Commit/Diff] [F]ile History (All)" },
---         { "<leader>gcm", function()
---             local range = vim.fn.input("Compare revisions: ", "main HEAD", "git")
---             vim.cmd("CodeDiff " .. range)
---         end, desc = "[Commit/Diff] [M]erge Base Diff" },
---     },
--- 	-- stylua: ignore end
--- })
+spec({
+	source = "esmuellert/codediff.nvim",
+	depends = { "MunifTanjim/nui.nvim" },
+	config = function()
+		require("codediff").setup({
+			-- Custom highlight configuration (defined in lua/config/colors.lua)
+			highlights = {
+				line_insert = "CodeDiffLineInsert",
+				line_delete = "CodeDiffLineDelete",
+				char_insert = "CodeDiffCharInsert",
+				char_delete = "CodeDiffCharDelete",
+				filler = "CodeDiffFiller",
+			},
+			keymaps = {
+				view = {
+					quit = "q",
+					toggle_explorer = "<leader>gcp", -- [C]ommit/Diff [P]anel
+					next_hunk = "]c",
+					prev_hunk = "[c",
+				},
+				conflict = {
+					accept_incoming = "<leader>gct", -- [T]heirs
+					accept_current = "<leader>gco", -- [O]urs
+					accept_both = "<leader>gcb", -- [B]oth
+					discard = "<leader>gcx", -- Discard
+					next_conflict = "]x",
+					prev_conflict = "[x",
+				},
+			},
+		})
+	end,
+	-- stylua: ignore start
+    keys = {
+        { "<leader>gcd", "<cmd>CodeDiff<cr>",                    desc = "[Commit/Diff] [D]iff (CodeDiff)" },
+        { "<leader>gcf", function()
+            local range = vim.fn.input("Git Range (default: current file): ")
+            if range == "" then
+                vim.cmd("CodeDiff history %")
+            else
+                vim.cmd("CodeDiff history " .. range .. " %")
+            end
+        end, desc = "[Commit/Diff] [F]ile History" },
+        { "<leader>gcF", function()
+            local range = vim.fn.input("Git Range (default: all): ")
+            vim.cmd("CodeDiff history " .. range)
+        end, desc = "[Commit/Diff] [F]ile History (All)" },
+        { "<leader>gcm", function()
+            local range = vim.fn.input("Compare revisions: ", "main HEAD", "git")
+            vim.cmd("CodeDiff " .. range)
+        end, desc = "[Commit/Diff] [M]erge Base Diff" },
+    },
+	-- stylua: ignore end
+})
 
 -- Neogit - Git interface
 spec({
-	source = "sotte/neogit",
+	source = "NeogitOrg/neogit",
 	depends = {
 		"nvim-lua/plenary.nvim",
 		"esmuellert/codediff.nvim",
@@ -123,12 +129,13 @@ spec({
 	source = "pwntester/octo.nvim",
 	depends = {
 		"nvim-lua/plenary.nvim",
+		"folke/snacks.nvim",
 		"nvim-tree/nvim-web-devicons",
 	},
 	config = function()
 		require("octo").setup({
 			enable_builtin = true, -- Enable builtin actions menu
-			picker = "default",
+			picker = "snacks",
 			picker_config = {
 				use_emojis = true,
 			},

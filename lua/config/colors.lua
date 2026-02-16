@@ -120,6 +120,44 @@ M.apply_highlights = function(palette)
     vim.api.nvim_set_hl(0, "NeogitChangeDeleted", { fg = palette.base08, bg = "NONE" })
 
     -- ═══════════════════════════════════════════════════════════════════
+    -- 🔹 CODEDIFF HIGHLIGHTS
+    -- ═══════════════════════════════════════════════════════════════════
+    -- VSCode-style diff highlighting using theme colors
+    
+    local MiniColors = require('mini.colors')
+    
+    local add_color = palette.base0B -- Green
+    local del_color = palette.base08 -- Red/Error
+    
+    local diff_add_bg, diff_del_bg
+    local diff_add_char_bg = add_color
+    local diff_del_char_bg = del_color
+    local diff_fg
+
+    if vim.o.background == "light" then
+        -- Light mode: Subtle background is very light (high lightness)
+        diff_add_bg = MiniColors.modify_channel(add_color, 'lightness', function() return 90 end)
+        diff_del_bg = MiniColors.modify_channel(del_color, 'lightness', function() return 90 end)
+        diff_fg = palette.base00 -- Dark text on strong background
+    else
+        -- Dark mode: Subtle background is very dark (low lightness)
+        diff_add_bg = MiniColors.modify_channel(add_color, 'lightness', function() return 20 end)
+        diff_del_bg = MiniColors.modify_channel(del_color, 'lightness', function() return 20 end)
+        diff_fg = palette.base00 -- Dark text on bright colored background
+    end
+
+    -- Line highlights (subtle background)
+    vim.api.nvim_set_hl(0, "CodeDiffLineInsert", { bg = diff_add_bg }) 
+    vim.api.nvim_set_hl(0, "CodeDiffLineDelete", { bg = diff_del_bg }) 
+    
+    -- Character highlights (strong background)
+    vim.api.nvim_set_hl(0, "CodeDiffCharInsert", { bg = diff_add_char_bg, fg = diff_fg }) 
+    vim.api.nvim_set_hl(0, "CodeDiffCharDelete", { bg = diff_del_char_bg, fg = diff_fg })
+    
+    -- Filler lines
+    vim.api.nvim_set_hl(0, "CodeDiffFiller", { fg = palette.base03 })
+
+    -- ═══════════════════════════════════════════════════════════════════
     -- 🔹 DEBUG HIGHLIGHTS (DAP) - Currently commented out but ready
     -- ═══════════════════════════════════════════════════════════════════
 
