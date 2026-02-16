@@ -1,6 +1,11 @@
 -- Uses global: spec (from 00-bootstrap.lua)
 
 -- CodeDiff - VSCode-style side-by-side diff
+-- To set CodeDiff as your default git difftool and mergetool, run:
+-- git config --global difftool.codediff.cmd "nvim -c 'CodeDiff $LOCAL $REMOTE'"
+-- git config --global mergetool.codediff.cmd "nvim -c 'CodeDiff $LOCAL $REMOTE $MERGED'"
+-- git config --global diff.tool codediff
+-- git config --global merge.tool codediff
 spec({
 	source = "esmuellert/codediff.nvim",
 	depends = { "MunifTanjim/nui.nvim" },
@@ -18,6 +23,9 @@ spec({
 				view = {
 					quit = "q",
 					toggle_explorer = "<leader>gcp", -- [C]ommit/Diff [P]anel
+					stage_hunk = "<leader>gcs", -- [S]tage Hunk
+					unstage_hunk = "<leader>gcu", -- [U]nstage Hunk
+					discard_hunk = "<leader>gcr", -- [R]evert Hunk
 					next_hunk = "]c",
 					prev_hunk = "[c",
 				},
@@ -35,22 +43,16 @@ spec({
 	-- stylua: ignore start
     keys = {
         { "<leader>gcd", "<cmd>CodeDiff<cr>",                    desc = "[Commit/Diff] [D]iff (CodeDiff)" },
-        { "<leader>gcf", function()
-            local range = vim.fn.input("Git Range (default: current file): ")
-            if range == "" then
-                vim.cmd("CodeDiff history %")
-            else
-                vim.cmd("CodeDiff history " .. range .. " %")
-            end
-        end, desc = "[Commit/Diff] [F]ile History" },
-        { "<leader>gcF", function()
-            local range = vim.fn.input("Git Range (default: all): ")
-            vim.cmd("CodeDiff history " .. range)
-        end, desc = "[Commit/Diff] [F]ile History (All)" },
-        { "<leader>gcm", function()
-            local range = vim.fn.input("Compare revisions: ", "main HEAD", "git")
-            vim.cmd("CodeDiff " .. range)
-        end, desc = "[Commit/Diff] [M]erge Base Diff" },
+        { "<leader>gcs", "<cmd>CodeDiff --cached<cr>",           desc = "[Commit/Diff] [S]taged Changes" },
+        { "<leader>gcu", "<cmd>CodeDiff<cr>",                    desc = "[Commit/Diff] [U]nstaged Changes" },
+        { "<leader>gcf", "<cmd>CodeDiff history %<cr>",          desc = "[Commit/Diff] [F]ile History" },
+        { "<leader>gcF", "<cmd>CodeDiff history<cr>",            desc = "[Commit/Diff] [F]ile Project History" },
+        { "<leader>gcm", "<cmd>CodeDiff main...HEAD<cr>",        desc = "[Commit/Diff] [M]erge Base Diff" },
+        { "<leader>gcr", function()
+             local branch = vim.fn.input("Review branch (default: main): ")
+             if branch == "" then branch = "main" end
+             vim.cmd("CodeDiff " .. branch .. "...HEAD")
+        end, desc = "[CodeDiff] [R]eview Merge Base" },
     },
 	-- stylua: ignore end
 })
@@ -63,7 +65,6 @@ spec({
 		"esmuellert/codediff.nvim",
 		"echasnovski/mini.pick",
 	},
-	checkout = "support-vscode-diff",
 	config = function()
 		require("neogit").setup({
 			integrations = {
@@ -78,7 +79,7 @@ spec({
     keys = {
         { "<leader>gg",  function() require("neogit").open() end,                     desc = "[Git] Status" },
         { "<leader>gb",  function() require("mini.extra").pickers.git_branches() end, desc = "[Git] [B]ranches" },
-        { "<leader>gcc", function() require("mini.extra").pickers.git_commits() end,  desc = "[Commit/Diff] [C]ommits" },
+        { "<leader>gl",  function() require("mini.extra").pickers.git_commits() end,  desc = "[Git] [L]og" },
         { "<leader>gH",  function() require("mini.extra").pickers.git_hunks() end,    desc = "[Git] [H]unks" },
     },
 	-- stylua: ignore end
